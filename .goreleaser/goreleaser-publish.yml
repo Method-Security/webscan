@@ -1,0 +1,102 @@
+version: 2
+
+project_name: webscan
+
+builds:
+  - id: prebuilt
+    builder: prebuilt
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    goamd64:
+      - v1
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: darwin
+        goarch: amd64
+    prebuilt:
+      path: output/build-{{ .Os }}_{{ .Arch }}/webscan{{ if eq .Os "windows" }}.exe{{ end }}
+    binary: webscan
+
+archives:
+  - id: archive
+    format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_
+      {{- if eq .Os "darwin" }}macOS
+      {{- else if eq .Os "linux" }}Linux
+      {{- else}}{{- .Os }}{{ end }}-
+      {{- if eq .Arch "amd64" }}64bit
+      {{- else if eq .Arch "386" }}32bit
+      {{- else if eq .Arch "arm" }}ARM
+      {{- else if eq .Arch "arm64" }}ARM64
+      {{- else }}{{ .Arch }}{{ end }}
+    files:
+      - README.md
+      - LICENSE
+    format_overrides:
+      - goos: windows
+        format: zip
+
+checksum:
+  name_template: "{{ .ProjectName }}_checksums.txt"
+
+dockers:
+  - image_templates:
+      - "ghcr.io/method-security/webscan:{{ .Version }}-amd64"
+      - "ghcr.io/method-security/webscan:latest-amd64"
+    use: buildx
+    goos: linux
+    goarch: amd64
+    ids:
+      - prebuilt
+    build_flag_templates:
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.description=An on-rails AWS enumeration tool"
+      - "--label=org.opencontainers.image.vendor=Method Security"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.source=https://github.com/method-security/webscan"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.url=https://method.security"
+      - "--label=org.opencontainers.image.documentation=https://github.com/method-security/webscan"
+      - "--platform=linux/amd64"
+    extra_files:
+      - configs/
+  - image_templates:
+      - "ghcr.io/method-security/webscan:{{ .Version }}-arm64"
+      - "ghcr.io/method-security/webscan:latest-arm64"
+    use: buildx
+    goos: linux
+    goarch: arm64
+    ids:
+      - prebuilt
+    build_flag_templates:
+      - "--label=org.opencontainers.image.title={{ .ProjectName }}"
+      - "--label=org.opencontainers.image.description=An on-rails AWS enumeration tool"
+      - "--label=org.opencontainers.image.vendor=Method Security"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.source=https://github.com/method-security/webscan"
+      - "--label=org.opencontainers.image.revision={{ .FullCommit }}"
+      - "--label=org.opencontainers.image.url=https://method.security"
+      - "--label=org.opencontainers.image.documentation=https://github.com/method-security/webscan"
+      - "--platform=linux/arm64"
+    extra_files:
+      - configs/
+
+docker_manifests:
+  - name_template: 'ghcr.io/method-security/webscan:{{ .Version }}'
+    image_templates:
+    - 'ghcr.io/method-security/webscan:{{ .Version }}-amd64'
+    - 'ghcr.io/method-security/webscan:{{ .Version }}-arm64'
+
+sboms:
+  - artifacts: archive
+  - id: source
+    artifacts: source

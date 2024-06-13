@@ -1,0 +1,10 @@
+products:
+  webscan:
+    build:
+      main-pkg: .
+      version-var: main.version
+      environment:
+        CGO_ENABLED: "0"
+    dist:
+      disters:
+        type: os-arch-bin
