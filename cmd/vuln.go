@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/Method-Security/webscan/internal/vuln"
@@ -28,6 +29,7 @@ func (a *WebScan) InitVulnCommand() {
 				return
 			}
 			if target == "" {
+				err = errors.New("target flag is required")
 				errorMessage := err.Error()
 				a.OutputSignal.ErrorMessage = &errorMessage
 				a.OutputSignal.Status = 1
