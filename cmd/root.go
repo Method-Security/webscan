@@ -1,3 +1,6 @@
+// Package cmd implements the CobraCLI commands for the methodaws CLI. Subcommands for the CLI should all live within
+// this package. Logic should be delegated to internal packages and functions to keep the CLI commands clean and
+// focused on CLI I/O.
 package cmd
 
 import (
@@ -13,6 +16,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// WebScan is the main struct for the webscan CLI. It contains both the root command and all subcommands that can be
+// invoked during the execution of the CLI. It also is responsible for managing the output configuration as well as the
+// output signal itself, which will be written after the execution of the invoked command's Run function.
 type WebScan struct {
 	Version      string
 	RootFlags    config.RootFlags
@@ -26,6 +32,9 @@ type WebScan struct {
 	VulnCmd      *cobra.Command
 }
 
+// NewWebScan creates a new WebScan struct with the provided version string. The Webscan struct is used throughout the
+// subcommands as a contex within which output results and configuration values can be stored.
+// We pass the version value in from the main.go file, where we set the version string during the build process.
 func NewWebScan(version string) *WebScan {
 	webscan := WebScan{
 		Version: version,
@@ -37,6 +46,13 @@ func NewWebScan(version string) *WebScan {
 	return &webscan
 }
 
+// InitRootCommand initializes the root command for the webscan CLI. This command is the parent command for all other
+// subcommands that can be invoked. It also sets up the version command, which prints the version of the CLI when invoked.
+// The root command also sets up the output configuration and signal, which are used to write the output of the subcommands
+// to the appropriate location (file or stdout).
+// Here, we set the PersistentPreRunE and PersistentPostRunE functions that are propagated to all subcommands. These functions
+// are used to set up the output configuration and signal before the command is run, and to write the output signal after the
+// command has completed.
 func (a *WebScan) InitRootCommand() {
 	var outputFormat string
 	var outputFile string

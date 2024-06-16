@@ -15,6 +15,8 @@ func parseSeverityIntoString(severity []string) string {
 	return strings.Join(severity, ",")
 }
 
+// InitVulnCommand initializes the vuln command for the webscan CLI. This command is used to perform a vulnerability scan
+// against a target by leveraging Project Discovery's nuclei tool.
 func (a *WebScan) InitVulnCommand() {
 	a.VulnCmd = &cobra.Command{
 		Use:   "vuln",

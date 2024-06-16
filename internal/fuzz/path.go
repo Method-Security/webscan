@@ -7,18 +7,22 @@ import (
 	"github.com/ffuf/ffuf/v2/pkg/ffuf"
 )
 
+// URLDetails provides the details of a single URL that was fuzzed.
 type URLDetails struct {
 	URL    string `json:"url" yaml:"url"`
 	Status string `json:"status" yaml:"status"`
 	Size   int64  `json:"size" yaml:"size"`
 }
 
+// A PathReport represents a holistic report of all the URLs that were fuzzed during a path fuzzing operation, including
+// non-fatal errors that occurred during the operation.
 type PathReport struct {
 	Target string       `json:"target" yaml:"target"`
 	URLs   []URLDetails `json:"urls" yaml:"urls"`
 	Errors []string     `json:"errors" yaml:"errors"`
 }
 
+// PerformPathFuzz performs a path fuzzing operation against a target URL, using the provided pathlist and responsecodes
 func PerformPathFuzz(ctx context.Context, target string, pathlist string, responsecodes string, maxtime int) (PathReport, error) {
 
 	// 1. Modify context

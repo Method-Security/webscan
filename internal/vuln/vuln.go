@@ -8,6 +8,8 @@ import (
 	nucleiOutput "github.com/projectdiscovery/nuclei/v3/pkg/output"
 )
 
+// VulnerabilityContext represents an instance of a vulnerability, with all of the information needed to contextualize
+// that particular vulnerability.
 type VulnerabilityContext struct {
 	TemplateID       string   `json:"template-id"`
 	Host             string   `json:"host"`
@@ -17,12 +19,15 @@ type VulnerabilityContext struct {
 	ExtractedResults []string `json:"extracted-results"`
 }
 
+// A VulnerabilityFinding represents a single vulnerability that was found during a vulnerability scan.
+// The Context is included in each finding to simplify the data integration and automation process.
 type VulnerabilityFinding struct {
 	ID      string               `json:"id"`
 	Info    model.Info           `json:"info"`
 	Context VulnerabilityContext `json:"context"`
 }
 
+// A VulnerabilityReport represents a holistic report of all the vulnerabilities that were found during a vulnerability scan.
 type VulnerabilityReport struct {
 	Target  string                 `json:"target"`
 	Reports []VulnerabilityFinding `json:"report"`
@@ -40,6 +45,9 @@ func parseResultIntoFinding(result nucleiOutput.ResultEvent) VulnerabilityFindin
 	return VulnerabilityFinding{ID: buildID(result), Info: result.Info, Context: parseResultIntoContext(result)}
 }
 
+// PerformVulnScan performs a vulnerability scan against a target URL, using the provided tags and severity to filter the
+// templates that are used in the scan. The scan uses the provided templateDirectory and customTemplateDirectory to load
+// the templates that are used in the scan.
 func PerformVulnScan(ctx context.Context, target string, tags []string, severity string, templateDirectory string, customTemplateDirectory string) (VulnerabilityReport, error) {
 	report := VulnerabilityReport{Target: target}
 	if templateDirectory != "" {

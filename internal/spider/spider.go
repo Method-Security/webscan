@@ -1,3 +1,5 @@
+// Package spider implements the logic for the `webscan spider` command. This command is used to crawl a list of URLs and
+// report back the links found on each page, as well as any errors encountered during the crawl.
 package spider
 
 import (
@@ -10,11 +12,14 @@ import (
 	"github.com/projectdiscovery/katana/pkg/types"
 )
 
+// LinkDetails provides the details of a single link found during a web spider operation.
 type LinkDetails struct {
 	Link   string `json:"link" yaml:"link"`
 	Status int    `json:"status" yaml:"status"`
 }
 
+// A WebSpiderReport represents a holistic report of all the links that were found during a web spider operation, including
+// non-fatal errors that occurred during the operation.
 type WebSpiderReport struct {
 	Targets []string      `json:"targets" yaml:"targets"`
 	Links   []LinkDetails `json:"links" yaml:"links"`
@@ -67,6 +72,8 @@ func performWebSpider(targets []string) ([]LinkDetails, []string, error) {
 
 }
 
+// PerformWebSpider performs a web spider operation against the provided targets, returning a WebSpiderReport with the
+// results of the spider.
 func PerformWebSpider(ctx context.Context, targets string) (WebSpiderReport, error) {
 	// 1. Parse target list
 	targetList := strings.Split(targets, ",")

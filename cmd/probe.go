@@ -5,6 +5,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// InitProbeCommand initializes the probe command for the webscan CLI. This command is used to perform a web probe against
+// targets to identify the existence of web servers.
 func (a *WebScan) InitProbeCommand() {
 	a.ProbeCmd = &cobra.Command{
 		Use:   "probe",
