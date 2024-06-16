@@ -6,9 +6,6 @@ on:
   push:
     branches:
       - develop
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
 jobs:
   build:
     name: Test Build

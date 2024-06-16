@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// InitFuzzCommand initializes the fuzz command for the webscan CLI. This command is used to perform a web fuzz against a target.
 func (a *WebScan) InitFuzzCommand() {
 	a.FuzzCmd = &cobra.Command{
 		Use:   "fuzz",

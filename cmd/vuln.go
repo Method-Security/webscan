@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/Method-Security/webscan/internal/vuln"
@@ -14,6 +15,8 @@ func parseSeverityIntoString(severity []string) string {
 	return strings.Join(severity, ",")
 }
 
+// InitVulnCommand initializes the vuln command for the webscan CLI. This command is used to perform a vulnerability scan
+// against a target by leveraging Project Discovery's nuclei tool.
 func (a *WebScan) InitVulnCommand() {
 	a.VulnCmd = &cobra.Command{
 		Use:   "vuln",
@@ -28,6 +31,7 @@ func (a *WebScan) InitVulnCommand() {
 				return
 			}
 			if target == "" {
+				err = errors.New("target flag is required")
 				errorMessage := err.Error()
 				a.OutputSignal.ErrorMessage = &errorMessage
 				a.OutputSignal.Status = 1

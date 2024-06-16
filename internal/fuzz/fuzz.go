@@ -9,6 +9,8 @@ import (
 	"github.com/ffuf/ffuf/v2/pkg/runner"
 )
 
+// PrepareJob creates a new ffuf job with the provided configuration, leveraging the CustomOutput ffuf type to provide
+// control over the output.
 func PrepareJob(conf *ffuf.Config) (*ffuf.Job, error) {
 	job := ffuf.NewJob(conf)
 
@@ -28,6 +30,7 @@ func PrepareJob(conf *ffuf.Config) (*ffuf.Job, error) {
 	return job, errs.ErrorOrNil()
 }
 
+// SetupFilters sets up the filters for the ffuf job based on the provided configuration options.
 func SetupFilters(parseOpts *ffuf.ConfigOptions, conf *ffuf.Config) error {
 	errs := ffuf.NewMultierror()
 	conf.MatcherManager = filter.NewMatcherManager()

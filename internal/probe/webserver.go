@@ -1,3 +1,4 @@
+// Package probe contains the logic and data structures necessary for the `webcan probe` command
 package probe
 
 import (
@@ -7,12 +8,14 @@ import (
 	"github.com/projectdiscovery/httpx/runner"
 )
 
+// URLDetails represents the data returned from a probe of a singular URL.
 type URLDetails struct {
 	URL    string `json:"url" yaml:"url"`
 	Status int    `json:"status" yaml:"status"`
 	Title  string `json:"title" yaml:"title"`
 }
 
+// A WebServerReport represents a holistic report of all the URLs that were probed during a web server probe operation,
 type WebServerReport struct {
 	Targets []string     `json:"targets" yaml:"targets"`
 	URLs    []URLDetails `json:"urls" yaml:"urls"`
@@ -52,6 +55,8 @@ func performWebServerProbe(targets []string) ([]URLDetails, []string, error) {
 
 }
 
+// PerformWebServerProbe performs a web server probe against the provided targets, returning a WebServerReport with the
+// results of the probe.
 func PerformWebServerProbe(ctx context.Context, targets string) (WebServerReport, error) {
 	// 1. Parse target list
 	targetList := strings.Split(targets, ",")

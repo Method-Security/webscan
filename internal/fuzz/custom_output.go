@@ -1,3 +1,5 @@
+// Package fuzz holds the data structures and logic necessary to perform web application fuzzing for the `networkscan fuzz`
+// command
 package fuzz
 
 import (
@@ -15,6 +17,8 @@ const (
 	AnsiRed           = "\x1b[31m"
 )
 
+// CustomOutput is a custom output implementation for ffuf. This implementation is used to customize the output of the
+// ffuf tool to provide easier data integration and automation capabilies within the webscan tool.
 type CustomOutput struct {
 	config         *ffuf.Config
 	fuzzkeywords   []string
@@ -22,6 +26,7 @@ type CustomOutput struct {
 	CurrentResults []ffuf.Result
 }
 
+// NewCustomOutput creates a new CustomOutput instance with the provided ffuf configuration.
 func NewCustomOutput(conf *ffuf.Config) *CustomOutput {
 	var outp CustomOutput
 	outp.config = conf
@@ -38,6 +43,8 @@ func printOption(name []byte, value []byte) {
 	fmt.Fprintf(os.Stderr, " :: %-16s : %s\n", name, value)
 }
 
+// Banner prints the banner for the ffuf tool, displaying the version, method, URL, wordlist, and other metadata
+// during the tool's execution.
 func (s *CustomOutput) Banner() {
 	version := strings.ReplaceAll(ffuf.Version(), "<3", fmt.Sprintf("%s<3%s", AnsiRed, AnsiClear))
 	fmt.Fprintf(os.Stderr, "%s\n", version)
@@ -131,23 +138,28 @@ func (s *CustomOutput) Banner() {
 	}
 }
 
+// Reset resets the current results for the CustomOutput instance.
 func (s *CustomOutput) Reset() {
 	s.CurrentResults = make([]ffuf.Result, 0)
 }
 
+// Cycle appends the current results to the results list and performs a reset of the current results.
 func (s *CustomOutput) Cycle() {
 	s.Results = append(s.Results, s.CurrentResults...)
 	s.Reset()
 }
 
+// GetCurrentResults returns the current results for the CustomOutput instance.
 func (s *CustomOutput) GetCurrentResults() []ffuf.Result {
 	return s.CurrentResults
 }
 
+// SetCurrentResults sets the current results for the CustomOutput instance.
 func (s *CustomOutput) SetCurrentResults(results []ffuf.Result) {
 	s.CurrentResults = results
 }
 
+// Progress prints the current progress of the ffuf tool, including the request count, request rate, duration, and error count.
 func (s *CustomOutput) Progress(status ffuf.Progress) {
 	if s.config.Quiet {
 		// No progress for quiet mode

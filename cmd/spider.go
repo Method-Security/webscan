@@ -5,6 +5,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// InitSpiderCommand initializes the spider command for the webscan CLI. This command is used to perform a web spider crawl
+// against URL targets, capturing data about webpages and endpoints that exist on the target.
 func (a *WebScan) InitSpiderCommand() {
 	a.SpiderCmd = &cobra.Command{
 		Use:   "spider",
