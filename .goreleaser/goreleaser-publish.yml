@@ -50,6 +50,8 @@ dockers:
   - image_templates:
       - "ghcr.io/method-security/webscan:{{ .Version }}-amd64"
       - "ghcr.io/method-security/webscan:latest-amd64"
+      - "docker.io/methodsecurity/webscan:{{ .Version }}-amd64"
+      - "docker.io/methodsecurity/webscan:latest-amd64"
     use: buildx
     goos: linux
     goarch: amd64
@@ -71,6 +73,8 @@ dockers:
   - image_templates:
       - "ghcr.io/method-security/webscan:{{ .Version }}-arm64"
       - "ghcr.io/method-security/webscan:latest-arm64"
+      - "docker.io/methodsecurity/webscan:{{ .Version }}-arm64"
+      - "docker.io/methodsecurity/webscan:latest-arm64"
     use: buildx
     goos: linux
     goarch: arm64
@@ -95,6 +99,18 @@ docker_manifests:
     image_templates:
     - 'ghcr.io/method-security/webscan:{{ .Version }}-amd64'
     - 'ghcr.io/method-security/webscan:{{ .Version }}-arm64'
+  - name_template: 'ghcr.io/method-security/webscan:latest'
+    image_templates:
+    - 'ghcr.io/method-security/webscan:{{ .Version }}-amd64'
+    - 'ghcr.io/method-security/webscan:{{ .Version }}-arm64'
+  - name_template: 'methodsecurity/webscan:{{ .Version }}'
+    image_templates:
+    - 'methodsecurity/webscan:{{ .Version }}-amd64'
+    - 'methodsecurity/webscan:{{ .Version }}-arm64'
+  - name_template: 'methodsecurity/webscan:latest'
+    image_templates:
+    - 'methodsecurity/webscan:{{ .Version }}-amd64'
+    - 'methodsecurity/webscan:{{ .Version }}-arm64'
 
 sboms:
   - artifacts: archive
