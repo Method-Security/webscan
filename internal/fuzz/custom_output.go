@@ -1,4 +1,4 @@
-// Package fuzz holds the data structures and logic necessary to perform web application fuzzing for the `networkscan fuzz`
+// Package fuzz holds the data structures and logic necessary to perform web application fuzzing for the `webscan fuzz`
 // command
 package fuzz
 
