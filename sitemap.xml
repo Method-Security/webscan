@@ -1,63 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://method-security.github.io/networkscan/index.html</loc>
-         <lastmod>2024-06-16</lastmod>
+         <loc>https://method-security.github.io/webscan/index.html</loc>
+         <lastmod>2024-06-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://method-security.github.io/networkscan/community/community.html</loc>
-         <lastmod>2024-06-16</lastmod>
+         <loc>https://method-security.github.io/webscan/community/community.html</loc>
+         <lastmod>2024-06-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://method-security.github.io/networkscan/development/adding.html</loc>
-         <lastmod>2024-06-16</lastmod>
+         <loc>https://method-security.github.io/webscan/development/adding.html</loc>
+         <lastmod>2024-06-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://method-security.github.io/networkscan/development/principles.html</loc>
-         <lastmod>2024-06-16</lastmod>
+         <loc>https://method-security.github.io/webscan/development/principles.html</loc>
+         <lastmod>2024-06-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://method-security.github.io/networkscan/development/setup.html</loc>
-         <lastmod>2024-06-16</lastmod>
+         <loc>https://method-security.github.io/webscan/development/setup.html</loc>
+         <lastmod>2024-06-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://method-security.github.io/networkscan/docs/index.html</loc>
-         <lastmod>2024-06-16</lastmod>
+         <loc>https://method-security.github.io/webscan/docs/index.html</loc>
+         <lastmod>2024-06-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://method-security.github.io/networkscan/docs/fuzz.html</loc>
-         <lastmod>2024-06-16</lastmod>
+         <loc>https://method-security.github.io/webscan/docs/fuzz.html</loc>
+         <lastmod>2024-06-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://method-security.github.io/networkscan/docs/probe.html</loc>
-         <lastmod>2024-06-16</lastmod>
+         <loc>https://method-security.github.io/webscan/docs/probe.html</loc>
+         <lastmod>2024-06-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://method-security.github.io/networkscan/docs/spider.html</loc>
-         <lastmod>2024-06-16</lastmod>
+         <loc>https://method-security.github.io/webscan/docs/spider.html</loc>
+         <lastmod>2024-06-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://method-security.github.io/networkscan/docs/vuln.html</loc>
-         <lastmod>2024-06-16</lastmod>
+         <loc>https://method-security.github.io/webscan/docs/vuln.html</loc>
+         <lastmod>2024-06-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://method-security.github.io/networkscan/getting-started/basic-usage.html</loc>
-         <lastmod>2024-06-16</lastmod>
+         <loc>https://method-security.github.io/webscan/getting-started/basic-usage.html</loc>
+         <lastmod>2024-06-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://method-security.github.io/networkscan/getting-started/installation.html</loc>
-         <lastmod>2024-06-16</lastmod>
+         <loc>https://method-security.github.io/webscan/getting-started/installation.html</loc>
+         <lastmod>2024-06-18</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
