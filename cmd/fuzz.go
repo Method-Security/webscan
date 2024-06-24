@@ -60,7 +60,7 @@ func (a *WebScan) InitFuzzCommand() {
 
 	pathCmd.Flags().String("target", "", "URL target to perform path fuzzing against")
 	pathCmd.Flags().String("pathlist", "", "Newline separated list of paths to fuzz")
-	pathCmd.Flags().String("responsecodes", "200-299,401,403", "Response codes to consider as valid responses")
+	pathCmd.Flags().String("responsecodes", "200-299", "Response codes to consider as valid responses")
 	pathCmd.Flags().Int("maxtime", 300, "The maximum time in seconds to run the job, default to 300 seconds")
 
 	a.FuzzCmd.AddCommand(pathCmd)
