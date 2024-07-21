@@ -758,6 +758,9 @@ github.com/google/go-querystring/query
 # github.com/google/pprof v0.0.0-20240227163752-401108e1b7e7
 ## explicit; go 1.19
 github.com/google/pprof/profile
+# github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
+## explicit; go 1.13
+github.com/google/shlex
 # github.com/google/uuid v1.3.1
 ## explicit
 github.com/google/uuid
@@ -1135,11 +1138,12 @@ github.com/projectdiscovery/dsl
 github.com/projectdiscovery/dsl/deserialization
 github.com/projectdiscovery/dsl/llm
 github.com/projectdiscovery/dsl/randomip
-# github.com/projectdiscovery/fastdialer v0.0.69
+# github.com/projectdiscovery/fastdialer v0.1.1
 ## explicit; go 1.21
 github.com/projectdiscovery/fastdialer/fastdialer
 github.com/projectdiscovery/fastdialer/fastdialer/ja3/impersonate
 github.com/projectdiscovery/fastdialer/fastdialer/metafiles
+github.com/projectdiscovery/fastdialer/fastdialer/utils
 # github.com/projectdiscovery/fasttemplate v0.0.2
 ## explicit; go 1.12
 github.com/projectdiscovery/fasttemplate
@@ -1164,8 +1168,8 @@ github.com/projectdiscovery/go-smb2/internal/utf16le
 # github.com/projectdiscovery/goconfig v0.0.1
 ## explicit; go 1.18
 github.com/projectdiscovery/goconfig
-# github.com/projectdiscovery/goflags v0.1.50
-## explicit; go 1.20
+# github.com/projectdiscovery/goflags v0.1.54
+## explicit; go 1.21
 github.com/projectdiscovery/goflags
 # github.com/projectdiscovery/gologger v1.1.12
 ## explicit; go 1.21
@@ -1181,8 +1185,8 @@ github.com/projectdiscovery/gostruct
 github.com/projectdiscovery/gozero
 github.com/projectdiscovery/gozero/cmdexec
 github.com/projectdiscovery/gozero/types
-# github.com/projectdiscovery/hmap v0.0.41
-## explicit; go 1.18
+# github.com/projectdiscovery/hmap v0.0.45
+## explicit; go 1.21
 github.com/projectdiscovery/hmap/filekv
 github.com/projectdiscovery/hmap/store/cache
 github.com/projectdiscovery/hmap/store/disk
@@ -1203,7 +1207,7 @@ github.com/projectdiscovery/httpx/common/slice
 github.com/projectdiscovery/httpx/common/stringz
 github.com/projectdiscovery/httpx/runner
 github.com/projectdiscovery/httpx/static
-# github.com/projectdiscovery/interactsh v1.1.9
+# github.com/projectdiscovery/interactsh v1.2.0
 ## explicit; go 1.21
 github.com/projectdiscovery/interactsh/pkg/client
 github.com/projectdiscovery/interactsh/pkg/filewatcher
@@ -1423,12 +1427,12 @@ github.com/projectdiscovery/rdap
 github.com/projectdiscovery/rdap/bootstrap
 github.com/projectdiscovery/rdap/bootstrap/cache
 github.com/projectdiscovery/rdap/sandbox
-# github.com/projectdiscovery/retryabledns v1.0.58
-## explicit; go 1.20
+# github.com/projectdiscovery/retryabledns v1.0.62
+## explicit; go 1.21
 github.com/projectdiscovery/retryabledns
 github.com/projectdiscovery/retryabledns/doh
 github.com/projectdiscovery/retryabledns/hostsfile
-# github.com/projectdiscovery/retryablehttp-go v1.0.58
+# github.com/projectdiscovery/retryablehttp-go v1.0.63
 ## explicit; go 1.21
 github.com/projectdiscovery/retryablehttp-go
 # github.com/projectdiscovery/sarif v0.0.1
@@ -1467,7 +1471,7 @@ github.com/projectdiscovery/uncover/sources/agent/zoomeye
 # github.com/projectdiscovery/useragent v0.0.49
 ## explicit; go 1.21
 github.com/projectdiscovery/useragent
-# github.com/projectdiscovery/utils v0.0.92
+# github.com/projectdiscovery/utils v0.1.1
 ## explicit; go 1.21
 github.com/projectdiscovery/utils/auth/pdcp
 github.com/projectdiscovery/utils/conn/connpool
@@ -1477,6 +1481,7 @@ github.com/projectdiscovery/utils/conversion
 github.com/projectdiscovery/utils/crypto
 github.com/projectdiscovery/utils/crypto/jarm
 github.com/projectdiscovery/utils/env
+github.com/projectdiscovery/utils/errkit
 github.com/projectdiscovery/utils/errors
 github.com/projectdiscovery/utils/file
 github.com/projectdiscovery/utils/folder
