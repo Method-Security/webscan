@@ -2,7 +2,7 @@ module github.com/Method-Security/webscan
 
 go 1.22
 
-toolchain go1.22.4
+toolchain go1.22.5
 
 require (
 	github.com/Method-Security/pkg v0.0.2

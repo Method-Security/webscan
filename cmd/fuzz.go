@@ -32,6 +32,13 @@ func (a *WebScan) InitFuzzCommand() {
 				a.OutputSignal.Status = 1
 				return
 			}
+			ignorebase, err := cmd.Flags().GetBool("ignore-base-content-match")
+			if err != nil {
+				errorMessage := err.Error()
+				a.OutputSignal.ErrorMessage = &errorMessage
+				a.OutputSignal.Status = 1
+				return
+			}
 			responsecodes, err := cmd.Flags().GetString("responsecodes")
 			if err != nil {
 				errorMessage := err.Error()
@@ -47,7 +54,7 @@ func (a *WebScan) InitFuzzCommand() {
 				return
 			}
 			var report fuzz.PathReport
-			report, err = fuzz.PerformPathFuzz(cmd.Context(), target, pathlist, responsecodes, maxtime)
+			report, err = fuzz.PerformPathFuzz(cmd.Context(), target, pathlist, ignorebase, responsecodes, maxtime)
 			if err != nil {
 				errorMessage := err.Error()
 				a.OutputSignal.ErrorMessage = &errorMessage
@@ -61,6 +68,7 @@ func (a *WebScan) InitFuzzCommand() {
 	pathCmd.Flags().String("target", "", "URL target to perform path fuzzing against")
 	pathCmd.Flags().String("pathlist", "", "Newline separated list of paths to fuzz")
 	pathCmd.Flags().String("responsecodes", "200-299", "Response codes to consider as valid responses")
+	pathCmd.Flags().Bool("ignore-base-content-match", true, "Ignores valid responses with identical size and word length to the base path, typically signifying a web backend redirect")
 	pathCmd.Flags().Int("maxtime", 300, "The maximum time in seconds to run the job, default to 300 seconds")
 
 	a.FuzzCmd.AddCommand(pathCmd)
