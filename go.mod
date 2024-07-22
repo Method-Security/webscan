@@ -7,12 +7,14 @@ toolchain go1.22.5
 require (
 	github.com/Method-Security/pkg v0.0.2
 	github.com/ffuf/ffuf/v2 v2.1.0
+	github.com/google/uuid v1.3.1
 	github.com/palantir/pkg/datetime v1.1.0
 	github.com/palantir/witchcraft-go-logging v1.51.0
 	github.com/projectdiscovery/httpx v1.6.0
 	github.com/projectdiscovery/katana v1.1.0
 	github.com/projectdiscovery/nuclei/v3 v3.2.7
 	github.com/spf13/cobra v1.8.0
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
@@ -86,6 +88,7 @@ require (
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08 // indirect
 	github.com/corona10/goimagehash v1.1.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/denisenkom/go-mssqldb v0.12.3 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
@@ -139,7 +142,6 @@ require (
 	github.com/google/go-github/v30 v30.1.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/pprof v0.0.0-20240227163752-401108e1b7e7 // indirect
-	github.com/google/uuid v1.3.1 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
@@ -222,6 +224,7 @@ require (
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/praetorian-inc/fingerprintx v1.1.9 // indirect
 	github.com/projectdiscovery/asnmap v1.1.0 // indirect

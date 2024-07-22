@@ -53,13 +53,7 @@ func (a *WebScan) InitFuzzCommand() {
 				a.OutputSignal.Status = 1
 				return
 			}
-			var report fuzz.PathReport
-			report, err = fuzz.PerformPathFuzz(cmd.Context(), target, pathlist, ignorebase, responsecodes, maxtime)
-			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
-			}
+			report := fuzz.PerformPathFuzz(cmd.Context(), target, pathlist, ignorebase, responsecodes, maxtime)
 			a.OutputSignal.Content = report
 
 		},

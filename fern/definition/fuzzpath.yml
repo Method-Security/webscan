@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/fern.schema.json
+
+types:
+  UrlDetails:
+    properties:
+      url: string
+      status: string
+      size: integer
+  FuzzPathReport:
+    properties:
+      target: string
+      urls: list<UrlDetails>
+      urlsSkipedFromBaseMatch: list<UrlDetails>
+      errors: optional<list<string>>
