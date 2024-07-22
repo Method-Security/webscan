@@ -3,6 +3,7 @@ package fuzz
 import (
 	"context"
 	"fmt"
+	"math"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
 	"github.com/ffuf/ffuf/v2/pkg/ffuf"
@@ -100,8 +101,8 @@ func PerformPathFuzz(ctx context.Context, target string, pathlist string, ignore
 
 	for _, result := range customOutput.CurrentResults {
 		if ignorebase && baseProfile.StatusCode == 200 {
-			// ffuz seems to report an extra line for every response, so we need to check for both the base profile lines and the base profile lines + 1
-			if result.ContentLength == int64(baseProfile.Size) && (result.ContentLines == int64(baseProfile.Lines)+1 || result.ContentLines == int64(baseProfile.Lines)) {
+			// ffuz seems to report an extra byte and line for every response, so we need to check accordingly
+			if (result.ContentLength == int64(baseProfile.Size) || math.Abs(float64(result.ContentLength-int64(baseProfile.Size))) <= 1) && (result.ContentLines == int64(baseProfile.Lines) || math.Abs(float64(result.ContentLines-int64(baseProfile.Lines))) <= 1) {
 				report.UrlsSkippedFromBaseMatch = append(report.UrlsSkippedFromBaseMatch, &webscan.UrlDetails{
 					Url:    result.Url,
 					Status: fmt.Sprintf("%d", result.StatusCode),
