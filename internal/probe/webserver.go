@@ -43,6 +43,10 @@ func performWebServerProbe(targets []string) ([]URLDetails, []string, error) {
 		},
 	}
 
+	if err := options.ValidateOptions(); err != nil {
+		return urls, errors, err
+	}
+
 	httpxRunner, err := runner.New(&options)
 	if err != nil {
 		return urls, errors, err
