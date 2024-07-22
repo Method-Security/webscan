@@ -19,6 +19,7 @@ import (
 	"github.com/projectdiscovery/gologger/levels"
 	"github.com/projectdiscovery/nuclei/v3/pkg/catalog/config"
 	"github.com/projectdiscovery/nuclei/v3/pkg/protocols/common/protocolinit"
+	"github.com/projectdiscovery/nuclei/v3/pkg/protocols/common/protocolstate"
 	"github.com/projectdiscovery/nuclei/v3/pkg/protocols/common/utils/vardump"
 	"github.com/projectdiscovery/nuclei/v3/pkg/protocols/headless/engine"
 	"github.com/projectdiscovery/nuclei/v3/pkg/reporting"
@@ -114,7 +115,12 @@ func ParseOptions(options *types.Options) {
 	// Load the resolvers if user asked for them
 	loadResolvers(options)
 
-	err := protocolinit.Init(options)
+	err := protocolstate.Init(options)
+	if err != nil {
+		gologger.Fatal().Msgf("Could not initialize protocol state: %s\n", err)
+	}
+
+	err = protocolinit.Init(options)
 	if err != nil {
 		gologger.Fatal().Msgf("Could not initialize protocols: %s\n", err)
 	}
@@ -316,9 +322,6 @@ func createReportingOptions(options *types.Options) (*reporting.Options, error) 
 
 // configureOutput configures the output logging levels to be displayed on the screen
 func configureOutput(options *types.Options) {
-	// disable standard logger (ref: https://github.com/golang/go/issues/19895)
-	defer logutil.DisableDefaultLogger()
-
 	if options.NoColor {
 		gologger.DefaultLogger.SetFormatter(formatter.NewCLI(true))
 	}
@@ -337,6 +340,9 @@ func configureOutput(options *types.Options) {
 	if options.Silent {
 		gologger.DefaultLogger.SetMaxLevel(levels.LevelSilent)
 	}
+
+	// disable standard logger (ref: https://github.com/golang/go/issues/19895)
+	logutil.DisableDefaultLogger()
 }
 
 // loadResolvers loads resolvers from both user-provided flags and file

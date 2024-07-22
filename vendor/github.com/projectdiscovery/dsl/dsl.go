@@ -1,6 +1,7 @@
 package dsl
 
 import (
+	"archive/zip"
 	"bytes"
 	"compress/flate"
 	"compress/gzip"
@@ -64,8 +65,9 @@ var (
 	// Use With Caution: Nuclei ignores this error in extractors(ref: https://github.com/projectdiscovery/nuclei/issues/3950)
 	ErrParsingArg = errors.New("error parsing argument value")
 
-	DefaultCacheSize                                   = 250
-	resultCache      gcache.Cache[string, interface{}] = gcache.New[string, interface{}](DefaultCacheSize).Build()
+	DefaultMaxDecompressionSize                                   = int64(10 * 1024 * 1024) // 10MB
+	DefaultCacheSize                                              = 250
+	resultCache                 gcache.Cache[string, interface{}] = gcache.New[string, interface{}](DefaultCacheSize).Build()
 )
 
 var PrintDebugCallback func(args ...interface{}) error
@@ -159,6 +161,42 @@ func init() {
 			}
 		},
 	))
+
+	MustAddFunction(NewWithMultipleSignatures("zip", []string{"(file_entry string, content string, ... ) []byte"}, false, func(args ...interface{}) (interface{}, error) {
+		if len(args) == 0 || len(args)%2 != 0 {
+			return nil, fmt.Errorf("zip function requires pairs of file entry and content")
+		}
+
+		buf := new(bytes.Buffer)
+		zipWriter := zip.NewWriter(buf)
+
+		for i := 0; i < len(args); i += 2 {
+			fileEntry, ok := args[i].(string)
+			if !ok {
+				return nil, fmt.Errorf("file entry must be a string")
+			}
+			content, ok := args[i+1].(string)
+			if !ok {
+				return nil, fmt.Errorf("content must be a string")
+			}
+
+			f, err := zipWriter.Create(fileEntry)
+			if err != nil {
+				return nil, err
+			}
+			_, err = f.Write([]byte(content))
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		err := zipWriter.Close()
+		if err != nil {
+			return nil, err
+		}
+
+		return buf.Bytes(), nil
+	}))
 	MustAddFunction(NewWithMultipleSignatures("uniq", []string{
 		"(input string) string",
 		"(input number) string",
@@ -248,7 +286,9 @@ func init() {
 		if err != nil {
 			return "", err
 		}
-		data, err := io.ReadAll(reader)
+		limitReader := io.LimitReader(reader, DefaultMaxDecompressionSize)
+
+		data, err := io.ReadAll(limitReader)
 		if err != nil {
 			_ = reader.Close()
 			return "", err
@@ -272,7 +312,9 @@ func init() {
 		if err != nil {
 			return "", err
 		}
-		data, err := io.ReadAll(reader)
+		limitReader := io.LimitReader(reader, DefaultMaxDecompressionSize)
+
+		data, err := io.ReadAll(limitReader)
 		if err != nil {
 			_ = reader.Close()
 			return "", err
@@ -297,7 +339,9 @@ func init() {
 	}))
 	MustAddFunction(NewWithPositionalArgs("inflate", 1, false, func(args ...interface{}) (interface{}, error) {
 		reader := flate.NewReader(strings.NewReader(args[0].(string)))
-		data, err := io.ReadAll(reader)
+		limitReader := io.LimitReader(reader, DefaultMaxDecompressionSize)
+
+		data, err := io.ReadAll(limitReader)
 		if err != nil {
 			_ = reader.Close()
 			return "", err
@@ -819,8 +863,8 @@ func init() {
 			result := constraint.Check(firstParsed)
 			return result, nil
 		}))
-	MustAddFunction(NewWithPositionalArgs("padding", 3, false, func(args ...interface{}) (interface{}, error) {
-		// padding('Test String','A',50) // will pad "Test String" up to 50 characters with "A" as padding byte.
+	MustAddFunction(NewWithPositionalArgs("padding", 4, false, func(args ...interface{}) (interface{}, error) {
+		// padding('Test String', 'A', 50, 'prefix') // will pad "Test String" up to 50 characters with "A" as padding byte, prefixing it.
 		bLen := 0
 		switch value := args[2].(type) {
 		case float64:
@@ -847,32 +891,25 @@ func init() {
 		if dataLen >= bLen {
 			return toString(bData), nil // Note: if given string is longer than the desired length, it will not be truncated
 		}
-		if dataLen == 0 {
-			// If the initial string is empty, simply create a padded array with the specified length
-			paddedData := make([]byte, bLen)
-			for i := 0; i < bLen; i++ {
-				paddedData[i] = bByte[i%len(bByte)]
-			}
-			return toString(paddedData), nil
+
+		padMode, ok := args[3].(string)
+		if !ok || (padMode != "prefix" && padMode != "suffix") {
+			return nil, errorutil.New("padding mode must be 'prefix' or 'suffix'")
 		}
 
-		// Calculate the number of bytes needed for padding
-		paddingLen := (bLen - (dataLen % bLen)) % bLen
-
-		// Create a new byte array with the desired length
-		paddedData := make([]byte, dataLen+paddingLen)
-
-		// Copy the original data into the padded array
-		copy(paddedData, bData)
-
-		// Add padding bytes with the specified padding byte
-		for i := dataLen; i < len(paddedData); i++ {
-			paddedData[i] = bByte[i%len(bByte)]
+		paddingLen := bLen - dataLen
+		padding := make([]byte, paddingLen)
+		for i := 0; i < paddingLen; i++ {
+			padding[i] = bByte[i%len(bByte)]
 		}
 
-		return toString(paddedData), nil
-
+		if padMode == "prefix" {
+			return toString(append(padding, bData...)), nil
+		} else { // suffix
+			return toString(append(bData, padding...)), nil
+		}
 	}))
+
 
 	MustAddFunction(NewWithSingleSignature("print_debug",
 		"(args ...interface{})",

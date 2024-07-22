@@ -4,27 +4,18 @@ import (
 	"context"
 	"fmt"
 
+	webscan "github.com/Method-Security/webscan/generated/go"
 	"github.com/ffuf/ffuf/v2/pkg/ffuf"
 )
 
-// URLDetails provides the details of a single URL that was fuzzed.
-type URLDetails struct {
-	URL    string `json:"url" yaml:"url"`
-	Status string `json:"status" yaml:"status"`
-	Size   int64  `json:"size" yaml:"size"`
-}
-
-// A PathReport represents a holistic report of all the URLs that were fuzzed during a path fuzzing operation, including
-// non-fatal errors that occurred during the operation.
-type PathReport struct {
-	Target                  string       `json:"target" yaml:"target"`
-	URLs                    []URLDetails `json:"urls" yaml:"urls"`
-	UrlsSkipedFromBaseMatch []URLDetails `json:"urls_skiped_from_base_match" yaml:"urls_skiped_from_base_match"`
-	Errors                  []string     `json:"errors" yaml:"errors"`
-}
-
 // PerformPathFuzz performs a path fuzzing operation against a target URL, using the provided pathlist and responsecodes
-func PerformPathFuzz(ctx context.Context, target string, pathlist string, ignorebase bool, responsecodes string, maxtime int) (PathReport, error) {
+func PerformPathFuzz(ctx context.Context, target string, pathlist string, ignorebase bool, responsecodes string, maxtime int) webscan.FuzzPathReport {
+	report := webscan.FuzzPathReport{
+		Target:                   target,
+		Urls:                     []*webscan.UrlDetails{},
+		UrlsSkippedFromBaseMatch: []*webscan.UrlDetails{},
+		Errors:                   []string{},
+	}
 
 	// 1. Modify context
 	ctx, cancel := context.WithCancel(ctx)
@@ -63,24 +54,28 @@ func PerformPathFuzz(ctx context.Context, target string, pathlist string, ignore
 	// 3. Create ffuf config
 	conf, err := ffuf.ConfigFromOptions(&opts, ctx, cancel)
 	if err != nil {
-		return PathReport{}, err
+		report.Errors = append(report.Errors, err.Error())
+		return report
 	}
 
 	// 4. Set up filters and matchers
 	err = SetupFilters(&opts, conf)
 	if err != nil {
-		return PathReport{}, err
+		report.Errors = append(report.Errors, err.Error())
+		return report
 	}
 
 	// 5. Prepare Job
 	job, err := PrepareJob(conf)
 	if err != nil {
-		return PathReport{}, err
+		report.Errors = append(report.Errors, err.Error())
+		return report
 	}
 
 	// Ensure the output provider is not nil before starting the job
 	if job.Output == nil {
-		return PathReport{}, nil
+		report.Errors = append(report.Errors, "job output provider is nil")
+		return report
 	}
 
 	// 6. Start the job
@@ -89,7 +84,8 @@ func PerformPathFuzz(ctx context.Context, target string, pathlist string, ignore
 	// 7. Get the results
 	customOutput, ok := job.Output.(*CustomOutput)
 	if !ok {
-		return PathReport{}, nil
+		report.Errors = append(report.Errors, "custom output provider errored")
+		return report
 	}
 
 	// 8. Profile the base URL if ignorebase is true
@@ -97,35 +93,29 @@ func PerformPathFuzz(ctx context.Context, target string, pathlist string, ignore
 	if ignorebase {
 		baseProfile, err = profileBaseURL(target)
 		if err != nil {
-			return PathReport{}, err
+			report.Errors = append(report.Errors, err.Error())
+			return report
 		}
-	}
-
-	report := PathReport{
-		Target:                  target,
-		URLs:                    []URLDetails{},
-		UrlsSkipedFromBaseMatch: []URLDetails{},
-		Errors:                  []string{},
 	}
 
 	for _, result := range customOutput.CurrentResults {
 		if ignorebase && baseProfile.StatusCode == 200 {
 			// ffuz seems to report an extra line for every response, so we need to check for both the base profile lines and the base profile lines + 1
 			if result.ContentLength == int64(baseProfile.Size) && (result.ContentLines == int64(baseProfile.Lines)+1 || result.ContentLines == int64(baseProfile.Lines)) {
-				report.UrlsSkipedFromBaseMatch = append(report.UrlsSkipedFromBaseMatch, URLDetails{
-					URL:    result.Url,
+				report.UrlsSkippedFromBaseMatch = append(report.UrlsSkippedFromBaseMatch, &webscan.UrlDetails{
+					Url:    result.Url,
 					Status: fmt.Sprintf("%d", result.StatusCode),
-					Size:   result.ContentLength,
+					Size:   int(result.ContentLength),
 				})
 				continue // Skip this result because it matches the base HTTP profile, likely a redirect
 			}
 		}
-		report.URLs = append(report.URLs, URLDetails{
-			URL:    result.Url,
+		report.Urls = append(report.Urls, &webscan.UrlDetails{
+			Url:    result.Url,
 			Status: fmt.Sprintf("%d", result.StatusCode),
-			Size:   result.ContentLength,
+			Size:   int(result.ContentLength),
 		})
 	}
 
-	return report, nil
+	return report
 }

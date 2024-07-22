@@ -4,7 +4,8 @@ checks:
       - value: "should have comment or be unexported"
       - value: "or a comment on this block"
     exclude:
-      paths: []
+      paths:
+        - generated/**
   deadcode:
     exclude:
       paths:
@@ -16,3 +17,7 @@ checks:
   importalias:
     exclude:
       paths: []
+  errcheck:
+    exclude:
+      paths:
+        - generated/**
