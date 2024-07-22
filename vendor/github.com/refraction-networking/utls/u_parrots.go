@@ -6,11 +6,14 @@ package tls
 
 import (
 	"crypto/ecdh"
+	crand "crypto/rand"
 	"crypto/sha256"
 	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
+	"math"
+	"math/big"
 	"math/rand"
 	"sort"
 	"strconv"
@@ -1238,6 +1241,7 @@ func utlsIdToSpec(id ClientHelloID) (ClientHelloSpec, error) {
 						0x0, // uncompressed
 					},
 				},
+				&SessionTicketExtension{},
 				&ALPNExtension{
 					AlpnProtocols: []string{
 						"h2",
@@ -1284,6 +1288,9 @@ func utlsIdToSpec(id ClientHelloID) (ClientHelloSpec, error) {
 						PKCS1WithSHA1,
 					},
 				},
+				&PSKKeyExchangeModesExtension{[]uint8{
+					PskModeDHE,
+				}},
 				&FakeRecordSizeLimitExtension{
 					Limit: 0x4001,
 				},
@@ -2558,12 +2565,24 @@ func ShuffleChromeTLSExtensions(exts []TLSExtension) []TLSExtension {
 	}
 
 	// Shuffle other extensions
-	rand.Shuffle(len(exts), func(i, j int) {
-		if skipShuf(i, exts) || skipShuf(j, exts) {
-			return // do not shuffle some of the extensions
-		}
-		exts[i], exts[j] = exts[j], exts[i]
-	})
+	randInt64, err := crand.Int(crand.Reader, big.NewInt(math.MaxInt64))
+	if err != nil {
+		// warning: random could be deterministic
+		rand.Shuffle(len(exts), func(i, j int) {
+			if skipShuf(i, exts) || skipShuf(j, exts) {
+				return // do not shuffle some of the extensions
+			}
+			exts[i], exts[j] = exts[j], exts[i]
+		})
+		fmt.Println("Warning: failed to use a cryptographically secure random number generator. The shuffle can be deterministic.")
+	} else {
+		rand.New(rand.NewSource(randInt64.Int64())).Shuffle(len(exts), func(i, j int) {
+			if skipShuf(i, exts) || skipShuf(j, exts) {
+				return // do not shuffle some of the extensions
+			}
+			exts[i], exts[j] = exts[j], exts[i]
+		})
+	}
 
 	return exts
 }
@@ -2653,12 +2672,21 @@ func (uconn *UConn) ApplyPreset(p *ClientHelloSpec) error {
 			hello.CipherSuites[i] = GetBoringGREASEValue(uconn.greaseSeed, ssl_grease_cipher)
 		}
 	}
-	var sessionID [32]byte
-	_, err = io.ReadFull(uconn.config.rand(), sessionID[:])
-	if err != nil {
-		return err
+
+	// A random session ID is used to detect when the server accepted a ticket
+	// and is resuming a session (see RFC 5077). In TLS 1.3, it's always set as
+	// a compatibility measure (see RFC 8446, Section 4.1.2).
+	//
+	// The session ID is not set for QUIC connections (see RFC 9001, Section 8.4).
+	if uconn.quic == nil {
+		var sessionID [32]byte
+		_, err = io.ReadFull(uconn.config.rand(), sessionID[:])
+		if err != nil {
+			return err
+		}
+		uconn.HandshakeState.Hello.SessionId = sessionID[:]
 	}
-	uconn.HandshakeState.Hello.SessionId = sessionID[:]
+
 	uconn.Extensions = make([]TLSExtension, len(p.Extensions))
 	copy(uconn.Extensions, p.Extensions)
 

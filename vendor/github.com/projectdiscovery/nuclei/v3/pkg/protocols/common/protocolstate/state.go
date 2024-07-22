@@ -22,6 +22,10 @@ var (
 	Dialer *fastdialer.Dialer
 )
 
+func ShouldInit() bool {
+	return Dialer == nil
+}
+
 // Init creates the Dialer instance based on user configuration
 func Init(options *types.Options) error {
 	if Dialer != nil {
@@ -30,9 +34,7 @@ func Init(options *types.Options) error {
 
 	lfaAllowed = options.AllowLocalFileAccess
 	opts := fastdialer.DefaultOptions
-	if options.DialerTimeout > 0 {
-		opts.DialerTimeout = options.DialerTimeout
-	}
+	opts.DialerTimeout = options.GetTimeouts().DialTimeout
 	if options.DialerKeepAlive > 0 {
 		opts.DialerKeepAlive = options.DialerKeepAlive
 	}
@@ -180,6 +182,7 @@ func interfaceAddress(interfaceName string) (net.IP, error) {
 		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 			if ipnet.IP.To4() != nil {
 				address = ipnet.IP
+				break
 			}
 		}
 	}
@@ -209,6 +212,8 @@ func interfaceAddresses(interfaceName string) ([]net.Addr, error) {
 func Close() {
 	if Dialer != nil {
 		Dialer.Close()
+		Dialer = nil
 	}
+	Dialer = nil
 	StopActiveMemGuardian()
 }

@@ -302,3 +302,24 @@ func IndexAny(s string, seps ...string) (int, string) {
 	}
 	return -1, ""
 }
+
+// ContainsAll returns true if s contains all specified substrings.
+func ContainsAll(s string, ss ...string) bool {
+	for _, sub := range ss {
+		if !strings.Contains(s, sub) {
+			return false
+		}
+	}
+	return true
+}
+
+// ContainsAllI returns true if s contains all specified substrings (case-insensitive).
+func ContainsAllI(s string, ss ...string) bool {
+	lowerS := strings.ToLower(s)
+	for _, sub := range ss {
+		if !strings.Contains(lowerS, strings.ToLower(sub)) {
+			return false
+		}
+	}
+	return true
+}
