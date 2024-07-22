@@ -9,6 +9,6 @@ types:
   FuzzPathReport:
     properties:
       target: string
-      urls: list<UrlDetails>
-      urlsSkipedFromBaseMatch: list<UrlDetails>
+      urls: optional<list<UrlDetails>>
+      urlsSkippedFromBaseMatch: optional<list<UrlDetails>>
       errors: optional<list<string>>

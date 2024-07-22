@@ -5,14 +5,15 @@ package webscan
 import (
 	json "encoding/json"
 	fmt "fmt"
+
 	core "github.com/Method-Security/webscan/generated/go/core"
 )
 
 type FuzzPathReport struct {
-	Target                  string        `json:"target" url:"target"`
-	Urls                    []*UrlDetails `json:"urls,omitempty" url:"urls,omitempty"`
-	UrlsSkipedFromBaseMatch []*UrlDetails `json:"urlsSkipedFromBaseMatch,omitempty" url:"urlsSkipedFromBaseMatch,omitempty"`
-	Errors                  []string      `json:"errors,omitempty" url:"errors,omitempty"`
+	Target                   string        `json:"target" url:"target"`
+	Urls                     []*UrlDetails `json:"urls,omitempty" url:"urls,omitempty"`
+	UrlsSkippedFromBaseMatch []*UrlDetails `json:"urlsSkippedFromBaseMatch,omitempty" url:"urlsSkippedFromBaseMatch,omitempty"`
+	Errors                   []string      `json:"errors,omitempty" url:"errors,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

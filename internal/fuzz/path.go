@@ -11,10 +11,10 @@ import (
 // PerformPathFuzz performs a path fuzzing operation against a target URL, using the provided pathlist and responsecodes
 func PerformPathFuzz(ctx context.Context, target string, pathlist string, ignorebase bool, responsecodes string, maxtime int) webscan.FuzzPathReport {
 	report := webscan.FuzzPathReport{
-		Target:                  target,
-		Urls:                    []*webscan.UrlDetails{},
-		UrlsSkipedFromBaseMatch: []*webscan.UrlDetails{},
-		Errors:                  []string{},
+		Target:                   target,
+		Urls:                     []*webscan.UrlDetails{},
+		UrlsSkippedFromBaseMatch: []*webscan.UrlDetails{},
+		Errors:                   []string{},
 	}
 
 	// 1. Modify context
@@ -102,7 +102,7 @@ func PerformPathFuzz(ctx context.Context, target string, pathlist string, ignore
 		if ignorebase && baseProfile.StatusCode == 200 {
 			// ffuz seems to report an extra line for every response, so we need to check for both the base profile lines and the base profile lines + 1
 			if result.ContentLength == int64(baseProfile.Size) && (result.ContentLines == int64(baseProfile.Lines)+1 || result.ContentLines == int64(baseProfile.Lines)) {
-				report.UrlsSkipedFromBaseMatch = append(report.UrlsSkipedFromBaseMatch, &webscan.UrlDetails{
+				report.UrlsSkippedFromBaseMatch = append(report.UrlsSkippedFromBaseMatch, &webscan.UrlDetails{
 					Url:    result.Url,
 					Status: fmt.Sprintf("%d", result.StatusCode),
 					Size:   int(result.ContentLength),

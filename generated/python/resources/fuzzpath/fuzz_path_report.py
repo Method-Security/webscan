@@ -10,8 +10,10 @@ from .url_details import UrlDetails
 
 class FuzzPathReport(pydantic_v1.BaseModel):
     target: str
-    urls: typing.List[UrlDetails]
-    urls_skiped_from_base_match: typing.List[UrlDetails] = pydantic_v1.Field(alias="urlsSkipedFromBaseMatch")
+    urls: typing.Optional[typing.List[UrlDetails]] = None
+    urls_skipped_from_base_match: typing.Optional[typing.List[UrlDetails]] = pydantic_v1.Field(
+        alias="urlsSkippedFromBaseMatch", default=None
+    )
     errors: typing.Optional[typing.List[str]] = None
 
     def json(self, **kwargs: typing.Any) -> str:
