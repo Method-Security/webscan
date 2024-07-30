@@ -6,7 +6,313 @@ import (
 	json "encoding/json"
 	fmt "fmt"
 	core "github.com/Method-Security/webscan/generated/go/core"
+	time "time"
 )
+
+type Certificate struct {
+	SubjectCommonName  *string             `json:"subjectCommonName,omitempty" url:"subjectCommonName,omitempty"`
+	IssuerCommonName   *string             `json:"issuerCommonName,omitempty" url:"issuerCommonName,omitempty"`
+	ValidFrom          *time.Time          `json:"validFrom,omitempty" url:"validFrom,omitempty"`
+	ValidTo            *time.Time          `json:"validTo,omitempty" url:"validTo,omitempty"`
+	Version            *int                `json:"version,omitempty" url:"version,omitempty"`
+	SerialNumber       *string             `json:"serialNumber,omitempty" url:"serialNumber,omitempty"`
+	Certificate        *string             `json:"certificate,omitempty" url:"certificate,omitempty"`
+	Signature          *string             `json:"signature,omitempty" url:"signature,omitempty"`
+	SignatureAlgorithm *SignatureAlgorithm `json:"signatureAlgorithm,omitempty" url:"signatureAlgorithm,omitempty"`
+	PublicKeyAlgorithm *PublicKeyAlgorithm `json:"publicKeyAlgorithm,omitempty" url:"publicKeyAlgorithm,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (c *Certificate) GetExtraProperties() map[string]interface{} {
+	return c.extraProperties
+}
+
+func (c *Certificate) UnmarshalJSON(data []byte) error {
+	type embed Certificate
+	var unmarshaler = struct {
+		embed
+		ValidFrom *core.DateTime `json:"validFrom,omitempty"`
+		ValidTo   *core.DateTime `json:"validTo,omitempty"`
+	}{
+		embed: embed(*c),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*c = Certificate(unmarshaler.embed)
+	c.ValidFrom = unmarshaler.ValidFrom.TimePtr()
+	c.ValidTo = unmarshaler.ValidTo.TimePtr()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *c)
+	if err != nil {
+		return err
+	}
+	c.extraProperties = extraProperties
+
+	c._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (c *Certificate) MarshalJSON() ([]byte, error) {
+	type embed Certificate
+	var marshaler = struct {
+		embed
+		ValidFrom *core.DateTime `json:"validFrom,omitempty"`
+		ValidTo   *core.DateTime `json:"validTo,omitempty"`
+	}{
+		embed:     embed(*c),
+		ValidFrom: core.NewOptionalDateTime(c.ValidFrom),
+		ValidTo:   core.NewOptionalDateTime(c.ValidTo),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (c *Certificate) String() string {
+	if len(c._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(c._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(c); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", c)
+}
+
+type FingerprintReport struct {
+	Target              string       `json:"target" url:"target"`
+	HttpHeaders         *HttpHeaders `json:"httpHeaders,omitempty" url:"httpHeaders,omitempty"`
+	RedirectUrl         string       `json:"redirectUrl" url:"redirectUrl"`
+	RedirectHttpHeaders *HttpHeaders `json:"redirectHttpHeaders,omitempty" url:"redirectHttpHeaders,omitempty"`
+	TlsInfo             *TlsInfo     `json:"tlsInfo,omitempty" url:"tlsInfo,omitempty"`
+	Errors              []string     `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (f *FingerprintReport) GetExtraProperties() map[string]interface{} {
+	return f.extraProperties
+}
+
+func (f *FingerprintReport) UnmarshalJSON(data []byte) error {
+	type unmarshaler FingerprintReport
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*f = FingerprintReport(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *f)
+	if err != nil {
+		return err
+	}
+	f.extraProperties = extraProperties
+
+	f._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (f *FingerprintReport) String() string {
+	if len(f._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(f._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(f); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", f)
+}
+
+type HttpHeaders struct {
+	Location                  *string `json:"location,omitempty" url:"location,omitempty"`
+	Server                    *string `json:"server,omitempty" url:"server,omitempty"`
+	XPoweredBy                *string `json:"xPoweredBy,omitempty" url:"xPoweredBy,omitempty"`
+	XFrameOptions             *string `json:"xFrameOptions,omitempty" url:"xFrameOptions,omitempty"`
+	XClusterName              *string `json:"xClusterName,omitempty" url:"xClusterName,omitempty"`
+	CrossOriginResourcePolicy *string `json:"crossOriginResourcePolicy,omitempty" url:"crossOriginResourcePolicy,omitempty"`
+	AccessControlAllowOrigin  *string `json:"accessControlAllowOrigin,omitempty" url:"accessControlAllowOrigin,omitempty"`
+	XAspNetVersion            *string `json:"xAspNetVersion,omitempty" url:"xAspNetVersion,omitempty"`
+	HttpMethods               *string `json:"httpMethods,omitempty" url:"httpMethods,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (h *HttpHeaders) GetExtraProperties() map[string]interface{} {
+	return h.extraProperties
+}
+
+func (h *HttpHeaders) UnmarshalJSON(data []byte) error {
+	type unmarshaler HttpHeaders
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*h = HttpHeaders(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *h)
+	if err != nil {
+		return err
+	}
+	h.extraProperties = extraProperties
+
+	h._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (h *HttpHeaders) String() string {
+	if len(h._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(h._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(h); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", h)
+}
+
+type PublicKeyAlgorithm string
+
+const (
+	PublicKeyAlgorithmRsa     PublicKeyAlgorithm = "RSA"
+	PublicKeyAlgorithmDsa     PublicKeyAlgorithm = "DSA"
+	PublicKeyAlgorithmEcdsa   PublicKeyAlgorithm = "ECDSA"
+	PublicKeyAlgorithmEd25519 PublicKeyAlgorithm = "Ed25519"
+	PublicKeyAlgorithmUnknown PublicKeyAlgorithm = "Unknown"
+)
+
+func NewPublicKeyAlgorithmFromString(s string) (PublicKeyAlgorithm, error) {
+	switch s {
+	case "RSA":
+		return PublicKeyAlgorithmRsa, nil
+	case "DSA":
+		return PublicKeyAlgorithmDsa, nil
+	case "ECDSA":
+		return PublicKeyAlgorithmEcdsa, nil
+	case "Ed25519":
+		return PublicKeyAlgorithmEd25519, nil
+	case "Unknown":
+		return PublicKeyAlgorithmUnknown, nil
+	}
+	var t PublicKeyAlgorithm
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p PublicKeyAlgorithm) Ptr() *PublicKeyAlgorithm {
+	return &p
+}
+
+type SignatureAlgorithm string
+
+const (
+	SignatureAlgorithmMd2WithRsa       SignatureAlgorithm = "MD2WithRSA"
+	SignatureAlgorithmMd5WithRsa       SignatureAlgorithm = "MD5WithRSA"
+	SignatureAlgorithmSha1WithRsa      SignatureAlgorithm = "SHA1WithRSA"
+	SignatureAlgorithmSha256WithRsa    SignatureAlgorithm = "SHA256WithRSA"
+	SignatureAlgorithmSha384WithRsa    SignatureAlgorithm = "SHA384WithRSA"
+	SignatureAlgorithmSha512WithRsa    SignatureAlgorithm = "SHA512WithRSA"
+	SignatureAlgorithmDsaWithSha1      SignatureAlgorithm = "DSAWithSHA1"
+	SignatureAlgorithmDsaWithSha256    SignatureAlgorithm = "DSAWithSHA256"
+	SignatureAlgorithmEcdsaWithSha1    SignatureAlgorithm = "ECDSAWithSHA1"
+	SignatureAlgorithmEcdsaWithSha256  SignatureAlgorithm = "ECDSAWithSHA256"
+	SignatureAlgorithmEcdsaWithSha384  SignatureAlgorithm = "ECDSAWithSHA384"
+	SignatureAlgorithmEcdsaWithSha512  SignatureAlgorithm = "ECDSAWithSHA512"
+	SignatureAlgorithmSha256WithRsapss SignatureAlgorithm = "SHA256WithRSAPSS"
+	SignatureAlgorithmSha384WithRsapss SignatureAlgorithm = "SHA384WithRSAPSS"
+	SignatureAlgorithmSha512WithRsapss SignatureAlgorithm = "SHA512WithRSAPSS"
+	SignatureAlgorithmPureEd25519      SignatureAlgorithm = "PureEd25519"
+)
+
+func NewSignatureAlgorithmFromString(s string) (SignatureAlgorithm, error) {
+	switch s {
+	case "MD2WithRSA":
+		return SignatureAlgorithmMd2WithRsa, nil
+	case "MD5WithRSA":
+		return SignatureAlgorithmMd5WithRsa, nil
+	case "SHA1WithRSA":
+		return SignatureAlgorithmSha1WithRsa, nil
+	case "SHA256WithRSA":
+		return SignatureAlgorithmSha256WithRsa, nil
+	case "SHA384WithRSA":
+		return SignatureAlgorithmSha384WithRsa, nil
+	case "SHA512WithRSA":
+		return SignatureAlgorithmSha512WithRsa, nil
+	case "DSAWithSHA1":
+		return SignatureAlgorithmDsaWithSha1, nil
+	case "DSAWithSHA256":
+		return SignatureAlgorithmDsaWithSha256, nil
+	case "ECDSAWithSHA1":
+		return SignatureAlgorithmEcdsaWithSha1, nil
+	case "ECDSAWithSHA256":
+		return SignatureAlgorithmEcdsaWithSha256, nil
+	case "ECDSAWithSHA384":
+		return SignatureAlgorithmEcdsaWithSha384, nil
+	case "ECDSAWithSHA512":
+		return SignatureAlgorithmEcdsaWithSha512, nil
+	case "SHA256WithRSAPSS":
+		return SignatureAlgorithmSha256WithRsapss, nil
+	case "SHA384WithRSAPSS":
+		return SignatureAlgorithmSha384WithRsapss, nil
+	case "SHA512WithRSAPSS":
+		return SignatureAlgorithmSha512WithRsapss, nil
+	case "PureEd25519":
+		return SignatureAlgorithmPureEd25519, nil
+	}
+	var t SignatureAlgorithm
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s SignatureAlgorithm) Ptr() *SignatureAlgorithm {
+	return &s
+}
+
+type TlsInfo struct {
+	Version      *string        `json:"version,omitempty" url:"version,omitempty"`
+	CipherSuite  *string        `json:"cipherSuite,omitempty" url:"cipherSuite,omitempty"`
+	Certificates []*Certificate `json:"certificates,omitempty" url:"certificates,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (t *TlsInfo) GetExtraProperties() map[string]interface{} {
+	return t.extraProperties
+}
+
+func (t *TlsInfo) UnmarshalJSON(data []byte) error {
+	type unmarshaler TlsInfo
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*t = TlsInfo(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *t)
+	if err != nil {
+		return err
+	}
+	t.extraProperties = extraProperties
+
+	t._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (t *TlsInfo) String() string {
+	if len(t._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(t._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(t); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", t)
+}
 
 type FuzzPathReport struct {
 	Target                   string        `json:"target" url:"target"`
@@ -93,4 +399,47 @@ func (u *UrlDetails) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", u)
+}
+
+type WebpageCaptureReport struct {
+	Target string   `json:"target" url:"target"`
+	Html   *string  `json:"html,omitempty" url:"html,omitempty"`
+	Errors []string `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (w *WebpageCaptureReport) GetExtraProperties() map[string]interface{} {
+	return w.extraProperties
+}
+
+func (w *WebpageCaptureReport) UnmarshalJSON(data []byte) error {
+	type unmarshaler WebpageCaptureReport
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*w = WebpageCaptureReport(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+
+	w._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (w *WebpageCaptureReport) String() string {
+	if len(w._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(w._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(w); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", w)
 }

@@ -18,7 +18,7 @@ func parseSeverityIntoString(severity []string) string {
 // InitVulnCommand initializes the vuln command for the webscan CLI. This command is used to perform a vulnerability scan
 // against a target by leveraging Project Discovery's nuclei tool.
 func (a *WebScan) InitVulnCommand() {
-	a.VulnCmd = &cobra.Command{
+	vulnCmd := &cobra.Command{
 		Use:   "vuln",
 		Short: "Perform a vulnerability scan against a target using nuclei",
 		Long:  `Perform a vulnerability scan against a target using nuclei`,
@@ -77,11 +77,11 @@ func (a *WebScan) InitVulnCommand() {
 		},
 	}
 
-	a.VulnCmd.Flags().String("target", "", "URL target to perform path fuzzing against")
-	a.VulnCmd.Flags().StringSlice("tags", []string{}, "Tags to filter templates by")
-	a.VulnCmd.Flags().StringSlice("severity", []string{}, "Severity to filter templates by")
-	a.VulnCmd.Flags().String("defaultTemplateDirectory", "", "Directory to load default templates from")
-	a.VulnCmd.Flags().String("customTemplateDirectory", "", "Directory to load custom templates from")
+	vulnCmd.Flags().String("target", "", "URL target to perform path fuzzing against")
+	vulnCmd.Flags().StringSlice("tags", []string{}, "Tags to filter templates by")
+	vulnCmd.Flags().StringSlice("severity", []string{}, "Severity to filter templates by")
+	vulnCmd.Flags().String("defaultTemplateDirectory", "", "Directory to load default templates from")
+	vulnCmd.Flags().String("customTemplateDirectory", "", "Directory to load custom templates from")
 
-	a.RootCmd.AddCommand(a.VulnCmd)
+	a.RootCmd.AddCommand(vulnCmd)
 }

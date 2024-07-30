@@ -18,6 +18,8 @@ func main() {
 	webscan.InitProbeCommand()
 	webscan.InitSpiderCommand()
 	webscan.InitVulnCommand()
+	webscan.InitFingerprintCommand()
+	webscan.InitWebpagecaptureCommand()
 
 	if err := webscan.RootCmd.Execute(); err != nil {
 		os.Exit(1)
