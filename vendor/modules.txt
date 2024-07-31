@@ -515,6 +515,9 @@ github.com/dop251/goja/unistring
 github.com/dop251/goja_nodejs/console
 github.com/dop251/goja_nodejs/require
 github.com/dop251/goja_nodejs/util
+# github.com/dprotaso/go-yit v0.0.0-20220510233725-9ba8df137936
+## explicit; go 1.13
+github.com/dprotaso/go-yit
 # github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5
 ## explicit; go 1.9
 github.com/dsnet/compress
@@ -658,11 +661,23 @@ github.com/go-ldap/ldap/v3
 ## explicit; go 1.12
 github.com/go-ole/go-ole
 github.com/go-ole/go-ole/oleutil
-# github.com/go-openapi/jsonpointer v0.20.2
-## explicit; go 1.19
+# github.com/go-openapi/analysis v0.23.0
+## explicit; go 1.20
+# github.com/go-openapi/errors v0.22.0
+## explicit; go 1.20
+# github.com/go-openapi/jsonpointer v0.21.0
+## explicit; go 1.20
 github.com/go-openapi/jsonpointer
-# github.com/go-openapi/swag v0.22.9
-## explicit; go 1.19
+# github.com/go-openapi/jsonreference v0.21.0
+## explicit; go 1.20
+# github.com/go-openapi/loads v0.22.0
+## explicit; go 1.20
+# github.com/go-openapi/spec v0.21.0
+## explicit; go 1.20
+# github.com/go-openapi/strfmt v0.23.0
+## explicit; go 1.20
+# github.com/go-openapi/swag v0.23.0
+## explicit; go 1.20
 github.com/go-openapi/swag
 # github.com/go-pg/pg v8.0.7+incompatible
 ## explicit
@@ -1036,6 +1051,8 @@ github.com/nfnt/resize
 # github.com/nwaples/rardecode v1.1.3
 ## explicit
 github.com/nwaples/rardecode
+# github.com/oklog/ulid v1.3.1
+## explicit
 # github.com/olekukonko/tablewriter v0.0.5
 ## explicit; go 1.12
 github.com/olekukonko/tablewriter
@@ -1080,6 +1097,25 @@ github.com/palantir/witchcraft-go-params
 # github.com/palantir/witchcraft-go-tracing v1.33.0
 ## explicit; go 1.21
 github.com/palantir/witchcraft-go-tracing/wtracing
+# github.com/pb33f/libopenapi v0.16.11
+## explicit; go 1.21
+github.com/pb33f/libopenapi
+github.com/pb33f/libopenapi/datamodel
+github.com/pb33f/libopenapi/datamodel/high
+github.com/pb33f/libopenapi/datamodel/high/base
+github.com/pb33f/libopenapi/datamodel/high/nodes
+github.com/pb33f/libopenapi/datamodel/high/v2
+github.com/pb33f/libopenapi/datamodel/high/v3
+github.com/pb33f/libopenapi/datamodel/low
+github.com/pb33f/libopenapi/datamodel/low/base
+github.com/pb33f/libopenapi/datamodel/low/v2
+github.com/pb33f/libopenapi/datamodel/low/v3
+github.com/pb33f/libopenapi/index
+github.com/pb33f/libopenapi/json
+github.com/pb33f/libopenapi/orderedmap
+github.com/pb33f/libopenapi/utils
+github.com/pb33f/libopenapi/what-changed
+github.com/pb33f/libopenapi/what-changed/model
 # github.com/pelletier/go-toml v1.9.5
 ## explicit; go 1.12
 github.com/pelletier/go-toml
@@ -1712,6 +1748,9 @@ github.com/valyala/bytebufferpool
 # github.com/valyala/fasttemplate v1.2.2
 ## explicit; go 1.12
 github.com/valyala/fasttemplate
+# github.com/vmware-labs/yaml-jsonpath v0.3.2
+## explicit; go 1.13
+github.com/vmware-labs/yaml-jsonpath/pkg/yamlpath
 # github.com/weppos/publicsuffix-go v0.30.2
 ## explicit; go 1.16
 github.com/weppos/publicsuffix-go/publicsuffix
@@ -1806,6 +1845,8 @@ github.com/zmap/zgrab2/tools/keys
 # go.etcd.io/bbolt v1.3.10
 ## explicit; go 1.21
 go.etcd.io/bbolt
+# go.mongodb.org/mongo-driver v1.16.0
+## explicit; go 1.18
 # go.uber.org/multierr v1.11.0
 ## explicit; go 1.19
 go.uber.org/multierr
