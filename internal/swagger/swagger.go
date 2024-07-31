@@ -17,8 +17,10 @@ import (
 type Route struct {
 	Path        string   `json:"path"`
 	QueryParams []string `json:"query_params"`
-	Auth        string   `json:"auth"`
+	Auth        *string  `json:"auth"`
 	Method      string   `json:"method"`
+	Type        string   `json:"type"`
+	Description string   `json:"description"`
 }
 
 // SwaggerReport represents the report of the Swagger API enumeration.
@@ -76,11 +78,14 @@ func PerformSwaggerScan(ctx context.Context, target string) (SwaggerReport, erro
 		for opPair := pathItem.GetOperations().Oldest(); opPair != nil; opPair = opPair.Next() {
 			method := opPair.Key
 			operation := opPair.Value
+			authType := getAuthType(convertSecurityRequirements(operation.Security), securityDefinitions)
 			route := Route{
 				Path:        path,
 				Method:      method,
 				QueryParams: getQueryParams(operation.Parameters),
-				Auth:        getAuthType(convertSecurityRequirements(operation.Security), securityDefinitions),
+				Auth:        &authType,
+				Type:        "swagger",
+				Description: operation.Description,
 			}
 			report.Routes = append(report.Routes, route)
 		}
@@ -123,7 +128,6 @@ func getAuthType(security map[string][]string, securityDefinitions map[string]*v
 	return "unknown"
 }
 
-// convertSecurityRequirements converts []*base.SecurityRequirement to map[string][]string
 func convertSecurityRequirements(security []*base.SecurityRequirement) map[string][]string {
 	securityMap := make(map[string][]string)
 	for _, secReq := range security {
