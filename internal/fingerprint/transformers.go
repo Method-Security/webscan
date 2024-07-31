@@ -89,7 +89,7 @@ func converToTLSInfo(state *tls.ConnectionState) *webscan.TlsInfo {
 
 		// Signature names defined in `signatureAlgorithmDetails` in the `x509` package have a hyphen
 		// Which is removed for proper enum conversion
-		signatureAlgorithm, err := webscan.NewSignatureAlgorithmFromString(strings.Replace(cert.SignatureAlgorithm.String(), "-", "", 1))	
+		signatureAlgorithm, err := webscan.NewSignatureAlgorithmFromString(strings.Replace(cert.SignatureAlgorithm.String(), "-", "", 1))
 		if err == nil {
 			certificate.SignatureAlgorithm = &signatureAlgorithm
 		}

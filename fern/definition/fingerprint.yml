@@ -58,7 +58,8 @@ types:
     properties:
       target: string
       httpHeaders: optional<HTTPHeaders>
+      tlsInfo: optional<TLSInfo>
       redirectUrl: string
       redirectHttpHeaders: optional<HTTPHeaders>
-      tlsInfo: optional<TLSInfo>
+      redirectTlsInfo: optional<TLSInfo>
       errors: optional<list<string>>

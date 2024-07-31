@@ -86,7 +86,16 @@ func PerformFingerprint(ctx context.Context, target string) webscan.FingerprintR
 		report.HttpHeaders = httpHeaders
 	}
 
+	// Perform TLS inspection
+	tlsInfo, err := performTLSInspedction(target)
+	if err != nil {
+		report.Errors = append(report.Errors, err.Error())
+	} else {
+		report.TlsInfo = tlsInfo
+	}
+
 	// Check if there was a redirect and if so follow the redirect and perform another OPTIONS request
+	// And TLS inspection
 	if httpHeaders.Location != nil && httpHeaders.Location != &target {
 		redirectHTTPHeaders, err := performOptionsRequest(*httpHeaders.Location)
 		if err != nil {
@@ -95,14 +104,14 @@ func PerformFingerprint(ctx context.Context, target string) webscan.FingerprintR
 			report.RedirectUrl = *httpHeaders.Location
 			report.RedirectHttpHeaders = redirectHTTPHeaders
 		}
-	}
 
-	// Perform TLS inspection
-	tlsInfo, err := performTLSInspedction(target)
-	if err != nil {
-		report.Errors = append(report.Errors, err.Error())
-	} else {
-		report.TlsInfo = tlsInfo
+		// Perform TLS inspection
+		redirectTLSInfo, err := performTLSInspedction(*httpHeaders.Location)
+		if err != nil {
+			report.Errors = append(report.Errors, err.Error())
+		} else {
+			report.RedirectTlsInfo = redirectTLSInfo
+		}
 	}
 
 	return report
