@@ -5,9 +5,8 @@ package webscan
 import (
 	json "encoding/json"
 	fmt "fmt"
-	time "time"
-
 	core "github.com/Method-Security/webscan/generated/go/core"
+	time "time"
 )
 
 type Certificate struct {
@@ -86,7 +85,7 @@ type FingerprintReport struct {
 	Target              string       `json:"target" url:"target"`
 	HttpHeaders         *HttpHeaders `json:"httpHeaders,omitempty" url:"httpHeaders,omitempty"`
 	TlsInfo             *TlsInfo     `json:"tlsInfo,omitempty" url:"tlsInfo,omitempty"`
-	RedirectUrl         string       `json:"redirectUrl" url:"redirectUrl"`
+	RedirectUrl         *string      `json:"redirectUrl,omitempty" url:"redirectUrl,omitempty"`
 	RedirectHttpHeaders *HttpHeaders `json:"redirectHttpHeaders,omitempty" url:"redirectHttpHeaders,omitempty"`
 	RedirectTlsInfo     *TlsInfo     `json:"redirectTlsInfo,omitempty" url:"redirectTlsInfo,omitempty"`
 	Errors              []string     `json:"errors,omitempty" url:"errors,omitempty"`

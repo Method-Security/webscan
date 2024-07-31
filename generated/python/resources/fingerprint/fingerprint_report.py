@@ -13,7 +13,7 @@ class FingerprintReport(pydantic_v1.BaseModel):
     target: str
     http_headers: typing.Optional[HttpHeaders] = pydantic_v1.Field(alias="httpHeaders", default=None)
     tls_info: typing.Optional[TlsInfo] = pydantic_v1.Field(alias="tlsInfo", default=None)
-    redirect_url: str = pydantic_v1.Field(alias="redirectUrl")
+    redirect_url: typing.Optional[str] = pydantic_v1.Field(alias="redirectUrl", default=None)
     redirect_http_headers: typing.Optional[HttpHeaders] = pydantic_v1.Field(alias="redirectHttpHeaders", default=None)
     redirect_tls_info: typing.Optional[TlsInfo] = pydantic_v1.Field(alias="redirectTlsInfo", default=None)
     errors: typing.Optional[typing.List[str]] = None

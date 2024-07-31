@@ -59,7 +59,7 @@ types:
       target: string
       httpHeaders: optional<HTTPHeaders>
       tlsInfo: optional<TLSInfo>
-      redirectUrl: string
+      redirectUrl: optional<string>
       redirectHttpHeaders: optional<HTTPHeaders>
       redirectTlsInfo: optional<TLSInfo>
       errors: optional<list<string>>
