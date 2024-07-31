@@ -101,7 +101,7 @@ func PerformFingerprint(ctx context.Context, target string) webscan.FingerprintR
 		if err != nil {
 			report.Errors = append(report.Errors, err.Error())
 		} else {
-			report.RedirectUrl = *httpHeaders.Location
+			report.RedirectUrl = httpHeaders.Location
 			report.RedirectHttpHeaders = redirectHTTPHeaders
 		}
 
