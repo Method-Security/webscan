@@ -6,6 +6,7 @@ import (
 	"encoding/pem"
 	"net/http"
 	"reflect"
+	"strings"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
 )
@@ -86,12 +87,14 @@ func converToTLSInfo(state *tls.ConnectionState) *webscan.TlsInfo {
 			Signature:         &signatureHex,
 		}
 
-		signatureAlgorithm, err := webscan.NewSignatureAlgorithmFromString(cert.SignatureAlgorithm.String())
-		if err != nil {
+		// Signature names defined in `signatureAlgorithmDetails` in the `x509` package have a hyphen
+		// Which is removed for proper enum conversion
+		signatureAlgorithm, err := webscan.NewSignatureAlgorithmFromString(strings.Replace(cert.SignatureAlgorithm.String(), "-", "", 1))	
+		if err == nil {
 			certificate.SignatureAlgorithm = &signatureAlgorithm
 		}
 		publicKeyAlgorithm, err := webscan.NewPublicKeyAlgorithmFromString(cert.PublicKeyAlgorithm.String())
-		if err != nil {
+		if err == nil {
 			certificate.PublicKeyAlgorithm = &publicKeyAlgorithm
 		}
 

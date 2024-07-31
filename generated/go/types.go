@@ -210,58 +210,58 @@ func (p PublicKeyAlgorithm) Ptr() *PublicKeyAlgorithm {
 type SignatureAlgorithm string
 
 const (
-	SignatureAlgorithmMd2WithRsa       SignatureAlgorithm = "MD2WithRSA"
-	SignatureAlgorithmMd5WithRsa       SignatureAlgorithm = "MD5WithRSA"
-	SignatureAlgorithmSha1WithRsa      SignatureAlgorithm = "SHA1WithRSA"
-	SignatureAlgorithmSha256WithRsa    SignatureAlgorithm = "SHA256WithRSA"
-	SignatureAlgorithmSha384WithRsa    SignatureAlgorithm = "SHA384WithRSA"
-	SignatureAlgorithmSha512WithRsa    SignatureAlgorithm = "SHA512WithRSA"
-	SignatureAlgorithmDsaWithSha1      SignatureAlgorithm = "DSAWithSHA1"
-	SignatureAlgorithmDsaWithSha256    SignatureAlgorithm = "DSAWithSHA256"
-	SignatureAlgorithmEcdsaWithSha1    SignatureAlgorithm = "ECDSAWithSHA1"
-	SignatureAlgorithmEcdsaWithSha256  SignatureAlgorithm = "ECDSAWithSHA256"
-	SignatureAlgorithmEcdsaWithSha384  SignatureAlgorithm = "ECDSAWithSHA384"
-	SignatureAlgorithmEcdsaWithSha512  SignatureAlgorithm = "ECDSAWithSHA512"
-	SignatureAlgorithmSha256WithRsapss SignatureAlgorithm = "SHA256WithRSAPSS"
-	SignatureAlgorithmSha384WithRsapss SignatureAlgorithm = "SHA384WithRSAPSS"
-	SignatureAlgorithmSha512WithRsapss SignatureAlgorithm = "SHA512WithRSAPSS"
-	SignatureAlgorithmPureEd25519      SignatureAlgorithm = "PureEd25519"
+	SignatureAlgorithmMd2Rsa       SignatureAlgorithm = "MD2RSA"
+	SignatureAlgorithmMd5Rsa       SignatureAlgorithm = "MD5RSA"
+	SignatureAlgorithmSha1Rsa      SignatureAlgorithm = "SHA1RSA"
+	SignatureAlgorithmSha256Rsa    SignatureAlgorithm = "SHA256RSA"
+	SignatureAlgorithmSha384Rsa    SignatureAlgorithm = "SHA384RSA"
+	SignatureAlgorithmSha512Rsa    SignatureAlgorithm = "SHA512RSA"
+	SignatureAlgorithmDsasha1      SignatureAlgorithm = "DSASHA1"
+	SignatureAlgorithmDsasha256    SignatureAlgorithm = "DSASHA256"
+	SignatureAlgorithmEcdsasha1    SignatureAlgorithm = "ECDSASHA1"
+	SignatureAlgorithmEcdsasha256  SignatureAlgorithm = "ECDSASHA256"
+	SignatureAlgorithmEcdsasha384  SignatureAlgorithm = "ECDSASHA384"
+	SignatureAlgorithmEcdsasha512  SignatureAlgorithm = "ECDSASHA512"
+	SignatureAlgorithmSha256Rsapss SignatureAlgorithm = "SHA256RSAPSS"
+	SignatureAlgorithmSha384Rsapss SignatureAlgorithm = "SHA384RSAPSS"
+	SignatureAlgorithmSha512Rsapss SignatureAlgorithm = "SHA512RSAPSS"
+	SignatureAlgorithmEd25519      SignatureAlgorithm = "Ed25519"
 )
 
 func NewSignatureAlgorithmFromString(s string) (SignatureAlgorithm, error) {
 	switch s {
-	case "MD2WithRSA":
-		return SignatureAlgorithmMd2WithRsa, nil
-	case "MD5WithRSA":
-		return SignatureAlgorithmMd5WithRsa, nil
-	case "SHA1WithRSA":
-		return SignatureAlgorithmSha1WithRsa, nil
-	case "SHA256WithRSA":
-		return SignatureAlgorithmSha256WithRsa, nil
-	case "SHA384WithRSA":
-		return SignatureAlgorithmSha384WithRsa, nil
-	case "SHA512WithRSA":
-		return SignatureAlgorithmSha512WithRsa, nil
-	case "DSAWithSHA1":
-		return SignatureAlgorithmDsaWithSha1, nil
-	case "DSAWithSHA256":
-		return SignatureAlgorithmDsaWithSha256, nil
-	case "ECDSAWithSHA1":
-		return SignatureAlgorithmEcdsaWithSha1, nil
-	case "ECDSAWithSHA256":
-		return SignatureAlgorithmEcdsaWithSha256, nil
-	case "ECDSAWithSHA384":
-		return SignatureAlgorithmEcdsaWithSha384, nil
-	case "ECDSAWithSHA512":
-		return SignatureAlgorithmEcdsaWithSha512, nil
-	case "SHA256WithRSAPSS":
-		return SignatureAlgorithmSha256WithRsapss, nil
-	case "SHA384WithRSAPSS":
-		return SignatureAlgorithmSha384WithRsapss, nil
-	case "SHA512WithRSAPSS":
-		return SignatureAlgorithmSha512WithRsapss, nil
-	case "PureEd25519":
-		return SignatureAlgorithmPureEd25519, nil
+	case "MD2RSA":
+		return SignatureAlgorithmMd2Rsa, nil
+	case "MD5RSA":
+		return SignatureAlgorithmMd5Rsa, nil
+	case "SHA1RSA":
+		return SignatureAlgorithmSha1Rsa, nil
+	case "SHA256RSA":
+		return SignatureAlgorithmSha256Rsa, nil
+	case "SHA384RSA":
+		return SignatureAlgorithmSha384Rsa, nil
+	case "SHA512RSA":
+		return SignatureAlgorithmSha512Rsa, nil
+	case "DSASHA1":
+		return SignatureAlgorithmDsasha1, nil
+	case "DSASHA256":
+		return SignatureAlgorithmDsasha256, nil
+	case "ECDSASHA1":
+		return SignatureAlgorithmEcdsasha1, nil
+	case "ECDSASHA256":
+		return SignatureAlgorithmEcdsasha256, nil
+	case "ECDSASHA384":
+		return SignatureAlgorithmEcdsasha384, nil
+	case "ECDSASHA512":
+		return SignatureAlgorithmEcdsasha512, nil
+	case "SHA256RSAPSS":
+		return SignatureAlgorithmSha256Rsapss, nil
+	case "SHA384RSAPSS":
+		return SignatureAlgorithmSha384Rsapss, nil
+	case "SHA512RSAPSS":
+		return SignatureAlgorithmSha512Rsapss, nil
+	case "Ed25519":
+		return SignatureAlgorithmEd25519, nil
 	}
 	var t SignatureAlgorithm
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
