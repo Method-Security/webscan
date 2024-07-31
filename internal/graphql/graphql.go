@@ -21,8 +21,8 @@ type Route struct {
 	Description string   `json:"description"`
 }
 
-// GraphQlReport represents the report of the GraphQL API enumeration.
-type GraphQlReport struct {
+// Report represents the report of the GraphQL API enumeration.
+type Report struct {
 	Target string  `json:"target"`
 	Routes []Route `json:"routes"`
 }
@@ -44,8 +44,8 @@ type GraphQLSchema struct {
 }
 
 // PerformGraphQLScan performs a GraphQL scan against a target URL and returns the report.
-func PerformGraphQLScan(ctx context.Context, target string) (GraphQlReport, error) {
-	report := GraphQlReport{Target: target}
+func PerformGraphQLScan(ctx context.Context, target string) (Report, error) {
+	report := Report{Target: target}
 
 	// GraphQL introspection query
 	query := `{"query":"{ __schema { types { name kind description fields { name } } } }"}`
@@ -65,7 +65,7 @@ func PerformGraphQLScan(ctx context.Context, target string) (GraphQlReport, erro
 		return report, fmt.Errorf("failed to unmarshal schema: %v", err)
 	}
 
-	// Create a map to store fields for each type, using lowercase keys for case-insensitivity
+	// Create a map to store fields for each type
 	typeFields := make(map[string][]string)
 	for _, t := range schema.Data.Schema.Types {
 		if t.Kind == "OBJECT" {

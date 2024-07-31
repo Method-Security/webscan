@@ -13,6 +13,8 @@ import (
 	v2 "github.com/pb33f/libopenapi/datamodel/high/v2"
 )
 
+//  TODO: support request / response schemas
+
 // Route represents a single API route with its details.
 type Route struct {
 	Path        string   `json:"path"`
@@ -23,15 +25,15 @@ type Route struct {
 	Description string   `json:"description"`
 }
 
-// SwaggerReport represents the report of the Swagger API enumeration.
-type SwaggerReport struct {
+// Report represents the report of the Swagger API enumeration.
+type Report struct {
 	Target string  `json:"target"`
 	Routes []Route `json:"routes"`
 }
 
 // PerformSwaggerScan performs a Swagger scan against a target URL and returns the report.
-func PerformSwaggerScan(ctx context.Context, target string) (SwaggerReport, error) {
-	report := SwaggerReport{Target: target}
+func PerformSwaggerScan(ctx context.Context, target string) (Report, error) {
+	report := Report{Target: target}
 
 	// Fetch the Swagger JSON
 	resp, err := http.Get(target)
