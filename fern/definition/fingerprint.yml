@@ -3,22 +3,22 @@
 types:
   SignatureAlgorithm:
     enum:
-      - MD2WithRSA
-      - MD5WithRSA
-      - SHA1WithRSA
-      - SHA256WithRSA
-      - SHA384WithRSA
-      - SHA512WithRSA
-      - DSAWithSHA1
-      - DSAWithSHA256
-      - ECDSAWithSHA1
-      - ECDSAWithSHA256
-      - ECDSAWithSHA384
-      - ECDSAWithSHA512
-      - SHA256WithRSAPSS
-      - SHA384WithRSAPSS
-      - SHA512WithRSAPSS
-      - PureEd25519
+      - MD2RSA
+      - MD5RSA
+      - SHA1RSA
+      - SHA256RSA
+      - SHA384RSA
+      - SHA512RSA
+      - DSASHA1
+      - DSASHA256
+      - ECDSASHA1
+      - ECDSASHA256
+      - ECDSASHA384
+      - ECDSASHA512
+      - SHA256RSAPSS
+      - SHA384RSAPSS
+      - SHA512RSAPSS
+      - Ed25519
   PublicKeyAlgorithm:
     enum:
       - RSA
