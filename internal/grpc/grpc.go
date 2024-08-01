@@ -74,7 +74,6 @@ func PerformGRPCScan(ctx context.Context, target string) (webscan.Report, error)
 			var fileDesc descriptorpb.FileDescriptorProto
 			if err := proto.Unmarshal(fdBytes, &fileDesc); err != nil {
 				return report, fmt.Errorf("failed to unmarshal file descriptor: %v", err)
-				// rawDescriptors = append(rawDescriptors, fdBytes)
 			}
 			rawDescriptors = append(rawDescriptors, &fileDesc)
 

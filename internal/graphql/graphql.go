@@ -75,7 +75,6 @@ func PerformGraphQLScan(ctx context.Context, target string) (webscan.GraphQlRepo
 					Fields: typeFields[strings.ToLower(field.Name)],
 				}
 				report.Queries = append(report.Queries, &query)
-				log.Printf("Added query: %s with fields: %v", query.Type, query.Fields)
 			}
 		}
 	}
