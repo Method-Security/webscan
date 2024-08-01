@@ -18,6 +18,7 @@ func main() {
 	webscan.InitProbeCommand()
 	webscan.InitSpiderCommand()
 	webscan.InitVulnCommand()
+	webscan.InitAppCommand()
 
 	if err := webscan.RootCmd.Execute(); err != nil {
 		os.Exit(1)
