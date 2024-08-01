@@ -30,6 +30,7 @@ type WebScan struct {
 	ProbeCmd     *cobra.Command
 	SpiderCmd    *cobra.Command
 	VulnCmd      *cobra.Command
+	AppCmd       *cobra.Command
 }
 
 // NewWebScan creates a new WebScan struct with the provided version string. The Webscan struct is used throughout the
