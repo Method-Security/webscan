@@ -1,0 +1,14 @@
+types:
+  Route:
+    properties:
+      path: string
+      queryparams: optional<list<string>>
+      auth: optional<string>
+      method: string
+      type: string
+      description: string
+  Report:
+    properties:
+      target: string
+      routes: list<Route>
+      raw: string
