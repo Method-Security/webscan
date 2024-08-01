@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 
+	webscan "github.com/Method-Security/webscan/generated/go"
 	"github.com/pb33f/libopenapi"
 	"github.com/pb33f/libopenapi/datamodel/high/base"
 	v2 "github.com/pb33f/libopenapi/datamodel/high/v2"
@@ -15,25 +17,9 @@ import (
 
 //  TODO: support request / response schemas
 
-// Route represents a single API route with its details.
-type Route struct {
-	Path        string   `json:"path"`
-	QueryParams []string `json:"query_params"`
-	Auth        *string  `json:"auth"`
-	Method      string   `json:"method"`
-	Type        string   `json:"type"`
-	Description string   `json:"description"`
-}
-
-// Report represents the report of the Swagger API enumeration.
-type Report struct {
-	Target string  `json:"target"`
-	Routes []Route `json:"routes"`
-}
-
 // PerformSwaggerScan performs a Swagger scan against a target URL and returns the report.
-func PerformSwaggerScan(ctx context.Context, target string) (Report, error) {
-	report := Report{Target: target}
+func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, error) {
+	report := webscan.Report{Target: target}
 
 	// Fetch the Swagger JSON
 	resp, err := http.Get(target)
@@ -46,6 +32,9 @@ func PerformSwaggerScan(ctx context.Context, target string) (Report, error) {
 	if err != nil {
 		return report, fmt.Errorf("failed to read response body: %v", err)
 	}
+
+	// Encode the raw body in base64 and add to the report
+	report.Raw = base64.StdEncoding.EncodeToString(body)
 
 	// create a new document from specification bytes
 	document, err := libopenapi.NewDocument(body)
@@ -81,15 +70,15 @@ func PerformSwaggerScan(ctx context.Context, target string) (Report, error) {
 			method := opPair.Key
 			operation := opPair.Value
 			authType := getAuthType(convertSecurityRequirements(operation.Security), securityDefinitions)
-			route := Route{
+			route := webscan.Route{
 				Path:        path,
 				Method:      method,
-				QueryParams: getQueryParams(operation.Parameters),
+				Queryparams: getQueryParams(operation.Parameters),
 				Auth:        &authType,
 				Type:        "swagger",
 				Description: operation.Description,
 			}
-			report.Routes = append(report.Routes, route)
+			report.Routes = append(report.Routes, &route)
 		}
 	}
 

@@ -94,3 +94,386 @@ func (u *UrlDetails) String() string {
 	}
 	return fmt.Sprintf("%#v", u)
 }
+
+type GraphQlData struct {
+	Schema *GraphQlSchemaData `json:"__schema,omitempty" url:"__schema,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GraphQlData) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GraphQlData) UnmarshalJSON(data []byte) error {
+	type unmarshaler GraphQlData
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GraphQlData(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GraphQlData) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GraphQlField struct {
+	Name string `json:"name" url:"name"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GraphQlField) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GraphQlField) UnmarshalJSON(data []byte) error {
+	type unmarshaler GraphQlField
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GraphQlField(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GraphQlField) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GraphQlQuery struct {
+	Type   string   `json:"type" url:"type"`
+	Fields []string `json:"fields,omitempty" url:"fields,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GraphQlQuery) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GraphQlQuery) UnmarshalJSON(data []byte) error {
+	type unmarshaler GraphQlQuery
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GraphQlQuery(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GraphQlQuery) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GraphQlReport struct {
+	Target  string          `json:"target" url:"target"`
+	Routes  []*Route        `json:"routes,omitempty" url:"routes,omitempty"`
+	Queries []*GraphQlQuery `json:"queries,omitempty" url:"queries,omitempty"`
+	Raw     string          `json:"raw" url:"raw"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GraphQlReport) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GraphQlReport) UnmarshalJSON(data []byte) error {
+	type unmarshaler GraphQlReport
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GraphQlReport(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GraphQlReport) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GraphQlSchema struct {
+	Data *GraphQlData `json:"data,omitempty" url:"data,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GraphQlSchema) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GraphQlSchema) UnmarshalJSON(data []byte) error {
+	type unmarshaler GraphQlSchema
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GraphQlSchema(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GraphQlSchema) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GraphQlSchemaData struct {
+	Types []*GraphQlType `json:"types,omitempty" url:"types,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GraphQlSchemaData) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GraphQlSchemaData) UnmarshalJSON(data []byte) error {
+	type unmarshaler GraphQlSchemaData
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GraphQlSchemaData(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GraphQlSchemaData) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GraphQlType struct {
+	Name        string          `json:"name" url:"name"`
+	Kind        string          `json:"kind" url:"kind"`
+	Description *string         `json:"description,omitempty" url:"description,omitempty"`
+	Fields      []*GraphQlField `json:"fields,omitempty" url:"fields,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GraphQlType) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GraphQlType) UnmarshalJSON(data []byte) error {
+	type unmarshaler GraphQlType
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GraphQlType(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GraphQlType) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type Report struct {
+	Target string   `json:"target" url:"target"`
+	Routes []*Route `json:"routes,omitempty" url:"routes,omitempty"`
+	Raw    string   `json:"raw" url:"raw"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *Report) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *Report) UnmarshalJSON(data []byte) error {
+	type unmarshaler Report
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = Report(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *Report) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+type Route struct {
+	Path        string   `json:"path" url:"path"`
+	Queryparams []string `json:"queryparams,omitempty" url:"queryparams,omitempty"`
+	Auth        *string  `json:"auth,omitempty" url:"auth,omitempty"`
+	Method      string   `json:"method" url:"method"`
+	Type        string   `json:"type" url:"type"`
+	Description string   `json:"description" url:"description"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *Route) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *Route) UnmarshalJSON(data []byte) error {
+	type unmarshaler Route
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = Route(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *Route) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}

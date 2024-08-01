@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
 	"time"
 
+	webscan "github.com/Method-Security/webscan/generated/go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
@@ -14,28 +16,11 @@ import (
 	descriptorpb "google.golang.org/protobuf/types/descriptorpb"
 )
 
-// Route represents a single API route with its details.
-type Route struct {
-	Path        string   `json:"path"`
-	QueryParams []string `json:"query_params"`
-	Auth        *string  `json:"auth"`
-	Method      string   `json:"method"`
-	Type        string   `json:"type"`
-	Description string   `json:"description"`
-}
-
-// Report represents the report of the gRPC API enumeration.
-type Report struct {
-	Target string  `json:"target"`
-	Routes []Route `json:"routes"`
-}
-
 // PerformGRPCScan performs a gRPC scan against a target URL and returns the report.
-func PerformGRPCScan(ctx context.Context, target string) (Report, error) {
-	report := Report{Target: target}
+func PerformGRPCScan(ctx context.Context, target string) (webscan.Report, error) {
+	report := webscan.Report{Target: target}
 
 	// Connect to the gRPC server
-	log.Printf("Connecting to gRPC server at %s", target)
 	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock(), grpc.WithTimeout(60*time.Second))
 	if err != nil {
 		return report, fmt.Errorf("failed to connect to gRPC server: %v", err)
@@ -43,7 +28,6 @@ func PerformGRPCScan(ctx context.Context, target string) (Report, error) {
 	defer conn.Close()
 
 	// Create a new reflection client
-	log.Println("Creating reflection client")
 	client := grpc_reflection_v1alpha.NewServerReflectionClient(conn)
 	stream, err := client.ServerReflectionInfo(ctx)
 	if err != nil {
@@ -51,7 +35,6 @@ func PerformGRPCScan(ctx context.Context, target string) (Report, error) {
 	}
 
 	// Request the list of services
-	log.Println("Requesting list of services")
 	if err := stream.Send(&grpc_reflection_v1alpha.ServerReflectionRequest{
 		MessageRequest: &grpc_reflection_v1alpha.ServerReflectionRequest_ListServices{
 			ListServices: "*",
@@ -61,19 +44,17 @@ func PerformGRPCScan(ctx context.Context, target string) (Report, error) {
 	}
 
 	// Receive the list of services
-	log.Println("Receiving list of services")
 	resp, err := stream.Recv()
 	if err != nil {
 		return report, fmt.Errorf("failed to receive list of services: %v", err)
 	}
 
 	services := resp.GetListServicesResponse().Service
-	log.Printf("Found %d services", len(services))
+	var rawDescriptors []*descriptorpb.FileDescriptorProto
 
 	// Iterate over services to populate the report
 	for _, service := range services {
 		serviceName := service.Name
-		log.Printf("Processing service: %s", serviceName)
 
 		// Request the file descriptor for the service
 		if err := stream.Send(&grpc_reflection_v1alpha.ServerReflectionRequest{
@@ -90,38 +71,44 @@ func PerformGRPCScan(ctx context.Context, target string) (Report, error) {
 			return report, fmt.Errorf("failed to receive file descriptor for service %s: %v", serviceName, err)
 		}
 
-		fileDescriptor := resp.GetFileDescriptorResponse().FileDescriptorProto
-		log.Printf("Received %d file descriptors for service %s", len(fileDescriptor), serviceName)
-
-		// Extract methods and their input types from the file descriptor
-		for _, fd := range fileDescriptor {
+		fileDescriptorBytes := resp.GetFileDescriptorResponse().FileDescriptorProto
+		for _, fdBytes := range fileDescriptorBytes {
 			var fileDesc descriptorpb.FileDescriptorProto
-			if err := proto.Unmarshal(fd, &fileDesc); err != nil {
+			if err := proto.Unmarshal(fdBytes, &fileDesc); err != nil {
 				return report, fmt.Errorf("failed to unmarshal file descriptor: %v", err)
+				// rawDescriptors = append(rawDescriptors, fdBytes)
 			}
+			rawDescriptors = append(rawDescriptors, &fileDesc)
 
+			// Extract methods and their input types from the file descriptor
 			for _, service := range fileDesc.Service {
 				for _, method := range service.Method {
 					queryParams := extractFields(&fileDesc, method.GetInputType())
-					route := Route{
+					route := webscan.Route{
 						Path:        fmt.Sprintf("/%s/%s", service.GetName(), method.GetName()),
 						Method:      "POST",
 						Auth:        nil,
-						QueryParams: queryParams,
+						Queryparams: queryParams,
 						Type:        "grpc",
 						Description: method.GetName(),
 					}
-					report.Routes = append(report.Routes, route)
-					log.Printf("Added route: %s with query params: %v", route.Path, queryParams)
+					report.Routes = append(report.Routes, &route)
 				}
 			}
 		}
 	}
 
+	// Encode the raw descriptors in base64 and add to the report
+	rawData, err := proto.Marshal(&descriptorpb.FileDescriptorSet{File: rawDescriptors})
+	if err != nil {
+		return report, fmt.Errorf("failed to marshal raw descriptors: %v", err)
+	}
+	report.Raw = base64.StdEncoding.EncodeToString(rawData)
+
 	return report, nil
 }
 
-// extractFields extracts the fields of a given message type from the file descriptor.
+// extracts the fields of a given message type from the file descriptor.
 func extractFields(fileDesc *descriptorpb.FileDescriptorProto, messageType string) []string {
 	var fields []string
 	for _, msg := range fileDesc.MessageType {
