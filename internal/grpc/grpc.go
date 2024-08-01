@@ -1,11 +1,9 @@
-package main
+package grpc
 
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
@@ -120,21 +118,4 @@ func extractFields(fileDesc *descriptorpb.FileDescriptorProto, messageType strin
 		}
 	}
 	return fields
-}
-
-// Temporary main function for testing
-func main() {
-	target := "grpc.postman-echo.com:443"
-	fmt.Printf("Starting gRPC scan for target: %s\n", target)
-	report, err := PerformGRPCScan(context.Background(), target)
-	if err != nil {
-		log.Fatalf("Failed to perform gRPC scan: %v", err)
-	}
-
-	reportJSON, err := json.MarshalIndent(report, "", "  ")
-	if err != nil {
-		log.Fatalf("Failed to marshal report: %v", err)
-	}
-
-	fmt.Println(string(reportJSON))
 }

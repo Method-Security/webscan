@@ -1,4 +1,4 @@
-package main
+package graphql
 
 import (
 	"bytes"
@@ -81,20 +81,4 @@ func PerformGraphQLScan(ctx context.Context, target string) (webscan.GraphQlRepo
 	}
 
 	return report, nil
-}
-
-// Temporary main function for testing
-func main() {
-	target := "https://countries.trevorblades.com/"
-	report, err := PerformGraphQLScan(context.Background(), target)
-	if err != nil {
-		log.Fatalf("Failed to perform GraphQL scan: %v", err)
-	}
-
-	reportJSON, err := json.MarshalIndent(report, "", "  ")
-	if err != nil {
-		log.Fatalf("Failed to marshal report: %v", err)
-	}
-
-	fmt.Println(string(reportJSON))
 }

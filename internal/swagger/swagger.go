@@ -1,12 +1,10 @@
-package main
+package swagger
 
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
@@ -127,20 +125,4 @@ func convertSecurityRequirements(security []*base.SecurityRequirement) map[strin
 		}
 	}
 	return securityMap
-}
-
-// Temporary main function for testing
-func main() {
-	target := "http://petstore.swagger.io/v2/swagger.json"
-	report, err := PerformSwaggerScan(context.Background(), target)
-	if err != nil {
-		log.Fatalf("Failed to perform Swagger scan: %v", err)
-	}
-
-	reportJSON, err := json.MarshalIndent(report, "", "  ")
-	if err != nil {
-		log.Fatalf("Failed to marshal report: %v", err)
-	}
-
-	fmt.Println(string(reportJSON))
 }
