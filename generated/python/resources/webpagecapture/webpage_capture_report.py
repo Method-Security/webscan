@@ -9,7 +9,7 @@ from ...core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
 
 class WebpageCaptureReport(pydantic_v1.BaseModel):
     target: str
-    html: typing.Optional[str] = None
+    html_encoded: typing.Optional[str] = None
     errors: typing.Optional[typing.List[str]] = None
 
     def json(self, **kwargs: typing.Any) -> str:

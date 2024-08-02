@@ -4,5 +4,5 @@ types:
   WebpageCaptureReport:
     properties:
       target: string
-      html: optional<string>
+      html_encoded: optional<string>
       errors: optional<list<string>>

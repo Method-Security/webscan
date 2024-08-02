@@ -13,7 +13,7 @@ import (
 
 // Map of HTTP header names to struct field names
 var headerMap = map[string]string{
-	"Allow":						"AllowedHttpMethods",
+	"Allow":                        "AllowedHttpMethods",
 	"Location":                     "Location",
 	"Server":                       "Server",
 	"X-Powered-By":                 "XPoweredBy",

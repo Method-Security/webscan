@@ -3,6 +3,7 @@ package webpagecapture
 import (
 	"context"
 	"crypto/tls"
+	"encoding/base64"
 	"io"
 	"net/http"
 
@@ -49,7 +50,8 @@ func PerformWebpageCapture(ctx context.Context, target string) *webscan.WebpageC
 		report.Errors = append(report.Errors, err.Error())
 	} else {
 		bodyString := string(body)
-		report.Html = &bodyString
+		encodedBodyString := base64.StdEncoding.EncodeToString([]byte(bodyString))
+		report.HtmlEncoded = &encodedBodyString
 	}
 
 	return report

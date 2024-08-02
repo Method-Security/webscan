@@ -5,8 +5,9 @@ package webscan
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/Method-Security/webscan/generated/go/core"
 	time "time"
+
+	core "github.com/Method-Security/webscan/generated/go/core"
 )
 
 type TlsVersion string
@@ -443,9 +444,9 @@ func (u *UrlDetails) String() string {
 }
 
 type WebpageCaptureReport struct {
-	Target string   `json:"target" url:"target"`
-	Html   *string  `json:"html,omitempty" url:"html,omitempty"`
-	Errors []string `json:"errors,omitempty" url:"errors,omitempty"`
+	Target      string   `json:"target" url:"target"`
+	HtmlEncoded *string  `json:"html_encoded,omitempty" url:"html_encoded,omitempty"`
+	Errors      []string `json:"errors,omitempty" url:"errors,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
