@@ -10,13 +10,9 @@
       
       
       
-        <link rel="canonical" href="https://method-security.github.io/webscan/docs/index.html">
+        <link rel="canonical" href="https://method-security.github.io/webscan/docs/fingerprint.html">
       
       
-        <link rel="prev" href="../getting-started/basic-usage.html">
-      
-      
-        <link rel="next" href="fuzz.html">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -24,7 +20,7 @@
     
     
       
-        <title>Overview - webscan</title>
+        <title>Spider - webscan</title>
       
     
     
@@ -78,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#capabilities" class="md-skip">
+        <a href="#spider" class="md-skip">
           Skip to content
         </a>
       
@@ -118,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              Spider
             
           </span>
         </div>
@@ -245,12 +241,10 @@
         
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="index.html" class="md-tabs__link">
           
   
@@ -445,30 +439,25 @@
       
   
   
-    
   
   
-  
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -479,7 +468,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Docs
@@ -490,30 +479,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Overview
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="index.html" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -522,53 +491,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#top-level-flags" class="md-nav__link">
-    <span class="md-ellipsis">
-      Top Level Flags
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#version-command" class="md-nav__link">
-    <span class="md-ellipsis">
-      Version Command
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#output-formats" class="md-nav__link">
-    <span class="md-ellipsis">
-      Output Formats
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -586,20 +508,17 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -922,27 +841,18 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#top-level-flags" class="md-nav__link">
+  <a href="#usage" class="md-nav__link">
     <span class="md-ellipsis">
-      Top Level Flags
+      Usage
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#version-command" class="md-nav__link">
+  <a href="#help-text" class="md-nav__link">
     <span class="md-ellipsis">
-      Version Command
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#output-formats" class="md-nav__link">
-    <span class="md-ellipsis">
-      Output Formats
+      Help Text
     </span>
   </a>
   
@@ -963,7 +873,7 @@
                   
 
   
-    <a href="https://github.com/Method-Security/webscan/blob/main/docs/docs/index.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/Method-Security/webscan/blob/main/docs/docs/fingerprint.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
     </a>
@@ -971,29 +881,28 @@
   
 
 
-<h1 id="capabilities">Capabilities<a class="headerlink" href="#capabilities" title="Permanent link">#</a></h1>
-<p>webscan offers a variety of scanning techniques to security teams working to gain a better handle on what web applications they have deployed across cloud providers and on-premise environments. Each of the below pages offers you an in depth look at a webscan capability related to a unique scanning technique.</p>
-<ul>
-<li><a href="fuzz.html">Fuzz</a></li>
-<li><a href="probe.html">Probe</a></li>
-<li><a href="spider.html">Spider</a></li>
-<li><a href="vuln.html">Vuln</a></li>
-<li><a href="fingerprint.html">Fingerprint</a></li>
-<li><a href="webpagecapture.html">Webpagecapture</a></li>
-</ul>
-<h2 id="top-level-flags">Top Level Flags<a class="headerlink" href="#top-level-flags" title="Permanent link">#</a></h2>
-<p>webscan has several top level flags that can be used on any subcommand. These include:</p>
-<div class="highlight"><pre><span></span><code>Flags:
-<span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">                 </span><span class="nb">help</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>webscan
+<h1 id="spider">Spider<a class="headerlink" href="#spider" title="Permanent link">#</a></h1>
+<p>The <code>webscan fingerprint</code> command fingerprints a URL by collecting its HTTP Options, TLS Config, and Certificates.</p>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code>webscan<span class="w"> </span>fingerprint<span class="w"> </span>--targets<span class="w"> </span>https://example.com
+</code></pre></div>
+<h2 id="help-text">Help Text<a class="headerlink" href="#help-text" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code>webscan<span class="w"> </span>fingerprint<span class="w"> </span>-h
+Perform<span class="w"> </span>a<span class="w"> </span>fingerprint<span class="w"> </span>against<span class="w"> </span>a<span class="w"> </span>URL<span class="w"> </span>target
+
+Usage:
+<span class="w">  </span>webscan<span class="w"> </span>fingerprint<span class="w"> </span><span class="o">[</span>flags<span class="o">]</span>
+
+Flags:
+<span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">            </span><span class="nb">help</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>fingerprint
+<span class="w">      </span>--target<span class="w"> </span>string<span class="w">   </span>Url<span class="w"> </span>target<span class="w"> </span>to<span class="w"> </span>perform<span class="w"> </span>fingerprint
+
+Global<span class="w"> </span>Flags:
 <span class="w">  </span>-o,<span class="w"> </span>--output<span class="w"> </span>string<span class="w">        </span>Output<span class="w"> </span>format<span class="w"> </span><span class="o">(</span>signal,<span class="w"> </span>json,<span class="w"> </span>yaml<span class="o">)</span>.<span class="w"> </span>Default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span>signal<span class="w"> </span><span class="o">(</span>default<span class="w"> </span><span class="s2">&quot;signal&quot;</span><span class="o">)</span>
 <span class="w">  </span>-f,<span class="w"> </span>--output-file<span class="w"> </span>string<span class="w">   </span>Path<span class="w"> </span>to<span class="w"> </span>output<span class="w"> </span>file.<span class="w"> </span>If<span class="w"> </span>blank,<span class="w"> </span>will<span class="w"> </span>output<span class="w"> </span>to<span class="w"> </span>STDOUT
 <span class="w">  </span>-q,<span class="w"> </span>--quiet<span class="w">                </span>Suppress<span class="w"> </span>output
 <span class="w">  </span>-v,<span class="w"> </span>--verbose<span class="w">              </span>Verbose<span class="w"> </span>output
 </code></pre></div>
-<h2 id="version-command">Version Command<a class="headerlink" href="#version-command" title="Permanent link">#</a></h2>
-<p>Run <code>webscan version</code> to get the exact version information for your binary</p>
-<h2 id="output-formats">Output Formats<a class="headerlink" href="#output-formats" title="Permanent link">#</a></h2>
-<p>For more information on the various output formats that are supported by webscan, see the <a href="https://method-security.github.io/docs/output.html">Output Formats</a> page in our organization wide documentation.</p>
 
 
 
@@ -1020,44 +929,6 @@
       
         <footer class="md-footer">
   
-    
-      
-      <nav class="md-footer__inner md-grid" aria-label="Footer" >
-        
-          
-          <a href="../getting-started/basic-usage.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Basic Usage">
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-            </div>
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              <div class="md-ellipsis">
-                Basic Usage
-              </div>
-            </div>
-          </a>
-        
-        
-          
-          <a href="fuzz.html" class="md-footer__link md-footer__link--next" aria-label="Next: Fuzzing">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                Fuzzing
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
     
   
   <div class="md-footer-meta md-typeset">
