@@ -8,7 +8,7 @@ import (
 // InitProbeCommand initializes the probe command for the webscan CLI. This command is used to perform a web probe against
 // targets to identify the existence of web servers.
 func (a *WebScan) InitProbeCommand() {
-	a.ProbeCmd = &cobra.Command{
+	probeCmd := &cobra.Command{
 		Use:   "probe",
 		Short: "Perform a web probe against targets",
 		Long:  `Perform a web probe against targets`,
@@ -40,6 +40,6 @@ func (a *WebScan) InitProbeCommand() {
 
 	webserverCmd.Flags().String("targets", "", "Address targets to perform webserver probing agains, comma delimited list")
 
-	a.ProbeCmd.AddCommand(webserverCmd)
-	a.RootCmd.AddCommand(a.ProbeCmd)
+	probeCmd.AddCommand(webserverCmd)
+	a.RootCmd.AddCommand(probeCmd)
 }

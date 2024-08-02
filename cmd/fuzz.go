@@ -7,7 +7,7 @@ import (
 
 // InitFuzzCommand initializes the fuzz command for the webscan CLI. This command is used to perform a web fuzz against a target.
 func (a *WebScan) InitFuzzCommand() {
-	a.FuzzCmd = &cobra.Command{
+	fuzzCmd := &cobra.Command{
 		Use:   "fuzz",
 		Short: "Perform a web fuzz against a target",
 		Long:  `Perform a web fuzz against a target`,
@@ -65,6 +65,6 @@ func (a *WebScan) InitFuzzCommand() {
 	pathCmd.Flags().Bool("ignore-base-content-match", true, "Ignores valid responses with identical size and word length to the base path, typically signifying a web backend redirect")
 	pathCmd.Flags().Int("maxtime", 300, "The maximum time in seconds to run the job, default to 300 seconds")
 
-	a.FuzzCmd.AddCommand(pathCmd)
-	a.RootCmd.AddCommand(a.FuzzCmd)
+	fuzzCmd.AddCommand(pathCmd)
+	a.RootCmd.AddCommand(fuzzCmd)
 }
