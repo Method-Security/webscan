@@ -20,7 +20,7 @@ class HttpHeaders(pydantic_v1.BaseModel):
         alias="accessControlAllowOrigin", default=None
     )
     x_asp_net_version: typing.Optional[str] = pydantic_v1.Field(alias="xAspNetVersion", default=None)
-    http_methods: typing.Optional[str] = pydantic_v1.Field(alias="httpMethods", default=None)
+    allowed_http_methods: typing.Optional[str] = pydantic_v1.Field(alias="allowedHttpMethods", default=None)
 
     def json(self, **kwargs: typing.Any) -> str:
         kwargs_with_defaults: typing.Any = {"by_alias": True, "exclude_unset": True, **kwargs}

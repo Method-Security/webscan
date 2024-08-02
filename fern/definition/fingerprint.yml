@@ -1,5 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fern-api/fern/main/fern.schema.json
 
+imports:
+  common: common.yml
 types:
   SignatureAlgorithm:
     enum:
@@ -40,7 +42,7 @@ types:
       publicKeyAlgorithm: optional<PublicKeyAlgorithm>
   TLSInfo:
     properties:
-      version: optional<string>
+      version: optional<common.TlsVersion>
       cipherSuite: optional<string>
       certificates: optional<list<Certificate>>
   HTTPHeaders:
@@ -53,7 +55,7 @@ types:
       crossOriginResourcePolicy: optional<string>
       accessControlAllowOrigin: optional<string>
       xAspNetVersion: optional<string>
-      httpMethods: optional<string>
+      allowedHttpMethods: optional<string>
   FingerprintReport:
     properties:
       target: string

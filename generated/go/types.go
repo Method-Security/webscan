@@ -9,6 +9,46 @@ import (
 	time "time"
 )
 
+type TlsVersion string
+
+const (
+	TlsVersionSsl10   TlsVersion = "SSL10"
+	TlsVersionSsl20   TlsVersion = "SSL20"
+	TlsVersionSsl30   TlsVersion = "SSL30"
+	TlsVersionTls10   TlsVersion = "TLS10"
+	TlsVersionTls11   TlsVersion = "TLS11"
+	TlsVersionTls12   TlsVersion = "TLS12"
+	TlsVersionTls13   TlsVersion = "TLS13"
+	TlsVersionUnknown TlsVersion = "UNKNOWN"
+)
+
+func NewTlsVersionFromString(s string) (TlsVersion, error) {
+	switch s {
+	case "SSL10":
+		return TlsVersionSsl10, nil
+	case "SSL20":
+		return TlsVersionSsl20, nil
+	case "SSL30":
+		return TlsVersionSsl30, nil
+	case "TLS10":
+		return TlsVersionTls10, nil
+	case "TLS11":
+		return TlsVersionTls11, nil
+	case "TLS12":
+		return TlsVersionTls12, nil
+	case "TLS13":
+		return TlsVersionTls13, nil
+	case "UNKNOWN":
+		return TlsVersionUnknown, nil
+	}
+	var t TlsVersion
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (t TlsVersion) Ptr() *TlsVersion {
+	return &t
+}
+
 type Certificate struct {
 	SubjectCommonName  *string             `json:"subjectCommonName,omitempty" url:"subjectCommonName,omitempty"`
 	IssuerCommonName   *string             `json:"issuerCommonName,omitempty" url:"issuerCommonName,omitempty"`
@@ -137,7 +177,7 @@ type HttpHeaders struct {
 	CrossOriginResourcePolicy *string `json:"crossOriginResourcePolicy,omitempty" url:"crossOriginResourcePolicy,omitempty"`
 	AccessControlAllowOrigin  *string `json:"accessControlAllowOrigin,omitempty" url:"accessControlAllowOrigin,omitempty"`
 	XAspNetVersion            *string `json:"xAspNetVersion,omitempty" url:"xAspNetVersion,omitempty"`
-	HttpMethods               *string `json:"httpMethods,omitempty" url:"httpMethods,omitempty"`
+	AllowedHttpMethods        *string `json:"allowedHttpMethods,omitempty" url:"allowedHttpMethods,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -273,7 +313,7 @@ func (s SignatureAlgorithm) Ptr() *SignatureAlgorithm {
 }
 
 type TlsInfo struct {
-	Version      *string        `json:"version,omitempty" url:"version,omitempty"`
+	Version      *TlsVersion    `json:"version,omitempty" url:"version,omitempty"`
 	CipherSuite  *string        `json:"cipherSuite,omitempty" url:"cipherSuite,omitempty"`
 	Certificates []*Certificate `json:"certificates,omitempty" url:"certificates,omitempty"`
 

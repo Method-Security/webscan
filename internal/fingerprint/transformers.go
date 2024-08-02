@@ -13,6 +13,7 @@ import (
 
 // Map of HTTP header names to struct field names
 var headerMap = map[string]string{
+	"Allow":						"AllowedHttpMethods",
 	"Location":                     "Location",
 	"Server":                       "Server",
 	"X-Powered-By":                 "XPoweredBy",
@@ -38,22 +39,22 @@ func assignHeaders(headers http.Header) *webscan.HttpHeaders {
 	return httpHeaders
 }
 
-func tlsVersionToString(version uint16) string {
+func tlsVersionToString(version uint16) webscan.TlsVersion {
 	switch version {
 	case tls.VersionTLS10:
-		return "TLS 1.0"
+		return webscan.TlsVersionTls10
 	case tls.VersionTLS11:
-		return "TLS 1.1"
+		return webscan.TlsVersionTls11
 	case tls.VersionTLS12:
-		return "TLS 1.2"
+		return webscan.TlsVersionTls12
 	case tls.VersionTLS13:
-		return "TLS 1.3"
+		return webscan.TlsVersionTls13
 	default:
-		return "Unknown"
+		return webscan.TlsVersionUnknown
 	}
 }
 
-func converToTLSInfo(state *tls.ConnectionState) *webscan.TlsInfo {
+func convertToTLSInfo(state *tls.ConnectionState) *webscan.TlsInfo {
 	tlsInfo := &webscan.TlsInfo{
 		Certificates: []*webscan.Certificate{},
 	}

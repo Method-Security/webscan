@@ -5,11 +5,12 @@ import typing
 
 from ...core.datetime_utils import serialize_datetime
 from ...core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
+from ..common.tls_version import TlsVersion
 from .certificate import Certificate
 
 
 class TlsInfo(pydantic_v1.BaseModel):
-    version: typing.Optional[str] = None
+    version: typing.Optional[TlsVersion] = None
     cipher_suite: typing.Optional[str] = pydantic_v1.Field(alias="cipherSuite", default=None)
     certificates: typing.Optional[typing.List[Certificate]] = None
 

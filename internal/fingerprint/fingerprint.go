@@ -39,7 +39,7 @@ func performOptionsRequest(target string) (*webscan.HttpHeaders, error) {
 }
 
 // PerformTlsInspedction performs a TLS inspection against a target URL and captures the TLS information
-func performTLSInspedction(target string) (*webscan.TlsInfo, error) {
+func performTLSInspection(target string) (*webscan.TlsInfo, error) {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
@@ -66,7 +66,7 @@ func performTLSInspedction(target string) (*webscan.TlsInfo, error) {
 		return &webscan.TlsInfo{}, err
 	}
 
-	tlsInfo := converToTLSInfo(state)
+	tlsInfo := convertToTLSInfo(state)
 
 	return tlsInfo, nil
 }
@@ -87,7 +87,7 @@ func PerformFingerprint(ctx context.Context, target string) webscan.FingerprintR
 	}
 
 	// Perform TLS inspection
-	tlsInfo, err := performTLSInspedction(target)
+	tlsInfo, err := performTLSInspection(target)
 	if err != nil {
 		report.Errors = append(report.Errors, err.Error())
 	} else {
@@ -106,7 +106,7 @@ func PerformFingerprint(ctx context.Context, target string) webscan.FingerprintR
 		}
 
 		// Perform TLS inspection
-		redirectTLSInfo, err := performTLSInspedction(*httpHeaders.Location)
+		redirectTLSInfo, err := performTLSInspection(*httpHeaders.Location)
 		if err != nil {
 			report.Errors = append(report.Errors, err.Error())
 		} else {
