@@ -22,6 +22,9 @@ func PerformGraphQLScan(ctx context.Context, target string) (webscan.GraphQlRepo
 	basePath := "/"
 	if len(urlParts) > 3 {
 		basePath = "/" + strings.Join(urlParts[3:], "/")
+		report.BaseEndpointUrl = strings.Join(urlParts[:3], "/")
+	} else {
+		report.BaseEndpointUrl = strings.Join(urlParts, "/")
 	}
 
 	// Add top-level GraphQL route

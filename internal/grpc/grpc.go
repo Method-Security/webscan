@@ -16,7 +16,7 @@ import (
 
 // PerformGRPCScan performs a gRPC scan against a target URL and returns the report.
 func PerformGRPCScan(ctx context.Context, target string) (webscan.Report, error) {
-	report := webscan.Report{Target: target}
+	report := webscan.Report{Target: target, BaseEndpointUrl: target}
 
 	// Connect to the gRPC server
 	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock(), grpc.WithTimeout(60*time.Second))

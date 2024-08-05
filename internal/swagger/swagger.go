@@ -249,7 +249,6 @@ func getAuthTypeV2(security map[string][]string, securityDefinitions map[string]
 	if len(security) == 0 {
 		return "none"
 	}
-	// Simplified logic to determine auth type
 	for name := range security {
 		if secDef, ok := securityDefinitions[name]; ok {
 			switch secDef.Type {
@@ -272,7 +271,6 @@ func getAuthTypeV3(security map[string][]string, securityDefinitions map[string]
 	if len(security) == 0 {
 		return "none"
 	}
-	// Simplified logic to determine auth type
 	for name := range security {
 		if secDef, ok := securityDefinitions[name]; ok {
 			switch secDef.Type {
