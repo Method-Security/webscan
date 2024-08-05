@@ -10,5 +10,7 @@ types:
   Report:
     properties:
       target: string
+      base_endpoint_url: string
+      schema_url: optional<string>
       routes: list<Route>
       raw: string

@@ -5,7 +5,6 @@ package webscan
 import (
 	json "encoding/json"
 	fmt "fmt"
-
 	core "github.com/Method-Security/webscan/generated/go/core"
 )
 
@@ -221,10 +220,11 @@ func (g *GraphQlQuery) String() string {
 }
 
 type GraphQlReport struct {
-	Target  string          `json:"target" url:"target"`
-	Routes  []*Route        `json:"routes,omitempty" url:"routes,omitempty"`
-	Queries []*GraphQlQuery `json:"queries,omitempty" url:"queries,omitempty"`
-	Raw     string          `json:"raw" url:"raw"`
+	Target          string          `json:"target" url:"target"`
+	BaseEndpointUrl string          `json:"base_endpoint_url" url:"base_endpoint_url"`
+	Routes          []*Route        `json:"routes,omitempty" url:"routes,omitempty"`
+	Queries         []*GraphQlQuery `json:"queries,omitempty" url:"queries,omitempty"`
+	Raw             string          `json:"raw" url:"raw"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -391,9 +391,11 @@ func (g *GraphQlType) String() string {
 }
 
 type Report struct {
-	Target string   `json:"target" url:"target"`
-	Routes []*Route `json:"routes,omitempty" url:"routes,omitempty"`
-	Raw    string   `json:"raw" url:"raw"`
+	Target          string   `json:"target" url:"target"`
+	BaseEndpointUrl string   `json:"base_endpoint_url" url:"base_endpoint_url"`
+	SchemaUrl       *string  `json:"schema_url,omitempty" url:"schema_url,omitempty"`
+	Routes          []*Route `json:"routes,omitempty" url:"routes,omitempty"`
+	Raw             string   `json:"raw" url:"raw"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

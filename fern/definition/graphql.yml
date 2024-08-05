@@ -32,6 +32,7 @@ types:
   GraphQLReport:
     properties:
       target: string
+      base_endpoint_url: string
       routes: list<routes.Route>
       queries: list<GraphQLQuery>
       raw: string

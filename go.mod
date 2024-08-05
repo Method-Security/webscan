@@ -6,6 +6,7 @@ toolchain go1.22.5
 
 require (
 	github.com/Method-Security/pkg v0.0.2
+	github.com/chromedp/chromedp v0.9.2
 	github.com/ffuf/ffuf/v2 v2.1.0
 	github.com/google/uuid v1.6.0
 	github.com/palantir/pkg/datetime v1.1.0
@@ -16,6 +17,7 @@ require (
 	github.com/projectdiscovery/nuclei/v3 v3.3.0
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
+	golang.org/x/net v0.26.0
 	google.golang.org/grpc v1.48.0
 	google.golang.org/protobuf v1.33.0
 )
@@ -85,6 +87,8 @@ require (
 	github.com/charmbracelet/glamour v0.6.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.1.4 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
+	github.com/chromedp/cdproto v0.0.0-20230802225258-3cf4e6d46a89 // indirect
+	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/cloudflare/cfssl v1.6.4 // indirect
 	github.com/cloudflare/circl v1.3.8 // indirect
@@ -333,7 +337,6 @@ require (
 	golang.org/x/crypto v0.24.0 // indirect
 	golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 // indirect
 	golang.org/x/mod v0.17.0 // indirect
-	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/oauth2 v0.18.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.21.0 // indirect
