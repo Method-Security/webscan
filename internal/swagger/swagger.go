@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -87,7 +88,11 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 	if err != nil {
 		return report, fmt.Errorf("failed to fetch Swagger JSON: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Println("Error closing response body:", err)
+		}
+	}()
 
 	// Check if the content type is JSON
 	contentType := resp.Header.Get("Content-Type")

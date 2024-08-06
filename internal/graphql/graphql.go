@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 
@@ -44,7 +45,11 @@ func PerformGraphQLScan(ctx context.Context, target string) (webscan.Report, err
 	if err != nil {
 		return report, fmt.Errorf("failed to fetch GraphQL schema: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			log.Println("Error closing response body:", err)
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

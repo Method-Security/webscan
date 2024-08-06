@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"time"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
@@ -23,7 +24,11 @@ func PerformGRPCScan(ctx context.Context, target string) (webscan.Report, error)
 	if err != nil {
 		return report, fmt.Errorf("failed to connect to gRPC server: %v", err)
 	}
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); err != nil {
+			log.Println("Error closing connection:", err)
+		}
+	}()
 
 	// Create a new reflection client
 	client := grpc_reflection_v1alpha.NewServerReflectionClient(conn)
