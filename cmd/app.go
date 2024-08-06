@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"errors"
+	"net/url"
+	"strings"
 
 	"github.com/Method-Security/webscan/internal/graphql"
 	"github.com/Method-Security/webscan/internal/grpc"
@@ -43,6 +45,13 @@ func (a *WebScan) initFingerprintCommand() {
 				a.OutputSignal.Status = 1
 				return
 			}
+
+			// Remove protocol from target URL if present
+			parsedURL, err := url.Parse(target)
+			if err == nil && parsedURL.Scheme != "" {
+				target = strings.TrimPrefix(target, parsedURL.Scheme+"://")
+			}
+
 			tags, err := cmd.Flags().GetStringSlice("tags")
 			if err != nil {
 				errorMessage := err.Error()
