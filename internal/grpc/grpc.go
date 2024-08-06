@@ -19,95 +19,150 @@ import (
 func PerformGRPCScan(ctx context.Context, target string) (webscan.Report, error) {
 	report := webscan.Report{Target: target, BaseEndpointUrl: target, AppType: webscan.ApiTypeGrpc}
 
-	// Connect to the gRPC server
+	conn, err := connectToGRPCServer(target)
+	if err != nil {
+		return report, err
+	}
+	defer closeConnection(conn)
+
+	stream, err := createReflectionClient(ctx, conn)
+	if err != nil {
+		return report, err
+	}
+
+	services, err := requestAndReceiveServices(stream)
+	if err != nil {
+		return report, err
+	}
+
+	rawDescriptors, err := processServices(stream, services, &report)
+	if err != nil {
+		return report, err
+	}
+
+	if err := encodeRawDescriptors(rawDescriptors, &report); err != nil {
+		return report, err
+	}
+
+	return report, nil
+}
+
+func connectToGRPCServer(target string) (*grpc.ClientConn, error) {
 	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock(), grpc.WithTimeout(60*time.Second))
 	if err != nil {
-		return report, fmt.Errorf("failed to connect to gRPC server: %v", err)
+		return nil, fmt.Errorf("failed to connect to gRPC server: %v", err)
 	}
-	defer func() {
-		if err := conn.Close(); err != nil {
-			log.Println("Error closing connection:", err)
-		}
-	}()
+	return conn, nil
+}
 
-	// Create a new reflection client
+func closeConnection(conn *grpc.ClientConn) {
+	if err := conn.Close(); err != nil {
+		log.Println("Error closing connection:", err)
+	}
+}
+
+func createReflectionClient(ctx context.Context, conn *grpc.ClientConn) (grpc_reflection_v1alpha.ServerReflection_ServerReflectionInfoClient, error) {
 	client := grpc_reflection_v1alpha.NewServerReflectionClient(conn)
 	stream, err := client.ServerReflectionInfo(ctx)
 	if err != nil {
-		return report, fmt.Errorf("failed to create reflection client: %v", err)
+		return nil, fmt.Errorf("failed to create reflection client: %v", err)
 	}
+	return stream, nil
+}
 
-	// Request the list of services
+func requestAndReceiveServices(stream grpc_reflection_v1alpha.ServerReflection_ServerReflectionInfoClient) ([]*grpc_reflection_v1alpha.ServiceResponse, error) {
 	if err := stream.Send(&grpc_reflection_v1alpha.ServerReflectionRequest{
 		MessageRequest: &grpc_reflection_v1alpha.ServerReflectionRequest_ListServices{
 			ListServices: "*",
 		},
 	}); err != nil {
-		return report, fmt.Errorf("failed to request list of services: %v", err)
+		return nil, fmt.Errorf("failed to request list of services: %v", err)
 	}
 
-	// Receive the list of services
 	resp, err := stream.Recv()
 	if err != nil {
-		return report, fmt.Errorf("failed to receive list of services: %v", err)
+		return nil, fmt.Errorf("failed to receive list of services: %v", err)
 	}
 
-	services := resp.GetListServicesResponse().Service
+	return resp.GetListServicesResponse().Service, nil
+}
+
+func processServices(stream grpc_reflection_v1alpha.ServerReflection_ServerReflectionInfoClient, services []*grpc_reflection_v1alpha.ServiceResponse, report *webscan.Report) ([]*descriptorpb.FileDescriptorProto, error) {
 	var rawDescriptors []*descriptorpb.FileDescriptorProto
 
-	// Iterate over services to populate the report
 	for _, service := range services {
 		serviceName := service.Name
 
-		// Request the file descriptor for the service
-		if err := stream.Send(&grpc_reflection_v1alpha.ServerReflectionRequest{
-			MessageRequest: &grpc_reflection_v1alpha.ServerReflectionRequest_FileContainingSymbol{
-				FileContainingSymbol: serviceName,
-			},
-		}); err != nil {
-			return report, fmt.Errorf("failed to request file descriptor for service %s: %v", serviceName, err)
+		if err := requestFileDescriptor(stream, serviceName); err != nil {
+			return nil, err
 		}
 
-		// Receive the file descriptor
-		resp, err := stream.Recv()
+		fileDescriptorBytes, err := receiveFileDescriptor(stream, serviceName)
 		if err != nil {
-			return report, fmt.Errorf("failed to receive file descriptor for service %s: %v", serviceName, err)
+			return nil, err
 		}
 
-		fileDescriptorBytes := resp.GetFileDescriptorResponse().FileDescriptorProto
-		for _, fdBytes := range fileDescriptorBytes {
-			var fileDesc descriptorpb.FileDescriptorProto
-			if err := proto.Unmarshal(fdBytes, &fileDesc); err != nil {
-				return report, fmt.Errorf("failed to unmarshal file descriptor: %v", err)
-			}
-			rawDescriptors = append(rawDescriptors, &fileDesc)
-
-			// Extract methods and their input types from the file descriptor
-			for _, service := range fileDesc.Service {
-				for _, method := range service.Method {
-					queryParams := extractFields(&fileDesc, method.GetInputType())
-					route := webscan.Route{
-						Path:        fmt.Sprintf("/%s/%s", service.GetName(), method.GetName()),
-						Method:      "POST",
-						Auth:        nil,
-						Queryparams: queryParams,
-						Type:        webscan.ApiTypeGrpc,
-						Description: method.GetName(),
-					}
-					report.Routes = append(report.Routes, &route)
-				}
-			}
+		if err := unmarshalFileDescriptors(fileDescriptorBytes, &rawDescriptors, report); err != nil {
+			return nil, err
 		}
 	}
 
-	// Encode the raw descriptors in base64 and add to the report
+	return rawDescriptors, nil
+}
+
+func requestFileDescriptor(stream grpc_reflection_v1alpha.ServerReflection_ServerReflectionInfoClient, serviceName string) error {
+	return stream.Send(&grpc_reflection_v1alpha.ServerReflectionRequest{
+		MessageRequest: &grpc_reflection_v1alpha.ServerReflectionRequest_FileContainingSymbol{
+			FileContainingSymbol: serviceName,
+		},
+	})
+}
+
+func receiveFileDescriptor(stream grpc_reflection_v1alpha.ServerReflection_ServerReflectionInfoClient, serviceName string) ([][]byte, error) {
+	resp, err := stream.Recv()
+	if err != nil {
+		return nil, fmt.Errorf("failed to receive file descriptor for service %s: %v", serviceName, err)
+	}
+	return resp.GetFileDescriptorResponse().FileDescriptorProto, nil
+}
+
+func unmarshalFileDescriptors(fileDescriptorBytes [][]byte, rawDescriptors *[]*descriptorpb.FileDescriptorProto, report *webscan.Report) error {
+	for _, fdBytes := range fileDescriptorBytes {
+		var fileDesc descriptorpb.FileDescriptorProto
+		if err := proto.Unmarshal(fdBytes, &fileDesc); err != nil {
+			return fmt.Errorf("failed to unmarshal file descriptor: %v", err)
+		}
+		*rawDescriptors = append(*rawDescriptors, &fileDesc)
+
+		extractMethods(&fileDesc, report)
+	}
+	return nil
+}
+
+func extractMethods(fileDesc *descriptorpb.FileDescriptorProto, report *webscan.Report) {
+	for _, service := range fileDesc.Service {
+		for _, method := range service.Method {
+			queryParams := extractFields(fileDesc, method.GetInputType())
+			route := webscan.Route{
+				Path:        fmt.Sprintf("/%s/%s", service.GetName(), method.GetName()),
+				Method:      "POST",
+				Auth:        nil,
+				Queryparams: queryParams,
+				Type:        webscan.ApiTypeGrpc,
+				Description: method.GetName(),
+			}
+			report.Routes = append(report.Routes, &route)
+		}
+	}
+}
+
+func encodeRawDescriptors(rawDescriptors []*descriptorpb.FileDescriptorProto, report *webscan.Report) error {
 	rawData, err := proto.Marshal(&descriptorpb.FileDescriptorSet{File: rawDescriptors})
 	if err != nil {
-		return report, fmt.Errorf("failed to marshal raw descriptors: %v", err)
+		return fmt.Errorf("failed to marshal raw descriptors: %v", err)
 	}
 	report.Raw = base64.StdEncoding.EncodeToString(rawData)
-
-	return report, nil
+	return nil
 }
 
 // extracts the fields of a given message type from the file descriptor.

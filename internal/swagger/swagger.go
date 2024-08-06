@@ -25,28 +25,83 @@ import (
 func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, error) {
 	report := webscan.Report{Target: target}
 
-	// Create a new context for chromedp
+	// Setup headless browser
 	ctx, cancel := chromedp.NewContext(ctx)
 	defer cancel()
 
-	// Create a timeout context
 	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	// Fetch the fully rendered HTML content
+	body, err := fetchHTMLContent(ctx, target)
+	if err != nil {
+		fmt.Printf("Error fetching HTML content: %v\n", err)
+		return report, err
+	}
+
+	// Parse the HTML to find the Swagger JSON link
+	swaggerURL, err := findSwaggerURL(body, target)
+	if err != nil {
+		fmt.Printf("Error finding Swagger URL: %v\n", err)
+		return report, err
+	}
+
+	report.SchemaUrl = &swaggerURL
+
+	// Fetch the Swagger JSON
+	bodyBytes, err := fetchSwaggerJSON(swaggerURL)
+	if err != nil {
+		fmt.Printf("Error fetching Swagger JSON: %v\n", err)
+		return report, err
+	}
+
+	// Encode the raw body in base64 and add to the report
+	report.Raw = base64.StdEncoding.EncodeToString(bodyBytes)
+
+	// Create a new document from specification bytes
+	document, err := libopenapi.NewDocument(bodyBytes)
+	if err != nil {
+		fmt.Printf("Error creating new document: %v\n", err)
+		return report, fmt.Errorf("cannot create new document: %v", err)
+	}
+
+	// Determine if the document is Swagger (OpenAPI 2.0) or OpenAPI 3.0+
+	var docType map[string]interface{}
+	if err := json.Unmarshal(bodyBytes, &docType); err != nil {
+		return report, fmt.Errorf("failed to unmarshal document type: %v", err)
+	}
+
+	if version, ok := docType["swagger"]; ok && strings.HasPrefix(version.(string), "2") {
+		err = handleSwaggerV2(document, &report)
+	} else if version, ok := docType["openapi"]; ok && strings.HasPrefix(version.(string), "3") {
+		err = handleOpenAPIV3(document, &report, target)
+	} else {
+		return report, fmt.Errorf("unsupported OpenAPI version")
+	}
+
+	if err != nil {
+		return report, err
+	}
+
+	return report, nil
+}
+
+func fetchHTMLContent(ctx context.Context, target string) (string, error) {
 	var body string
 	err := chromedp.Run(ctx,
 		chromedp.Navigate(target),
 		chromedp.OuterHTML("html", &body),
 	)
 	if err != nil {
-		return report, fmt.Errorf("failed to fetch HTML: %v", err)
+		return "", fmt.Errorf("failed to fetch HTML: %v", err)
 	}
+	return body, nil
+}
 
-	// Parse the HTML to find the Swagger JSON link
+func findSwaggerURL(body, target string) (string, error) {
 	doc, err := html.Parse(strings.NewReader(body))
 	if err != nil {
-		return report, fmt.Errorf("failed to parse HTML: %v", err)
+		return "", fmt.Errorf("failed to parse HTML: %v", err)
 	}
 
 	var swaggerURL string
@@ -54,13 +109,21 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 	f = func(n *html.Node) {
 		if n.Type == html.ElementNode {
 			for _, a := range n.Attr {
-				if strings.Contains(a.Val, "swagger.json") {
-					// Ensure the base part of the URL matches the target's base
-					if strings.HasPrefix(a.Val, target[:strings.LastIndex(target, "/")+1]) {
-						swaggerURL = a.Val
-						fmt.Printf("Found swagger.json link: %s\n", swaggerURL)
-						return
-					}
+				if strings.Contains(a.Val, "swagger.json") || strings.Contains(a.Val, "openapi.json") {
+					swaggerURL = constructSwaggerURL(a.Val, target)
+					fmt.Printf("Found docs link: %s\n", swaggerURL)
+					return
+				}
+			}
+		} else if n.Type == html.TextNode && n.Parent != nil && n.Parent.Data == "script" {
+			if strings.Contains(n.Data, "swagger.json") || strings.Contains(n.Data, "openapi.json") {
+				start := strings.Index(n.Data, "url: '") + len("url: '")
+				end := strings.Index(n.Data[start:], "'") + start
+				if start > len("url: '")-1 && end > start {
+					urlStr := n.Data[start:end]
+					swaggerURL = constructSwaggerURL(urlStr, target)
+					fmt.Printf("Found docs link in script: %s\n", swaggerURL)
+					return
 				}
 			}
 		}
@@ -71,22 +134,30 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 	f(doc)
 
 	if swaggerURL == "" {
-		return report, fmt.Errorf("swagger.json link not found in HTML")
+		return "", fmt.Errorf("swagger.json link not found in HTML")
 	}
 
-	// Construct the full URL if the found URL is relative
-	if !strings.HasPrefix(swaggerURL, "http") {
-		baseURL := target[:strings.LastIndex(target, "/")+1]
-		swaggerURL = baseURL + swaggerURL
+	return swaggerURL, nil
+}
+
+func constructSwaggerURL(urlStr, target string) string {
+	if strings.HasPrefix(urlStr, target[:strings.LastIndex(target, "/")+1]) {
+		return urlStr
+	} else {
+		parsedURL, err := url.Parse(target)
+		if err != nil {
+			fmt.Printf("Error parsing target URL: %v\n", err)
+			return ""
+		}
+		baseURL := fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host)
+		return baseURL + urlStr // Keep the leading slash
 	}
+}
 
-	// Update the report with the found Swagger URL
-	report.SchemaUrl = &swaggerURL
-
-	// Fetch the Swagger JSON
+func fetchSwaggerJSON(swaggerURL string) ([]byte, error) {
 	resp, err := http.Get(swaggerURL)
 	if err != nil {
-		return report, fmt.Errorf("failed to fetch Swagger JSON: %v", err)
+		return nil, fmt.Errorf("failed to fetch Swagger JSON: %v", err)
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
@@ -94,135 +165,121 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 		}
 	}()
 
-	// Check if the content type is JSON
 	contentType := resp.Header.Get("Content-Type")
 	if !strings.HasPrefix(contentType, "application/json") {
-		return report, fmt.Errorf("invalid content type: expected application/json, got %s", contentType)
+		return nil, fmt.Errorf("invalid content type: expected application/json, got %s", contentType)
 	}
 
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return report, fmt.Errorf("failed to read response body: %v", err)
+		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 
-	// Encode the raw body in base64 and add to the report
-	report.Raw = base64.StdEncoding.EncodeToString(bodyBytes)
+	return bodyBytes, nil
+}
 
-	// create a new document from specification bytes
-	document, err := libopenapi.NewDocument(bodyBytes)
-	if err != nil {
-		return report, fmt.Errorf("cannot create new document: %v", err)
+func handleSwaggerV2(document libopenapi.Document, report *webscan.Report) error {
+	report.AppType = webscan.ApiTypeSwaggerV2
+	var errors []error
+	var v2Model *libopenapi.DocumentModel[v2.Swagger]
+
+	v2Model, errors = document.BuildV2Model()
+	if len(errors) > 0 {
+		for i := range errors {
+			fmt.Printf("error: %v\n", errors[i])
+		}
+		return fmt.Errorf("cannot create v2 model from document: %d errors reported", len(errors))
 	}
 
-	// Determine if the document is Swagger (OpenAPI 2.0) or OpenAPI 3.0+
-	var docType map[string]interface{}
-	if err := json.Unmarshal(bodyBytes, &docType); err != nil {
-		return report, fmt.Errorf("failed to unmarshal document type: %v", err)
+	model := v2Model.Model
+
+	// Construct the base endpoint URL from the host and basePath fields
+	baseEndpointURL := fmt.Sprintf("https://%s%s", model.Host, model.BasePath)
+	report.BaseEndpointUrl = baseEndpointURL
+
+	// Extract security definitions
+	securityDefinitions := make(map[string]*v2.SecurityScheme)
+	for pair := model.SecurityDefinitions.Definitions.Oldest(); pair != nil; pair = pair.Next() {
+		securityDefinitions[pair.Key] = pair.Value
 	}
 
-	if version, ok := docType["swagger"]; ok && version == "2.0" {
-		// Handle Swagger (OpenAPI 2.0)
-		report.AppType = webscan.ApiTypeSwaggerV2
-		var errors []error
-		var v2Model *libopenapi.DocumentModel[v2.Swagger]
-
-		v2Model, errors = document.BuildV2Model()
-		if len(errors) > 0 {
-			for i := range errors {
-				fmt.Printf("error: %v\n", errors[i])
+	// Iterate over paths and methods to populate the report
+	for pair := model.Paths.PathItems.Oldest(); pair != nil; pair = pair.Next() {
+		path := pair.Key
+		pathItem := pair.Value
+		for opPair := pathItem.GetOperations().Oldest(); opPair != nil; opPair = opPair.Next() {
+			method := opPair.Key
+			operation := opPair.Value
+			authType := getAuthTypeV2(convertSecurityRequirementsV2(operation.Security), securityDefinitions)
+			route := webscan.Route{
+				Path:        path,
+				Method:      method,
+				Queryparams: getQueryParamsV2(operation.Parameters),
+				Auth:        &authType,
+				Type:        webscan.ApiTypeSwaggerV2,
+				Description: operation.Description,
 			}
-			return report, fmt.Errorf("cannot create v2 model from document: %d errors reported", len(errors))
+			report.Routes = append(report.Routes, &route)
 		}
-
-		model := v2Model.Model
-
-		// Construct the base endpoint URL from the host and basePath fields
-		baseEndpointURL := fmt.Sprintf("https://%s%s", model.Host, model.BasePath)
-		report.BaseEndpointUrl = baseEndpointURL
-
-		// Extract security definitions
-		securityDefinitions := make(map[string]*v2.SecurityScheme)
-		for pair := model.SecurityDefinitions.Definitions.Oldest(); pair != nil; pair = pair.Next() {
-			securityDefinitions[pair.Key] = pair.Value
-		}
-
-		// Iterate over paths and methods to populate the report
-		for pair := model.Paths.PathItems.Oldest(); pair != nil; pair = pair.Next() {
-			path := pair.Key
-			pathItem := pair.Value
-			for opPair := pathItem.GetOperations().Oldest(); opPair != nil; opPair = opPair.Next() {
-				method := opPair.Key
-				operation := opPair.Value
-				authType := getAuthTypeV2(convertSecurityRequirementsV2(operation.Security), securityDefinitions)
-				route := webscan.Route{
-					Path:        path,
-					Method:      method,
-					Queryparams: getQueryParamsV2(operation.Parameters),
-					Auth:        &authType,
-					Type:        webscan.ApiTypeSwaggerV2,
-					Description: operation.Description,
-				}
-				report.Routes = append(report.Routes, &route)
-			}
-		}
-	} else if version, ok := docType["openapi"]; ok && strings.HasPrefix(version.(string), "3.0") {
-		// Handle OpenAPI 3.0+
-		report.AppType = webscan.ApiTypeSwaggerV3
-		var errors []error
-		var v3Model *libopenapi.DocumentModel[v3.Document]
-
-		v3Model, errors = document.BuildV3Model()
-		if len(errors) > 0 {
-			for i := range errors {
-				fmt.Printf("error: %v\n", errors[i])
-			}
-			return report, fmt.Errorf("cannot create v3 model from document: %d errors reported", len(errors))
-		}
-
-		model := v3Model.Model
-
-		// Construct the base endpoint URL from the servers array
-		if len(model.Servers) > 0 {
-			serverPath := model.Servers[0].URL
-			parsedURL, err := url.Parse(target)
-			if err != nil {
-				return report, fmt.Errorf("failed to parse target URL: %v", err)
-			}
-			baseURL := fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host)
-			baseURL = strings.TrimSuffix(baseURL, "/")
-			report.BaseEndpointUrl = baseURL + serverPath
-		}
-
-		// Extract security definitions
-		securityDefinitions := make(map[string]*v3.SecurityScheme)
-		for pair := model.Components.SecuritySchemes.Oldest(); pair != nil; pair = pair.Next() {
-			securityDefinitions[pair.Key] = pair.Value
-		}
-
-		// Iterate over paths and methods to populate the report
-		for pair := model.Paths.PathItems.Oldest(); pair != nil; pair = pair.Next() {
-			path := pair.Key
-			pathItem := pair.Value
-			for opPair := pathItem.GetOperations().Oldest(); opPair != nil; opPair = opPair.Next() {
-				method := opPair.Key
-				operation := opPair.Value
-				authType := getAuthTypeV3(convertSecurityRequirementsV3(operation.Security), securityDefinitions)
-				route := webscan.Route{
-					Path:        path,
-					Method:      method,
-					Queryparams: getQueryParamsV3(operation.Parameters),
-					Auth:        &authType,
-					Type:        webscan.ApiTypeSwaggerV3,
-					Description: operation.Description,
-				}
-				report.Routes = append(report.Routes, &route)
-			}
-		}
-	} else {
-		return report, fmt.Errorf("unsupported OpenAPI version")
 	}
 
-	return report, nil
+	return nil
+}
+
+func handleOpenAPIV3(document libopenapi.Document, report *webscan.Report, target string) error {
+	report.AppType = webscan.ApiTypeSwaggerV3
+	var errors []error
+	var v3Model *libopenapi.DocumentModel[v3.Document]
+
+	v3Model, errors = document.BuildV3Model()
+	if len(errors) > 0 {
+		for i := range errors {
+			fmt.Printf("error: %v\n", errors[i])
+		}
+		return fmt.Errorf("cannot create v3 model from document: %d errors reported", len(errors))
+	}
+
+	model := v3Model.Model
+
+	// Construct the base endpoint URL from the servers array
+	if len(model.Servers) > 0 {
+		serverPath := model.Servers[0].URL
+		parsedURL, err := url.Parse(target)
+		if err != nil {
+			return fmt.Errorf("failed to parse target URL: %v", err)
+		}
+		baseURL := fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host)
+		baseURL = strings.TrimSuffix(baseURL, "/")
+		report.BaseEndpointUrl = baseURL + serverPath
+	}
+
+	// Extract security definitions
+	securityDefinitions := make(map[string]*v3.SecurityScheme)
+	for pair := model.Components.SecuritySchemes.Oldest(); pair != nil; pair = pair.Next() {
+		securityDefinitions[pair.Key] = pair.Value
+	}
+
+	// Iterate over paths and methods to populate the report
+	for pair := model.Paths.PathItems.Oldest(); pair != nil; pair = pair.Next() {
+		path := pair.Key
+		pathItem := pair.Value
+		for opPair := pathItem.GetOperations().Oldest(); opPair != nil; opPair = opPair.Next() {
+			method := opPair.Key
+			operation := opPair.Value
+			authType := getAuthTypeV3(convertSecurityRequirementsV3(operation.Security), securityDefinitions)
+			route := webscan.Route{
+				Path:        path,
+				Method:      method,
+				Queryparams: getQueryParamsV3(operation.Parameters),
+				Auth:        &authType,
+				Type:        webscan.ApiTypeSwaggerV3,
+				Description: operation.Description,
+			}
+			report.Routes = append(report.Routes, &route)
+		}
+	}
+
+	return nil
 }
 
 // getQueryParamsV2 extracts query parameters from the operation parameters for Swagger (OpenAPI 2.0)
