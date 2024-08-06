@@ -40,3 +40,6 @@ go.work.sum
 # IDE files
 .idea/
 .vscode/
+
+# Fern Python
+generated/python/**
