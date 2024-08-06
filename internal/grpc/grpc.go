@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"internal/types"
+
 	webscan "github.com/Method-Security/webscan/generated/go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -86,7 +88,7 @@ func PerformGRPCScan(ctx context.Context, target string) (webscan.Report, error)
 						Method:      "POST",
 						Auth:        nil,
 						Queryparams: queryParams,
-						Type:        "grpc",
+						Type:        string(internal.GRPC), // Use the shared type here
 						Description: method.GetName(),
 					}
 					report.Routes = append(report.Routes, &route)
