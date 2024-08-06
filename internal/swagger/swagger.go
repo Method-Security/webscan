@@ -42,10 +42,6 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 		return report, fmt.Errorf("failed to fetch HTML: %v", err)
 	}
 
-	// Log the full HTML content
-	fmt.Println("Fetched HTML content:")
-	fmt.Println(body)
-
 	// Parse the HTML to find the Swagger JSON link
 	doc, err := html.Parse(strings.NewReader(body))
 	if err != nil {
