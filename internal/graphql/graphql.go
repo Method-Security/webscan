@@ -18,8 +18,8 @@ import (
 func PerformGraphQLScan(ctx context.Context, target string) (webscan.Report, error) {
 	report := webscan.Report{Target: target, AppType: webscan.ApiTypeGraphQl}
 
-	basePath, baseEndpointUrl := extractBasePathAndEndpoint(target)
-	report.BaseEndpointUrl = baseEndpointUrl
+	basePath, baseEndpointURL := extractBasePathAndEndpoint(target)
+	report.BaseEndpointUrl = baseEndpointURL
 
 	addTopLevelRoute(&report, basePath)
 
