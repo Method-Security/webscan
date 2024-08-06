@@ -5,6 +5,7 @@ import typing
 
 from ...core.datetime_utils import serialize_datetime
 from ...core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
+from .api_type import ApiType
 
 
 class Route(pydantic_v1.BaseModel):
@@ -12,7 +13,7 @@ class Route(pydantic_v1.BaseModel):
     queryparams: typing.Optional[typing.List[str]] = None
     auth: typing.Optional[str] = None
     method: str
-    type: str
+    type: ApiType
     description: str
 
     def json(self, **kwargs: typing.Any) -> str:

@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"internal/types"
-
 	webscan "github.com/Method-Security/webscan/generated/go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -18,7 +16,7 @@ import (
 
 // PerformGRPCScan performs a gRPC scan against a target URL and returns the report.
 func PerformGRPCScan(ctx context.Context, target string) (webscan.Report, error) {
-	report := webscan.Report{Target: target, BaseEndpointUrl: target}
+	report := webscan.Report{Target: target, BaseEndpointUrl: target, AppType: webscan.ApiTypeGrpc}
 
 	// Connect to the gRPC server
 	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock(), grpc.WithTimeout(60*time.Second))
@@ -88,7 +86,7 @@ func PerformGRPCScan(ctx context.Context, target string) (webscan.Report, error)
 						Method:      "POST",
 						Auth:        nil,
 						Queryparams: queryParams,
-						Type:        string(internal.GRPC), // Use the shared type here
+						Type:        webscan.ApiTypeGrpc,
 						Description: method.GetName(),
 					}
 					report.Routes = append(report.Routes, &route)

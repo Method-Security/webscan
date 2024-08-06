@@ -7,14 +7,20 @@ types:
       queryparams: optional<list<string>>
       auth: optional<string>
       method: string
-      type: string
+      type: APIType
       description: string
   Report:
     properties:
       target: string
-      app_type: string
+      app_type: APIType
       base_endpoint_url: string
       schema_url: optional<string>
       routes: list<Route>
       queries: optional<list<graphql.GraphQLQuery>>
       raw: string
+  APIType:
+    enum:
+      - Grpc
+      - GraphQL
+      - SwaggerV2
+      - SwaggerV3

@@ -6,11 +6,13 @@ import typing
 from ...core.datetime_utils import serialize_datetime
 from ...core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
 from ..graphql.graph_ql_query import GraphQlQuery
+from .api_type import ApiType
 from .route import Route
 
 
 class Report(pydantic_v1.BaseModel):
     target: str
+    app_type: ApiType
     base_endpoint_url: str
     schema_url: typing.Optional[str] = None
     routes: typing.List[Route]

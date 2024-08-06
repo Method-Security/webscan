@@ -15,7 +15,7 @@ import (
 
 // PerformGraphQLScan performs a GraphQL scan against a target URL and returns the report.
 func PerformGraphQLScan(ctx context.Context, target string) (webscan.Report, error) {
-	report := webscan.Report{Target: target}
+	report := webscan.Report{Target: target, AppType: webscan.ApiTypeGraphQl}
 
 	// Extract the path from the target URL
 	urlParts := strings.Split(target, "/")
@@ -33,7 +33,7 @@ func PerformGraphQLScan(ctx context.Context, target string) (webscan.Report, err
 		Queryparams: nil,
 		Auth:        nil,
 		Method:      "POST",
-		Type:        "graphql",
+		Type:        webscan.ApiTypeGraphQl,
 		Description: "Top-level GraphQL route",
 	}
 	report.Routes = append(report.Routes, &baseRoute)

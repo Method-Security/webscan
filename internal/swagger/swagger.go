@@ -117,6 +117,7 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 
 	if version, ok := docType["swagger"]; ok && version == "2.0" {
 		// Handle Swagger (OpenAPI 2.0)
+		report.AppType = webscan.ApiTypeSwaggerV2
 		var errors []error
 		var v2Model *libopenapi.DocumentModel[v2.Swagger]
 
@@ -153,7 +154,7 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 					Method:      method,
 					Queryparams: getQueryParamsV2(operation.Parameters),
 					Auth:        &authType,
-					Type:        "swagger",
+					Type:        webscan.ApiTypeSwaggerV2,
 					Description: operation.Description,
 				}
 				report.Routes = append(report.Routes, &route)
@@ -161,6 +162,7 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 		}
 	} else if version, ok := docType["openapi"]; ok && strings.HasPrefix(version.(string), "3.0") {
 		// Handle OpenAPI 3.0+
+		report.AppType = webscan.ApiTypeSwaggerV3
 		var errors []error
 		var v3Model *libopenapi.DocumentModel[v3.Document]
 
@@ -205,7 +207,7 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 					Method:      method,
 					Queryparams: getQueryParamsV3(operation.Parameters),
 					Auth:        &authType,
-					Type:        "openapi",
+					Type:        webscan.ApiTypeSwaggerV3,
 					Description: operation.Description,
 				}
 				report.Routes = append(report.Routes, &route)

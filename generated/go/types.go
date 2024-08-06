@@ -5,9 +5,8 @@ package webscan
 import (
 	json "encoding/json"
 	fmt "fmt"
-	time "time"
-
 	core "github.com/Method-Security/webscan/generated/go/core"
+	time "time"
 )
 
 type TlsVersion string
@@ -693,8 +692,37 @@ func (g *GraphQlType) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
+type ApiType string
+
+const (
+	ApiTypeGrpc      ApiType = "Grpc"
+	ApiTypeGraphQl   ApiType = "GraphQL"
+	ApiTypeSwaggerV2 ApiType = "SwaggerV2"
+	ApiTypeSwaggerV3 ApiType = "SwaggerV3"
+)
+
+func NewApiTypeFromString(s string) (ApiType, error) {
+	switch s {
+	case "Grpc":
+		return ApiTypeGrpc, nil
+	case "GraphQL":
+		return ApiTypeGraphQl, nil
+	case "SwaggerV2":
+		return ApiTypeSwaggerV2, nil
+	case "SwaggerV3":
+		return ApiTypeSwaggerV3, nil
+	}
+	var t ApiType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (a ApiType) Ptr() *ApiType {
+	return &a
+}
+
 type Report struct {
 	Target          string          `json:"target" url:"target"`
+	AppType         ApiType         `json:"app_type" url:"app_type"`
 	BaseEndpointUrl string          `json:"base_endpoint_url" url:"base_endpoint_url"`
 	SchemaUrl       *string         `json:"schema_url,omitempty" url:"schema_url,omitempty"`
 	Routes          []*Route        `json:"routes,omitempty" url:"routes,omitempty"`
@@ -744,7 +772,7 @@ type Route struct {
 	Queryparams []string `json:"queryparams,omitempty" url:"queryparams,omitempty"`
 	Auth        *string  `json:"auth,omitempty" url:"auth,omitempty"`
 	Method      string   `json:"method" url:"method"`
-	Type        string   `json:"type" url:"type"`
+	Type        ApiType  `json:"type" url:"type"`
 	Description string   `json:"description" url:"description"`
 
 	extraProperties map[string]interface{}
