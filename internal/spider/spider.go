@@ -53,13 +53,11 @@ func performWebSpider(targets []string) ([]LinkDetails, []string, error) {
 	if err != nil {
 		return links, errors, err
 	}
-	//defer crawlerOptions.Close()
 
 	crawler, err := standard.New(crawlerOptions)
 	if err != nil {
 		return links, errors, err
 	}
-	//defer crawler.Close()
 
 	for _, target := range targets {
 		err := crawler.Crawl(target)
