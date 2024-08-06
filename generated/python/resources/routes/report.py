@@ -5,6 +5,7 @@ import typing
 
 from ...core.datetime_utils import serialize_datetime
 from ...core.pydantic_utilities import deep_union_pydantic_dicts, pydantic_v1
+from ..graphql.graph_ql_query import GraphQlQuery
 from .route import Route
 
 
@@ -13,6 +14,7 @@ class Report(pydantic_v1.BaseModel):
     base_endpoint_url: str
     schema_url: typing.Optional[str] = None
     routes: typing.List[Route]
+    queries: typing.Optional[typing.List[GraphQlQuery]] = None
     raw: str
 
     def json(self, **kwargs: typing.Any) -> str:

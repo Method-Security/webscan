@@ -4,15 +4,7 @@ from . import common, fingerprint, fuzzpath, graphql, routes, webpagecapture
 from .common import TlsVersion
 from .fingerprint import Certificate, FingerprintReport, HttpHeaders, PublicKeyAlgorithm, SignatureAlgorithm, TlsInfo
 from .fuzzpath import FuzzPathReport, UrlDetails
-from .graphql import (
-    GraphQlData,
-    GraphQlField,
-    GraphQlQuery,
-    GraphQlReport,
-    GraphQlSchema,
-    GraphQlSchemaData,
-    GraphQlType,
-)
+from .graphql import GraphQlData, GraphQlField, GraphQlQuery, GraphQlSchema, GraphQlSchemaData, GraphQlType
 from .routes import Report, Route
 from .webpagecapture import WebpageCaptureReport
 
@@ -23,7 +15,6 @@ __all__ = [
     "GraphQlData",
     "GraphQlField",
     "GraphQlQuery",
-    "GraphQlReport",
     "GraphQlSchema",
     "GraphQlSchemaData",
     "GraphQlType",

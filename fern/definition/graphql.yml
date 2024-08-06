@@ -1,5 +1,3 @@
-imports:
-  routes: ./routes.yml
 types:
   GraphQLSchema:
     properties:
@@ -28,11 +26,3 @@ types:
     properties:
       type: string
       fields: list<string>
-
-  GraphQLReport:
-    properties:
-      target: string
-      base_endpoint_url: string
-      routes: list<routes.Route>
-      queries: list<GraphQLQuery>
-      raw: string

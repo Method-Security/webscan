@@ -14,8 +14,8 @@ import (
 )
 
 // PerformGraphQLScan performs a GraphQL scan against a target URL and returns the report.
-func PerformGraphQLScan(ctx context.Context, target string) (webscan.GraphQlReport, error) {
-	report := webscan.GraphQlReport{Target: target}
+func PerformGraphQLScan(ctx context.Context, target string) (webscan.Report, error) {
+	report := webscan.Report{Target: target}
 
 	// Extract the path from the target URL
 	urlParts := strings.Split(target, "/")

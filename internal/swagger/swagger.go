@@ -131,8 +131,8 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 		model := v2Model.Model
 
 		// Construct the base endpoint URL from the host and basePath fields
-		baseEndpointUrl := fmt.Sprintf("https://%s%s", model.Host, model.BasePath)
-		report.BaseEndpointUrl = baseEndpointUrl
+		baseEndpointURL := fmt.Sprintf("https://%s%s", model.Host, model.BasePath)
+		report.BaseEndpointUrl = baseEndpointURL
 
 		// Extract security definitions
 		securityDefinitions := make(map[string]*v2.SecurityScheme)

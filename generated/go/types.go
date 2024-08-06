@@ -5,8 +5,9 @@ package webscan
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/Method-Security/webscan/generated/go/core"
 	time "time"
+
+	core "github.com/Method-Security/webscan/generated/go/core"
 )
 
 type TlsVersion string
@@ -566,51 +567,6 @@ func (g *GraphQlQuery) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
-type GraphQlReport struct {
-	Target          string          `json:"target" url:"target"`
-	BaseEndpointUrl string          `json:"base_endpoint_url" url:"base_endpoint_url"`
-	Routes          []*Route        `json:"routes,omitempty" url:"routes,omitempty"`
-	Queries         []*GraphQlQuery `json:"queries,omitempty" url:"queries,omitempty"`
-	Raw             string          `json:"raw" url:"raw"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (g *GraphQlReport) GetExtraProperties() map[string]interface{} {
-	return g.extraProperties
-}
-
-func (g *GraphQlReport) UnmarshalJSON(data []byte) error {
-	type unmarshaler GraphQlReport
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*g = GraphQlReport(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *g)
-	if err != nil {
-		return err
-	}
-	g.extraProperties = extraProperties
-
-	g._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (g *GraphQlReport) String() string {
-	if len(g._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(g); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", g)
-}
-
 type GraphQlSchema struct {
 	Data *GraphQlData `json:"data,omitempty" url:"data,omitempty"`
 
@@ -738,11 +694,12 @@ func (g *GraphQlType) String() string {
 }
 
 type Report struct {
-	Target          string   `json:"target" url:"target"`
-	BaseEndpointUrl string   `json:"base_endpoint_url" url:"base_endpoint_url"`
-	SchemaUrl       *string  `json:"schema_url,omitempty" url:"schema_url,omitempty"`
-	Routes          []*Route `json:"routes,omitempty" url:"routes,omitempty"`
-	Raw             string   `json:"raw" url:"raw"`
+	Target          string          `json:"target" url:"target"`
+	BaseEndpointUrl string          `json:"base_endpoint_url" url:"base_endpoint_url"`
+	SchemaUrl       *string         `json:"schema_url,omitempty" url:"schema_url,omitempty"`
+	Routes          []*Route        `json:"routes,omitempty" url:"routes,omitempty"`
+	Queries         []*GraphQlQuery `json:"queries,omitempty" url:"queries,omitempty"`
+	Raw             string          `json:"raw" url:"raw"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
