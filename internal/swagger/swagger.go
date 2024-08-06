@@ -115,7 +115,8 @@ func findSwaggerURL(body, target string) (string, error) {
 					return
 				}
 			}
-		} else if n.Type == html.TextNode && n.Parent != nil && n.Parent.Data == "script" {
+		}
+		if n.Type == html.TextNode && n.Parent != nil && n.Parent.Data == "script" {
 			if strings.Contains(n.Data, "swagger.json") || strings.Contains(n.Data, "openapi.json") {
 				start := strings.Index(n.Data, "url: '") + len("url: '")
 				end := strings.Index(n.Data[start:], "'") + start
@@ -143,15 +144,14 @@ func findSwaggerURL(body, target string) (string, error) {
 func constructSwaggerURL(urlStr, target string) string {
 	if strings.HasPrefix(urlStr, target[:strings.LastIndex(target, "/")+1]) {
 		return urlStr
-	} else {
-		parsedURL, err := url.Parse(target)
-		if err != nil {
-			fmt.Printf("Error parsing target URL: %v\n", err)
-			return ""
-		}
-		baseURL := fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host)
-		return baseURL + urlStr // Keep the leading slash
 	}
+	parsedURL, err := url.Parse(target)
+	if err != nil {
+		fmt.Printf("Error parsing target URL: %v\n", err)
+		return ""
+	}
+	baseURL := fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host)
+	return baseURL + urlStr
 }
 
 func fetchSwaggerJSON(swaggerURL string) ([]byte, error) {
