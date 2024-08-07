@@ -262,18 +262,19 @@ func handleOpenAPIV3(document libopenapi.Document, report *webscan.RoutesReport,
 	model := v3Model.Model
 
 	// Construct the base endpoint URL from the servers array
+	serverPath := ""
 	if len(model.Servers) > 0 {
-		serverPath := model.Servers[0].URL
-		parsedURL, err := url.Parse(target)
-		if err != nil {
-			errMsg := fmt.Sprintf("failed to parse target URL: %v", err)
-			report.Errors = append(report.Errors, errMsg)
-			return fmt.Errorf("failed to parse target URL: %v", err)
-		}
-		baseURL := fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host)
-		baseURL = strings.TrimSuffix(baseURL, "/")
-		report.BaseEndpointUrl = baseURL + serverPath
+		serverPath = model.Servers[0].URL
 	}
+	parsedURL, err := url.Parse(target)
+	if err != nil {
+		errMsg := fmt.Sprintf("failed to parse target URL: %v", err)
+		report.Errors = append(report.Errors, errMsg)
+		return fmt.Errorf("failed to parse target URL: %v", err)
+	}
+	baseURL := fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host)
+	baseURL = strings.TrimSuffix(baseURL, "/")
+	report.BaseEndpointUrl = baseURL + serverPath
 
 	// Extract security definitions
 	securityDefinitions := make(map[string]*v3.SecurityScheme)
