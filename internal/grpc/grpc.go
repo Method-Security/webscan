@@ -22,34 +22,34 @@ func PerformGRPCScan(ctx context.Context, target string) webscan.RoutesReport {
 	conn, err := connectToGRPCServer(target)
 	if err != nil {
 		report.Errors = append(report.Errors, err.Error())
-		return report, err
+		return report
 	}
 	defer closeConnection(conn)
 
 	stream, err := createReflectionClient(ctx, conn)
 	if err != nil {
 		report.Errors = append(report.Errors, err.Error())
-		return report, err
+		return report
 	}
 
 	services, err := requestAndReceiveServices(stream)
 	if err != nil {
 		report.Errors = append(report.Errors, err.Error())
-		return report, err
+		return report
 	}
 
 	rawDescriptors, err := processServices(stream, services, &report)
 	if err != nil {
 		report.Errors = append(report.Errors, err.Error())
-		return report, err
+		return report
 	}
 
 	if err := encodeRawDescriptors(rawDescriptors, &report); err != nil {
 		report.Errors = append(report.Errors, err.Error())
-		return report, err
+		return report
 	}
 
-	return report, nil
+	return report
 }
 
 func connectToGRPCServer(target string) (*grpc.ClientConn, error) {

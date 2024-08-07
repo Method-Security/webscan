@@ -26,7 +26,7 @@ func PerformGraphQLScan(ctx context.Context, target string) webscan.RoutesReport
 	body, err := fetchGraphQLSchema(target)
 	if err != nil {
 		report.Errors = append(report.Errors, err.Error())
-		return report, err
+		return report
 	}
 
 	report.Raw = base64.StdEncoding.EncodeToString(body)
@@ -35,14 +35,14 @@ func PerformGraphQLScan(ctx context.Context, target string) webscan.RoutesReport
 	if err := json.Unmarshal(body, &schema); err != nil {
 		errMsg := fmt.Errorf("failed to unmarshal schema: %v", err)
 		report.Errors = append(report.Errors, errMsg.Error())
-		return report, errMsg
+		return report
 	}
 
 	typeFields := extractTypeFields(schema)
 
 	populateReportWithQueries(&report, schema, typeFields)
 
-	return report, nil
+	return report
 }
 
 func extractBasePathAndEndpoint(target string) (string, string) {

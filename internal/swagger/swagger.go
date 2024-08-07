@@ -37,7 +37,7 @@ func PerformSwaggerScan(ctx context.Context, target string) webscan.RoutesReport
 	if err != nil {
 		errMsg := fmt.Sprintf("Error fetching HTML content: %v", err)
 		report.Errors = append(report.Errors, errMsg)
-		return report, err
+		return report
 	}
 
 	// Parse the HTML to find the Swagger JSON link
@@ -45,7 +45,7 @@ func PerformSwaggerScan(ctx context.Context, target string) webscan.RoutesReport
 	if err != nil {
 		errMsg := fmt.Sprintf("Error finding Swagger URL: %v", err)
 		report.Errors = append(report.Errors, errMsg)
-		return report, err
+		return report
 	}
 
 	report.SchemaUrl = &swaggerURL
@@ -55,7 +55,7 @@ func PerformSwaggerScan(ctx context.Context, target string) webscan.RoutesReport
 	if err != nil {
 		errMsg := fmt.Sprintf("Error fetching Swagger JSON: %v", err)
 		report.Errors = append(report.Errors, errMsg)
-		return report, err
+		return report
 	}
 
 	// Encode the raw body in base64 and add to the report
@@ -66,7 +66,7 @@ func PerformSwaggerScan(ctx context.Context, target string) webscan.RoutesReport
 	if err != nil {
 		errMsg := fmt.Sprintf("Error creating new document: %v", err)
 		report.Errors = append(report.Errors, errMsg)
-		return report, fmt.Errorf("cannot create new document: %v", err)
+		return report
 	}
 
 	// Determine if the document is Swagger (OpenAPI 2.0) or OpenAPI 3.0+
@@ -74,7 +74,7 @@ func PerformSwaggerScan(ctx context.Context, target string) webscan.RoutesReport
 	if err := json.Unmarshal(bodyBytes, &docType); err != nil {
 		errMsg := fmt.Sprintf("failed to unmarshal document type: %v", err)
 		report.Errors = append(report.Errors, errMsg)
-		return report, fmt.Errorf("failed to unmarshal document type: %v", err)
+		return report
 	}
 
 	if version, ok := docType["swagger"]; ok && strings.HasPrefix(version.(string), "2") {
@@ -88,15 +88,15 @@ func PerformSwaggerScan(ctx context.Context, target string) webscan.RoutesReport
 	} else {
 		errMsg := "unsupported OpenAPI version"
 		report.Errors = append(report.Errors, errMsg)
-		return report, fmt.Errorf(errMsg)
+		return report
 	}
 
 	if err != nil {
 		report.Errors = append(report.Errors, err.Error())
-		return report, err
+		return report
 	}
 
-	return report, nil
+	return report
 }
 
 func fetchHTMLContent(ctx context.Context, target string) (string, error) {

@@ -147,12 +147,7 @@ HTTP methods, query parameters, and authentication mechanisms.`,
 				a.OutputSignal.Status = 1
 				return
 			}
-			report, err := swagger.PerformSwaggerScan(cmd.Context(), target)
-			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
-			}
+			report := swagger.PerformSwaggerScan(cmd.Context(), target)
 			a.OutputSignal.Content = report
 		},
 	}
@@ -184,12 +179,7 @@ and extracting details about the methods, including their input and output types
 				a.OutputSignal.Status = 1
 				return
 			}
-			report, err := grpc.PerformGRPCScan(cmd.Context(), target)
-			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
-			}
+			report := grpc.PerformGRPCScan(cmd.Context(), target)
 			a.OutputSignal.Content = report
 		},
 	}
@@ -221,12 +211,7 @@ and extracting details about the fields and their types.`,
 				a.OutputSignal.Status = 1
 				return
 			}
-			report, err := graphql.PerformGraphQLScan(cmd.Context(), target)
-			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
-			}
+			report := graphql.PerformGraphQLScan(cmd.Context(), target)
 			a.OutputSignal.Content = report
 		},
 	}
