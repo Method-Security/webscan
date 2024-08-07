@@ -21,26 +21,31 @@ func PerformGRPCScan(ctx context.Context, target string) (webscan.Report, error)
 
 	conn, err := connectToGRPCServer(target)
 	if err != nil {
+		report.Errors = append(report.Errors, err.Error())
 		return report, err
 	}
 	defer closeConnection(conn)
 
 	stream, err := createReflectionClient(ctx, conn)
 	if err != nil {
+		report.Errors = append(report.Errors, err.Error())
 		return report, err
 	}
 
 	services, err := requestAndReceiveServices(stream)
 	if err != nil {
+		report.Errors = append(report.Errors, err.Error())
 		return report, err
 	}
 
 	rawDescriptors, err := processServices(stream, services, &report)
 	if err != nil {
+		report.Errors = append(report.Errors, err.Error())
 		return report, err
 	}
 
 	if err := encodeRawDescriptors(rawDescriptors, &report); err != nil {
+		report.Errors = append(report.Errors, err.Error())
 		return report, err
 	}
 
@@ -94,15 +99,18 @@ func processServices(stream grpc_reflection_v1alpha.ServerReflection_ServerRefle
 		serviceName := service.Name
 
 		if err := requestFileDescriptor(stream, serviceName); err != nil {
+			report.Errors = append(report.Errors, err.Error())
 			return nil, err
 		}
 
 		fileDescriptorBytes, err := receiveFileDescriptor(stream, serviceName)
 		if err != nil {
+			report.Errors = append(report.Errors, err.Error())
 			return nil, err
 		}
 
 		if err := unmarshalFileDescriptors(fileDescriptorBytes, &rawDescriptors, report); err != nil {
+			report.Errors = append(report.Errors, err.Error())
 			return nil, err
 		}
 	}

@@ -25,6 +25,7 @@ func PerformGraphQLScan(ctx context.Context, target string) (webscan.Report, err
 
 	body, err := fetchGraphQLSchema(target)
 	if err != nil {
+		report.Errors = append(report.Errors, err.Error())
 		return report, err
 	}
 
@@ -32,7 +33,9 @@ func PerformGraphQLScan(ctx context.Context, target string) (webscan.Report, err
 
 	var schema webscan.GraphQlSchema
 	if err := json.Unmarshal(body, &schema); err != nil {
-		return report, fmt.Errorf("failed to unmarshal schema: %v", err)
+		errMsg := fmt.Errorf("failed to unmarshal schema: %v", err)
+		report.Errors = append(report.Errors, errMsg.Error())
+		return report, errMsg
 	}
 
 	typeFields := extractTypeFields(schema)

@@ -5,9 +5,8 @@ package webscan
 import (
 	json "encoding/json"
 	fmt "fmt"
-	time "time"
-
 	core "github.com/Method-Security/webscan/generated/go/core"
+	time "time"
 )
 
 type TlsVersion string
@@ -729,6 +728,7 @@ type Report struct {
 	Routes          []*Route        `json:"routes,omitempty" url:"routes,omitempty"`
 	Queries         []*GraphQlQuery `json:"queries,omitempty" url:"queries,omitempty"`
 	Raw             string          `json:"raw" url:"raw"`
+	Errors          []string        `json:"errors,omitempty" url:"errors,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

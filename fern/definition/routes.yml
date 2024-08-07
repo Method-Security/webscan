@@ -18,6 +18,7 @@ types:
       routes: list<Route>
       queries: optional<list<graphql.GraphQLQuery>>
       raw: string
+      errors: optional<list<string>>
   APIType:
     enum:
       - Grpc

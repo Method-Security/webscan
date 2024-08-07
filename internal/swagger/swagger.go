@@ -35,14 +35,16 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 	// Fetch the fully rendered HTML content
 	body, err := fetchHTMLContent(ctx, target)
 	if err != nil {
-		fmt.Printf("Error fetching HTML content: %v\n", err)
+		errMsg := fmt.Sprintf("Error fetching HTML content: %v", err)
+		report.Errors = append(report.Errors, errMsg)
 		return report, err
 	}
 
 	// Parse the HTML to find the Swagger JSON link
 	swaggerURL, err := findSwaggerURL(body, target)
 	if err != nil {
-		fmt.Printf("Error finding Swagger URL: %v\n", err)
+		errMsg := fmt.Sprintf("Error finding Swagger URL: %v", err)
+		report.Errors = append(report.Errors, errMsg)
 		return report, err
 	}
 
@@ -51,7 +53,8 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 	// Fetch the Swagger JSON
 	bodyBytes, err := fetchSwaggerJSON(swaggerURL)
 	if err != nil {
-		fmt.Printf("Error fetching Swagger JSON: %v\n", err)
+		errMsg := fmt.Sprintf("Error fetching Swagger JSON: %v", err)
+		report.Errors = append(report.Errors, errMsg)
 		return report, err
 	}
 
@@ -61,13 +64,16 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 	// Create a new document from specification bytes
 	document, err := libopenapi.NewDocument(bodyBytes)
 	if err != nil {
-		fmt.Printf("Error creating new document: %v\n", err)
+		errMsg := fmt.Sprintf("Error creating new document: %v", err)
+		report.Errors = append(report.Errors, errMsg)
 		return report, fmt.Errorf("cannot create new document: %v", err)
 	}
 
 	// Determine if the document is Swagger (OpenAPI 2.0) or OpenAPI 3.0+
 	var docType map[string]interface{}
 	if err := json.Unmarshal(bodyBytes, &docType); err != nil {
+		errMsg := fmt.Sprintf("failed to unmarshal document type: %v", err)
+		report.Errors = append(report.Errors, errMsg)
 		return report, fmt.Errorf("failed to unmarshal document type: %v", err)
 	}
 
@@ -76,10 +82,13 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 	} else if version, ok := docType["openapi"]; ok && strings.HasPrefix(version.(string), "3") {
 		err = handleOpenAPIV3(document, &report, target)
 	} else {
-		return report, fmt.Errorf("unsupported OpenAPI version")
+		errMsg := "unsupported OpenAPI version"
+		report.Errors = append(report.Errors, errMsg)
+		return report, fmt.Errorf(errMsg)
 	}
 
 	if err != nil {
+		report.Errors = append(report.Errors, err.Error())
 		return report, err
 	}
 
@@ -104,15 +113,13 @@ func findSwaggerURL(body, target string) (string, error) {
 		return "", fmt.Errorf("failed to parse HTML: %v", err)
 	}
 
-	var swaggerURL string
+	var potentialURLs []string
 	var f func(*html.Node)
 	f = func(n *html.Node) {
 		if n.Type == html.ElementNode {
 			for _, a := range n.Attr {
 				if strings.Contains(a.Val, "swagger.json") || strings.Contains(a.Val, "openapi.json") {
-					swaggerURL = constructSwaggerURL(a.Val, target)
-					fmt.Printf("Found docs link: %s\n", swaggerURL)
-					return
+					potentialURLs = append(potentialURLs, a.Val)
 				}
 			}
 		}
@@ -122,9 +129,7 @@ func findSwaggerURL(body, target string) (string, error) {
 				end := strings.Index(n.Data[start:], "'") + start
 				if start > len("url: '")-1 && end > start {
 					urlStr := n.Data[start:end]
-					swaggerURL = constructSwaggerURL(urlStr, target)
-					fmt.Printf("Found docs link in script: %s\n", swaggerURL)
-					return
+					potentialURLs = append(potentialURLs, urlStr)
 				}
 			}
 		}
@@ -134,24 +139,33 @@ func findSwaggerURL(body, target string) (string, error) {
 	}
 	f(doc)
 
-	if swaggerURL == "" {
-		return "", fmt.Errorf("swagger.json link not found in HTML")
+	// Parse the potential URls found in the HTML and return the first valid one
+	for _, urlStr := range potentialURLs {
+		swaggerURL := constructSwaggerURL(urlStr, target)
+		if _, err := url.ParseRequestURI(swaggerURL); err == nil {
+			fmt.Printf("Valid docs link: %s\n", swaggerURL)
+			return swaggerURL, nil
+		}
 	}
 
-	return swaggerURL, nil
+	return "", fmt.Errorf("valid swagger.json link not found in HTML")
 }
 
 func constructSwaggerURL(urlStr, target string) string {
-	if strings.HasPrefix(urlStr, target[:strings.LastIndex(target, "/")+1]) {
-		return urlStr
+	parsedURL, err := url.Parse(urlStr)
+	if err != nil || !parsedURL.IsAbs() {
+		parsedTarget, err := url.Parse(target)
+		if err != nil {
+			fmt.Printf("Error parsing target URL: %v\n", err)
+			return ""
+		}
+		baseURL := fmt.Sprintf("%s://%s", parsedTarget.Scheme, parsedTarget.Host)
+		if strings.HasPrefix(urlStr, "/") {
+			return baseURL + urlStr
+		}
+		return baseURL + "/" + urlStr
 	}
-	parsedURL, err := url.Parse(target)
-	if err != nil {
-		fmt.Printf("Error parsing target URL: %v\n", err)
-		return ""
-	}
-	baseURL := fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host)
-	return baseURL + urlStr
+	return parsedURL.String()
 }
 
 func fetchSwaggerJSON(swaggerURL string) ([]byte, error) {
@@ -186,7 +200,8 @@ func handleSwaggerV2(document libopenapi.Document, report *webscan.Report) error
 	v2Model, errors = document.BuildV2Model()
 	if len(errors) > 0 {
 		for i := range errors {
-			fmt.Printf("error: %v\n", errors[i])
+			errMsg := fmt.Sprintf("error: %v", errors[i])
+			report.Errors = append(report.Errors, errMsg)
 		}
 		return fmt.Errorf("cannot create v2 model from document: %d errors reported", len(errors))
 	}
@@ -234,7 +249,8 @@ func handleOpenAPIV3(document libopenapi.Document, report *webscan.Report, targe
 	v3Model, errors = document.BuildV3Model()
 	if len(errors) > 0 {
 		for i := range errors {
-			fmt.Printf("error: %v\n", errors[i])
+			errMsg := fmt.Sprintf("error: %v", errors[i])
+			report.Errors = append(report.Errors, errMsg)
 		}
 		return fmt.Errorf("cannot create v3 model from document: %d errors reported", len(errors))
 	}
@@ -246,6 +262,8 @@ func handleOpenAPIV3(document libopenapi.Document, report *webscan.Report, targe
 		serverPath := model.Servers[0].URL
 		parsedURL, err := url.Parse(target)
 		if err != nil {
+			errMsg := fmt.Sprintf("failed to parse target URL: %v", err)
+			report.Errors = append(report.Errors, errMsg)
 			return fmt.Errorf("failed to parse target URL: %v", err)
 		}
 		baseURL := fmt.Sprintf("%s://%s", parsedURL.Scheme, parsedURL.Host)
