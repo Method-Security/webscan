@@ -18,6 +18,7 @@ func main() {
 	webscan.InitProbeCommand()
 	webscan.InitSpiderCommand()
 	webscan.InitVulnCommand()
+	webscan.InitAppCommand()
 	webscan.InitFingerprintCommand()
 	webscan.InitWebpagecaptureCommand()
 

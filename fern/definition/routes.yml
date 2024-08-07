@@ -1,0 +1,28 @@
+imports:
+  graphql: ./graphql.yml
+types:
+  Route:
+    properties:
+      path: string
+      queryParams: optional<list<string>>
+      auth: optional<string>
+      method: string
+      type: APIType
+      description: string
+  RoutesReport:
+    properties:
+      target: string
+      appType: APIType
+      baseEndpointUrl: string
+      version: optional<string>
+      schemaUrl: optional<string>
+      routes: list<Route>
+      queries: optional<list<graphql.GraphQLQuery>>
+      raw: string
+      errors: optional<list<string>>
+  APIType:
+    enum:
+      - Grpc
+      - GraphQL
+      - SwaggerV2
+      - SwaggerV3
