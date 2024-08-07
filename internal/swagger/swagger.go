@@ -22,8 +22,8 @@ import (
 )
 
 // PerformSwaggerScan performs a Swagger scan against a target URL and returns the report.
-func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, error) {
-	report := webscan.Report{Target: target}
+func PerformSwaggerScan(ctx context.Context, target string) webscan.RoutesReport {
+	report := webscan.RoutesReport{Target: target}
 
 	// Setup headless browser with silent logging
 	ctx, cancel := chromedp.NewContext(ctx, chromedp.WithLogf(func(string, ...interface{}) {}))
@@ -78,8 +78,12 @@ func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, err
 	}
 
 	if version, ok := docType["swagger"]; ok && strings.HasPrefix(version.(string), "2") {
+		versionStr := version.(string)
+		report.Version = &versionStr
 		err = handleSwaggerV2(document, &report)
 	} else if version, ok := docType["openapi"]; ok && strings.HasPrefix(version.(string), "3") {
+		versionStr := version.(string)
+		report.Version = &versionStr
 		err = handleOpenAPIV3(document, &report, target)
 	} else {
 		errMsg := "unsupported OpenAPI version"
@@ -192,7 +196,7 @@ func fetchSwaggerJSON(swaggerURL string) ([]byte, error) {
 	return bodyBytes, nil
 }
 
-func handleSwaggerV2(document libopenapi.Document, report *webscan.Report) error {
+func handleSwaggerV2(document libopenapi.Document, report *webscan.RoutesReport) error {
 	report.AppType = webscan.ApiTypeSwaggerV2
 	var errors []error
 	var v2Model *libopenapi.DocumentModel[v2.Swagger]
@@ -229,7 +233,7 @@ func handleSwaggerV2(document libopenapi.Document, report *webscan.Report) error
 			route := webscan.Route{
 				Path:        path,
 				Method:      method,
-				Queryparams: getQueryParamsV2(operation.Parameters),
+				QueryParams: getQueryParamsV2(operation.Parameters),
 				Auth:        &authType,
 				Type:        webscan.ApiTypeSwaggerV2,
 				Description: operation.Description,
@@ -241,7 +245,7 @@ func handleSwaggerV2(document libopenapi.Document, report *webscan.Report) error
 	return nil
 }
 
-func handleOpenAPIV3(document libopenapi.Document, report *webscan.Report, target string) error {
+func handleOpenAPIV3(document libopenapi.Document, report *webscan.RoutesReport, target string) error {
 	report.AppType = webscan.ApiTypeSwaggerV3
 	var errors []error
 	var v3Model *libopenapi.DocumentModel[v3.Document]
@@ -288,7 +292,7 @@ func handleOpenAPIV3(document libopenapi.Document, report *webscan.Report, targe
 			route := webscan.Route{
 				Path:        path,
 				Method:      method,
-				Queryparams: getQueryParamsV3(operation.Parameters),
+				QueryParams: getQueryParamsV3(operation.Parameters),
 				Auth:        &authType,
 				Type:        webscan.ApiTypeSwaggerV3,
 				Description: operation.Description,

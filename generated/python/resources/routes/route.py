@@ -10,7 +10,7 @@ from .api_type import ApiType
 
 class Route(UniversalBaseModel):
     path: str
-    queryparams: typing.Optional[typing.List[str]] = None
+    query_params: typing.Optional[typing.List[str]] = pydantic.Field(alias="queryParams", default=None)
     auth: typing.Optional[str] = None
     method: str
     type: ApiType

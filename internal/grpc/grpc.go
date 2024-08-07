@@ -16,8 +16,8 @@ import (
 )
 
 // PerformGRPCScan performs a gRPC scan against a target URL and returns the report.
-func PerformGRPCScan(ctx context.Context, target string) (webscan.Report, error) {
-	report := webscan.Report{Target: target, BaseEndpointUrl: target, AppType: webscan.ApiTypeGrpc}
+func PerformGRPCScan(ctx context.Context, target string) webscan.RoutesReport {
+	report := webscan.RoutesReport{Target: target, BaseEndpointUrl: target, AppType: webscan.ApiTypeGrpc}
 
 	conn, err := connectToGRPCServer(target)
 	if err != nil {
@@ -92,7 +92,7 @@ func requestAndReceiveServices(stream grpc_reflection_v1alpha.ServerReflection_S
 	return resp.GetListServicesResponse().Service, nil
 }
 
-func processServices(stream grpc_reflection_v1alpha.ServerReflection_ServerReflectionInfoClient, services []*grpc_reflection_v1alpha.ServiceResponse, report *webscan.Report) ([]*descriptorpb.FileDescriptorProto, error) {
+func processServices(stream grpc_reflection_v1alpha.ServerReflection_ServerReflectionInfoClient, services []*grpc_reflection_v1alpha.ServiceResponse, report *webscan.RoutesReport) ([]*descriptorpb.FileDescriptorProto, error) {
 	var rawDescriptors []*descriptorpb.FileDescriptorProto
 
 	for _, service := range services {
@@ -134,7 +134,7 @@ func receiveFileDescriptor(stream grpc_reflection_v1alpha.ServerReflection_Serve
 	return resp.GetFileDescriptorResponse().FileDescriptorProto, nil
 }
 
-func unmarshalFileDescriptors(fileDescriptorBytes [][]byte, rawDescriptors *[]*descriptorpb.FileDescriptorProto, report *webscan.Report) error {
+func unmarshalFileDescriptors(fileDescriptorBytes [][]byte, rawDescriptors *[]*descriptorpb.FileDescriptorProto, report *webscan.RoutesReport) error {
 	for _, fdBytes := range fileDescriptorBytes {
 		var fileDesc descriptorpb.FileDescriptorProto
 		if err := proto.Unmarshal(fdBytes, &fileDesc); err != nil {
@@ -147,7 +147,7 @@ func unmarshalFileDescriptors(fileDescriptorBytes [][]byte, rawDescriptors *[]*d
 	return nil
 }
 
-func extractMethods(fileDesc *descriptorpb.FileDescriptorProto, report *webscan.Report) {
+func extractMethods(fileDesc *descriptorpb.FileDescriptorProto, report *webscan.RoutesReport) {
 	for _, service := range fileDesc.Service {
 		for _, method := range service.Method {
 			queryParams := extractFields(fileDesc, method.GetInputType())
@@ -155,7 +155,7 @@ func extractMethods(fileDesc *descriptorpb.FileDescriptorProto, report *webscan.
 				Path:        fmt.Sprintf("/%s/%s", service.GetName(), method.GetName()),
 				Method:      "POST",
 				Auth:        nil,
-				Queryparams: queryParams,
+				QueryParams: queryParams,
 				Type:        webscan.ApiTypeGrpc,
 				Description: method.GetName(),
 			}
@@ -164,7 +164,7 @@ func extractMethods(fileDesc *descriptorpb.FileDescriptorProto, report *webscan.
 	}
 }
 
-func encodeRawDescriptors(rawDescriptors []*descriptorpb.FileDescriptorProto, report *webscan.Report) error {
+func encodeRawDescriptors(rawDescriptors []*descriptorpb.FileDescriptorProto, report *webscan.RoutesReport) error {
 	rawData, err := proto.Marshal(&descriptorpb.FileDescriptorSet{File: rawDescriptors})
 	if err != nil {
 		return fmt.Errorf("failed to marshal raw descriptors: %v", err)

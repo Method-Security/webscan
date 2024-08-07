@@ -15,8 +15,8 @@ import (
 )
 
 // PerformGraphQLScan performs a GraphQL scan against a target URL and returns the report.
-func PerformGraphQLScan(ctx context.Context, target string) (webscan.Report, error) {
-	report := webscan.Report{Target: target, AppType: webscan.ApiTypeGraphQl}
+func PerformGraphQLScan(ctx context.Context, target string) webscan.RoutesReport {
+	report := webscan.RoutesReport{Target: target, AppType: webscan.ApiTypeGraphQl}
 
 	basePath, baseEndpointURL := extractBasePathAndEndpoint(target)
 	report.BaseEndpointUrl = baseEndpointURL
@@ -55,10 +55,10 @@ func extractBasePathAndEndpoint(target string) (string, string) {
 	return basePath, strings.Join(urlParts, "/")
 }
 
-func addTopLevelRoute(report *webscan.Report, basePath string) {
+func addTopLevelRoute(report *webscan.RoutesReport, basePath string) {
 	baseRoute := webscan.Route{
 		Path:        basePath,
-		Queryparams: nil,
+		QueryParams: nil,
 		Auth:        nil,
 		Method:      "POST",
 		Type:        webscan.ApiTypeGraphQl,
@@ -98,7 +98,7 @@ func extractTypeFields(schema webscan.GraphQlSchema) map[string][]string {
 	return typeFields
 }
 
-func populateReportWithQueries(report *webscan.Report, schema webscan.GraphQlSchema, typeFields map[string][]string) {
+func populateReportWithQueries(report *webscan.RoutesReport, schema webscan.GraphQlSchema, typeFields map[string][]string) {
 	for _, t := range schema.Data.Schema.Types {
 		if t.Kind == "OBJECT" && (t.Name == "Query" || t.Name == "Mutation" || t.Name == "Subscription") {
 			for _, field := range t.Fields {

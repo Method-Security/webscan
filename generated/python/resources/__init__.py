@@ -5,7 +5,7 @@ from .common import TlsVersion
 from .fingerprint import Certificate, FingerprintReport, HttpHeaders, PublicKeyAlgorithm, SignatureAlgorithm, TlsInfo
 from .fuzzpath import FuzzPathReport, UrlDetails
 from .graphql import GraphQlData, GraphQlField, GraphQlQuery, GraphQlSchema, GraphQlSchemaData, GraphQlType
-from .routes import ApiType, Report, Route
+from .routes import ApiType, Route, RoutesReport
 from .webpagecapture import WebpageCaptureReport
 
 __all__ = [
@@ -21,8 +21,8 @@ __all__ = [
     "GraphQlType",
     "HttpHeaders",
     "PublicKeyAlgorithm",
-    "Report",
     "Route",
+    "RoutesReport",
     "SignatureAlgorithm",
     "TlsInfo",
     "TlsVersion",

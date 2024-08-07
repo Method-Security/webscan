@@ -5,8 +5,9 @@ package webscan
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/Method-Security/webscan/generated/go/core"
 	time "time"
+
+	core "github.com/Method-Security/webscan/generated/go/core"
 )
 
 type TlsVersion string
@@ -720,57 +721,9 @@ func (a ApiType) Ptr() *ApiType {
 	return &a
 }
 
-type Report struct {
-	Target          string          `json:"target" url:"target"`
-	AppType         ApiType         `json:"app_type" url:"app_type"`
-	BaseEndpointUrl string          `json:"base_endpoint_url" url:"base_endpoint_url"`
-	SchemaUrl       *string         `json:"schema_url,omitempty" url:"schema_url,omitempty"`
-	Routes          []*Route        `json:"routes,omitempty" url:"routes,omitempty"`
-	Queries         []*GraphQlQuery `json:"queries,omitempty" url:"queries,omitempty"`
-	Raw             string          `json:"raw" url:"raw"`
-	Errors          []string        `json:"errors,omitempty" url:"errors,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (r *Report) GetExtraProperties() map[string]interface{} {
-	return r.extraProperties
-}
-
-func (r *Report) UnmarshalJSON(data []byte) error {
-	type unmarshaler Report
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*r = Report(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *r)
-	if err != nil {
-		return err
-	}
-	r.extraProperties = extraProperties
-
-	r._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (r *Report) String() string {
-	if len(r._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(r); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", r)
-}
-
 type Route struct {
 	Path        string   `json:"path" url:"path"`
-	Queryparams []string `json:"queryparams,omitempty" url:"queryparams,omitempty"`
+	QueryParams []string `json:"queryParams,omitempty" url:"queryParams,omitempty"`
 	Auth        *string  `json:"auth,omitempty" url:"auth,omitempty"`
 	Method      string   `json:"method" url:"method"`
 	Type        ApiType  `json:"type" url:"type"`
@@ -803,6 +756,55 @@ func (r *Route) UnmarshalJSON(data []byte) error {
 }
 
 func (r *Route) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+type RoutesReport struct {
+	Target          string          `json:"target" url:"target"`
+	AppType         ApiType         `json:"appType" url:"appType"`
+	BaseEndpointUrl string          `json:"baseEndpointUrl" url:"baseEndpointUrl"`
+	Version         *string         `json:"version,omitempty" url:"version,omitempty"`
+	SchemaUrl       *string         `json:"schemaUrl,omitempty" url:"schemaUrl,omitempty"`
+	Routes          []*Route        `json:"routes,omitempty" url:"routes,omitempty"`
+	Queries         []*GraphQlQuery `json:"queries,omitempty" url:"queries,omitempty"`
+	Raw             string          `json:"raw" url:"raw"`
+	Errors          []string        `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RoutesReport) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RoutesReport) UnmarshalJSON(data []byte) error {
+	type unmarshaler RoutesReport
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RoutesReport(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RoutesReport) String() string {
 	if len(r._rawJSON) > 0 {
 		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
 			return value
