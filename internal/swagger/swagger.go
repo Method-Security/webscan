@@ -25,8 +25,8 @@ import (
 func PerformSwaggerScan(ctx context.Context, target string) (webscan.Report, error) {
 	report := webscan.Report{Target: target}
 
-	// Setup headless browser
-	ctx, cancel := chromedp.NewContext(ctx)
+	// Setup headless browser with silent logging
+	ctx, cancel := chromedp.NewContext(ctx, chromedp.WithLogf(func(string, ...interface{}) {}))
 	defer cancel()
 
 	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
@@ -139,7 +139,7 @@ func findSwaggerURL(body, target string) (string, error) {
 	}
 	f(doc)
 
-	// Parse the potential URls found in the HTML and return the first valid one
+	// Parse the potential URLs found in the HTML and return the first valid one
 	for _, urlStr := range potentialURLs {
 		swaggerURL := constructSwaggerURL(urlStr, target)
 		if _, err := url.ParseRequestURI(swaggerURL); err == nil {

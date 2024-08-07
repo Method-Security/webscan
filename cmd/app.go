@@ -29,7 +29,10 @@ func (a *WebScan) initFingerprintCommand() {
 	fingerprintCmd := &cobra.Command{
 		Use:   "fingerprint",
 		Short: "Perform a fingerprint scan against a target",
-		Long:  `Perform a fingerprint scan against a target using specified types`,
+		Long: `Perform a fingerprint scan against a target using specified types.
+		
+The fingerprint command identifies the type of web application running on the target URL. 
+It uses custom templates to match URLs hosting different types of web applications such as Swagger, gRPC, GraphQL, and Kubernetes.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
@@ -108,7 +111,10 @@ func (a *WebScan) initEnumerateCommand() {
 	enumerateCmd := &cobra.Command{
 		Use:   "enumerate",
 		Short: "Perform enumeration scans against a target",
-		Long:  `Perform enumeration scans against a target using specified types`,
+		Long: `Perform enumeration scans against a target using specified types.
+		
+The enumerate command details the routes and endpoints for an API application. 
+It extracts information such as available endpoints, HTTP methods, query parameters, and authentication mechanisms.`,
 	}
 
 	enumerateCmd.AddCommand(a.initSwaggerEnumerateCommand())
@@ -122,7 +128,10 @@ func (a *WebScan) initSwaggerEnumerateCommand() *cobra.Command {
 	swaggerCmd := &cobra.Command{
 		Use:   "swagger",
 		Short: "Perform a Swagger enumeration scan against a target",
-		Long:  `Perform a Swagger enumeration scan against a target`,
+		Long: `Perform a Swagger enumeration scan against a target.
+		
+This involves fetching and parsing the Swagger (OpenAPI) documentation to extract details about the available endpoints, 
+HTTP methods, query parameters, and authentication mechanisms.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
@@ -156,7 +165,10 @@ func (a *WebScan) initGrpcEnumerateCommand() *cobra.Command {
 	grpcCmd := &cobra.Command{
 		Use:   "grpc",
 		Short: "Perform a gRPC enumeration scan against a target",
-		Long:  `Perform a gRPC enumeration scan against a target`,
+		Long: `Perform a gRPC enumeration scan against a target.
+		
+This involves connecting to the gRPC server, using reflection to discover available services and methods, 
+and extracting details about the methods, including their input and output types.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
@@ -190,7 +202,10 @@ func (a *WebScan) initGraphqlEnumerateCommand() *cobra.Command {
 	graphqlCmd := &cobra.Command{
 		Use:   "graphql",
 		Short: "Perform a GraphQL enumeration scan against a target",
-		Long:  `Perform a GraphQL enumeration scan against a target`,
+		Long: `Perform a GraphQL enumeration scan against a target.
+		
+This involves querying the GraphQL schema to discover available types, queries, mutations, and subscriptions, 
+and extracting details about the fields and their types.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
