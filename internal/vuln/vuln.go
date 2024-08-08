@@ -2,7 +2,6 @@ package vuln
 
 import (
 	"context"
-
 	"net/url"
 	"strings"
 
