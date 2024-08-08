@@ -3,6 +3,9 @@ package vuln
 import (
 	"context"
 
+	"net/url"
+	"strings"
+
 	nuclei "github.com/projectdiscovery/nuclei/v3/lib"
 	"github.com/projectdiscovery/nuclei/v3/pkg/model"
 	nucleiOutput "github.com/projectdiscovery/nuclei/v3/pkg/output"
@@ -34,7 +37,7 @@ type VulnerabilityReport struct {
 }
 
 func parseResultIntoContext(result nucleiOutput.ResultEvent) VulnerabilityContext {
-	return VulnerabilityContext{URL: result.Host, Port: result.Port, FullPath: result.Matched, Host: result.Host, TemplateID: result.TemplateID, ExtractedResults: result.ExtractedResults}
+	return VulnerabilityContext{URL: result.URL, Port: result.Port, FullPath: result.Matched, Host: result.Host, TemplateID: result.TemplateID, ExtractedResults: result.ExtractedResults}
 }
 
 func buildID(result nucleiOutput.ResultEvent) string {
@@ -61,7 +64,14 @@ func PerformVulnScan(ctx context.Context, target string, tags []string, severity
 	if err != nil {
 		return VulnerabilityReport{}, err
 	}
-	ne.LoadTargets([]string{target}, true)
+	// Parse the target URL to remove the protocol
+	parsedURL, err := url.Parse(target)
+	if err != nil {
+		return VulnerabilityReport{}, err
+	}
+	address := strings.TrimPrefix(parsedURL.String(), parsedURL.Scheme+"://")
+
+	ne.LoadTargets([]string{address}, true)
 	results := []nucleiOutput.ResultEvent{}
 	err = ne.ExecuteCallbackWithCtx(ctx, func(event *nucleiOutput.ResultEvent) {
 		results = append(results, *event)
