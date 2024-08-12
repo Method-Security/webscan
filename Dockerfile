@@ -1,5 +1,4 @@
 # Dockerfile used as distribution for the webscan CLI in Tool container format
-# FROM alpine:3.20 as base
 FROM chromedp/headless-shell:129.0.6643.2 
 
 ARG CLI_NAME="webscan"
