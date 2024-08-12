@@ -53,7 +53,7 @@ func PerformGRPCScan(ctx context.Context, target string) webscan.RoutesReport {
 }
 
 func connectToGRPCServer(target string) (*grpc.ClientConn, error) {
-	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock(), grpc.WithTimeout(60*time.Second))
+	conn, err := grpc.Dial(target, grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock(), grpc.WithTimeout(20*time.Second))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to gRPC server: %v", err)
 	}
