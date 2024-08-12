@@ -43,3 +43,6 @@ go.work.sum
 
 # Fern Python
 generated/python/**
+
+# Webscan binary
+/webscan

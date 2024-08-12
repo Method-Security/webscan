@@ -44,17 +44,13 @@ webscan vuln --severity INFO --tags swagger --tags fastapi --tags api --target e
 
 2. Build ARM64 image: `docker run -v .:/app/webscan -e GOARCH=arm64 -e GOOS=linux --rm armbuilder goreleaser build --single-target -f .goreleaser/goreleaser-build.yml --snapshot --clean`
 
-3. `cd dist/linux_arm64/build-linux_linux_arm64/`
+3. `cp dist/linux_arm64/build-linux_linux_arm64/webscan .`
 
-4. `cp webscan ../../../`
+4. `docker buildx build . --platform linux/arm64 --load --tag webscan:local -f Dockerfile`
 
-5. `cd ../../../`
+5. Open shell: `docker run -it --rm --entrypoint /bin/sh webscan:testing`
 
-6. `docker buildx build . --platform linux/arm64 --load --tag webscan:local -f Dockerfile`
-
-7. Open shell: `docker run -it --rm --entrypoint /bin/sh webscan:testing`
-
-8. OR run command without shell example: `docker run webscan:local app enumerate graphql --target https://countries.trevorblades.com/ -o json`
+6. OR run command without shell example: `docker run webscan:local app enumerate graphql --target https://countries.trevorblades.com/ -o json`
 
 
 ### Note:
