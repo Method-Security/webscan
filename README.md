@@ -37,6 +37,25 @@ webscan spider --targets https://example.com,https://example.dev
 webscan vuln --severity INFO --tags swagger --tags fastapi --tags api --target example.com
 ```
 
+### Building a Statically Compiled Container for Local Testing
+(Reference reusable-build.yaml)
+
+1. Build ARM64 builder image: `docker buildx build . --platform linux/arm64 --load --tag armbuilder -f Dockerfile.builder`
+
+2. Build ARM64 image: `docker run -v .:/app/webscan -e GOARCH=arm64 -e GOOS=linux --rm armbuilder goreleaser build --single-target -f .goreleaser/goreleaser-build.yml --snapshot --clean`
+
+3. `cp dist/linux_arm64/build-linux_linux_arm64/webscan .`
+
+4. `docker buildx build . --platform linux/arm64 --load --tag webscan:local -f Dockerfile`
+
+5. Open shell: `docker run -it --rm --entrypoint /bin/sh webscan:testing`
+
+6. OR run command without shell example: `docker run webscan:local app enumerate graphql --target https://countries.trevorblades.com/ -o json`
+
+
+### Note:
+This tool runs on a headless-shell base image to support chrome/chromium browser automation. The dockerfile uses debian-based install tools. 
+
 ## Contributing
 
 Interested in contributing to webscan? Please see our organization wide [Contribution](https://method-security.github.io/community/contribute/discussions.html) page.

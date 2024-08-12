@@ -1,10 +1,10 @@
 # Dockerfile used as distribution for the webscan CLI in Tool container format
-FROM alpine:3.20 as base
+FROM chromedp/headless-shell:129.0.6643.2 
 
 ARG CLI_NAME="webscan"
 ARG TARGETARCH
 
-RUN apk --no-cache add ca-certificates git
+RUN apt-get update && apt-get install -y ca-certificates git
 
 # Setup Method Directory Structure
 RUN \
