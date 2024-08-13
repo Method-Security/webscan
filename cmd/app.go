@@ -139,12 +139,22 @@ HTTP methods, query parameters, and authentication mechanisms.`,
 				a.OutputSignal.Status = 1
 				return
 			}
-			report := swagger.PerformSwaggerScan(cmd.Context(), target)
+
+			noSandbox, err := cmd.Flags().GetBool("no-sandbox")
+			if err != nil {
+				errorMessage := err.Error()
+				a.OutputSignal.ErrorMessage = &errorMessage
+				a.OutputSignal.Status = 1
+				return
+			}
+
+			report := swagger.PerformSwaggerScan(cmd.Context(), target, noSandbox)
 			a.OutputSignal.Content = report
 		},
 	}
 
 	swaggerCmd.Flags().String("target", "", "URL target to perform Swagger enumeration against")
+	swaggerCmd.Flags().Bool("no-sandbox", false, "Disable sandbox mode for Swagger scan")
 	return swaggerCmd
 }
 
