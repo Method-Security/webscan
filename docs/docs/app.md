@@ -63,7 +63,7 @@ The `webscan app enumerate swagger` command performs a Swagger enumeration scan 
 ###### Usage
 
 ```bash 
-webscan app enumerate swagger --target https://example.com
+webscan app enumerate swagger --target https://example.com --no-sandbox
 ```
 
 ###### Help Text
@@ -75,6 +75,7 @@ webscan app enumerate swagger [flags]
 Flags:
 -h, --help help for swagger
 --target string URL target to perform Swagger enumeration against
+--no-sandbox Disable sandbox mode for Swagger scan. Boolean flag, default false. 
 Global Flags:
 -o, --output string Output format (signal, json, yaml). Default value is signal (default "signal")
 -f, --output-file string Path to output file. If blank, will output to STDOUT

@@ -22,11 +22,18 @@ import (
 )
 
 // PerformSwaggerScan performs a Swagger scan against a target URL and returns the report.
-func PerformSwaggerScan(ctx context.Context, target string) webscan.RoutesReport {
+func PerformSwaggerScan(ctx context.Context, target string, noSandbox bool) webscan.RoutesReport {
 	report := webscan.RoutesReport{Target: target}
 
-	// Setup headless browser with silent logging
-	ctx, cancel := chromedp.NewContext(ctx, chromedp.WithLogf(func(string, ...interface{}) {}))
+	opts := chromedp.DefaultExecAllocatorOptions[:]
+	if noSandbox {
+		opts = append(opts, chromedp.Flag("no-sandbox", true))
+	}
+
+	ctx, cancel := chromedp.NewExecAllocator(ctx, opts...)
+	defer cancel()
+
+	ctx, cancel = chromedp.NewContext(ctx, chromedp.WithLogf(func(string, ...interface{}) {}))
 	defer cancel()
 
 	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)

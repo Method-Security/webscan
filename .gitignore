@@ -46,3 +46,6 @@ generated/python/**
 
 # Webscan binary
 /webscan
+
+# .DS_Store
+.DS_Store
