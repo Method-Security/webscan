@@ -25,8 +25,14 @@ import (
 func PerformSwaggerScan(ctx context.Context, target string) webscan.RoutesReport {
 	report := webscan.RoutesReport{Target: target}
 
-	// Setup headless browser with silent logging
-	ctx, cancel := chromedp.NewContext(ctx, chromedp.WithLogf(func(string, ...interface{}) {}))
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Flag("no-sandbox", true),
+	)
+
+	ctx, cancel := chromedp.NewExecAllocator(ctx, opts...)
+	defer cancel()
+
+	ctx, cancel = chromedp.NewContext(ctx, chromedp.WithLogf(func(string, ...interface{}) {}))
 	defer cancel()
 
 	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
