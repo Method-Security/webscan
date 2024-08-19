@@ -303,10 +303,14 @@ func handleOpenAPIV3(document libopenapi.Document, report *webscan.RoutesReport,
 	report.SecuritySchemes = convertSecurityDefinitionsV3(securityDefinitions)
 
 	// Add app-level security requirements to the report
+<<<<<<< HEAD
 	securityRequirements := convertSecurityRequirementsV3(model.Security)
 	if securityRequirements != nil {
 		report.Security = []*webscan.SecurityRequirement{securityRequirements}
 	}
+=======
+	report.Security = []*webscan.SecurityRequirement{convertSecurityRequirementsV3(model.Security)}
+>>>>>>> origin/develop
 
 	// Iterate over paths and methods to populate the report
 	for pair := model.Paths.PathItems.Oldest(); pair != nil; pair = pair.Next() {
@@ -356,13 +360,17 @@ func getQueryParamsV3(params []*v3.Parameter) []string {
 func convertSecurityDefinitionsV2(securityDefinitions map[string]*v2.SecurityScheme) map[string]*webscan.SecurityScheme {
 	schemes := make(map[string]*webscan.SecurityScheme)
 	for name, scheme := range securityDefinitions {
+<<<<<<< HEAD
 		if scheme == nil {
 			continue
 		}
+=======
+>>>>>>> origin/develop
 		webscanScheme := &webscan.SecurityScheme{
 			Type:        webscan.SecuritySchemeType(scheme.Type),
 			Description: &scheme.Description,
 			Name:        &name,
+<<<<<<< HEAD
 		}
 
 		switch scheme.Type {
@@ -377,7 +385,21 @@ func convertSecurityDefinitionsV2(securityDefinitions map[string]*v2.SecuritySch
 
 		if webscanScheme.Type != "" {
 			schemes[name] = webscanScheme
+=======
+>>>>>>> origin/develop
 		}
+
+		switch scheme.Type {
+		case "apiKey":
+			webscanScheme.In = &scheme.In
+		case "oauth2":
+			webscanScheme.Flow = &scheme.Flow
+			webscanScheme.AuthorizationUrl = &scheme.AuthorizationUrl
+			webscanScheme.TokenUrl = &scheme.TokenUrl
+			webscanScheme.Scopes = convertV2ScopesToMap(scheme.Scopes)
+		}
+
+		schemes[name] = webscanScheme
 	}
 	return schemes
 }
@@ -389,6 +411,7 @@ func convertV2ScopesToMap(scopes *v2.Scopes) map[string]string {
 	result := make(map[string]string)
 	for pair := scopes.Values.Oldest(); pair != nil; pair = pair.Next() {
 		result[pair.Key] = pair.Value
+<<<<<<< HEAD
 	}
 	return result
 }
@@ -424,6 +447,38 @@ func convertSecurityDefinitionsV3(securityDefinitions map[string]*v3.SecuritySch
 	return schemes
 }
 
+=======
+	}
+	return result
+}
+
+func convertSecurityDefinitionsV3(securityDefinitions map[string]*v3.SecurityScheme) map[string]*webscan.SecurityScheme {
+	schemes := make(map[string]*webscan.SecurityScheme)
+	for name, scheme := range securityDefinitions {
+		webscanScheme := &webscan.SecurityScheme{
+			Type:        webscan.SecuritySchemeType(scheme.Type),
+			Description: &scheme.Description,
+			Name:        &name,
+		}
+
+		switch scheme.Type {
+		case "apiKey":
+			webscanScheme.In = &scheme.In
+		case "http":
+			webscanScheme.Scheme = &scheme.Scheme
+			webscanScheme.BearerFormat = &scheme.BearerFormat
+		case "oauth2":
+			webscanScheme.Flows = convertOAuthFlowsV3(scheme.Flows)
+		case "openIdConnect":
+			webscanScheme.OpenIdConnectUrl = &scheme.OpenIdConnectUrl
+		}
+
+		schemes[name] = webscanScheme
+	}
+	return schemes
+}
+
+>>>>>>> origin/develop
 func convertOAuthFlowsV3(flows *v3.OAuthFlows) *webscan.OAuthFlows {
 	if flows == nil {
 		return nil
@@ -471,9 +526,12 @@ func convertSecurityRequirementsV2(security []*base.SecurityRequirement) *websca
 			req.Schemes[pair.Key] = pair.Value
 		}
 	}
+<<<<<<< HEAD
 	if len(req.Schemes) == 0 {
 		return nil
 	}
+=======
+>>>>>>> origin/develop
 	return req
 }
 
@@ -489,8 +547,11 @@ func convertSecurityRequirementsV3(security []*base.SecurityRequirement) *websca
 			req.Schemes[pair.Key] = pair.Value
 		}
 	}
+<<<<<<< HEAD
 	if len(req.Schemes) == 0 {
 		return nil
 	}
+=======
+>>>>>>> origin/develop
 	return req
 }
