@@ -408,19 +408,6 @@ func convertSecurityDefinitionsV3(securityDefinitions map[string]*v3.SecuritySch
 	return schemes
 }
 
-func convertOAuthFlowsV2(flow string) *webscan.OAuthFlows {
-	if flow == "" {
-		return nil
-	}
-	// Assuming the flow is implicit for simplicity, you can expand this as needed
-	return &webscan.OAuthFlows{
-		Implicit: &webscan.OAuthFlow{
-			AuthorizationUrl: &flow,
-			Scopes:           map[string]string{},
-		},
-	}
-}
-
 func convertOAuthFlowsV3(flows *v3.OAuthFlows) *webscan.OAuthFlows {
 	if flows == nil {
 		return nil
