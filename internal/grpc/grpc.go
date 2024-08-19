@@ -154,7 +154,7 @@ func extractMethods(fileDesc *descriptorpb.FileDescriptorProto, report *webscan.
 			route := webscan.Route{
 				Path:        fmt.Sprintf("/%s/%s", service.GetName(), method.GetName()),
 				Method:      "POST",
-				Auth:        nil,
+				Security:    nil,
 				QueryParams: queryParams,
 				Type:        webscan.ApiTypeGrpc,
 				Description: method.GetName(),

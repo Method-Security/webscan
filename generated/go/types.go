@@ -720,13 +720,101 @@ func (a ApiType) Ptr() *ApiType {
 	return &a
 }
 
+type OAuthFlow struct {
+	AuthorizationUrl *string           `json:"authorizationUrl,omitempty" url:"authorizationUrl,omitempty"`
+	TokenUrl         *string           `json:"tokenUrl,omitempty" url:"tokenUrl,omitempty"`
+	RefreshUrl       *string           `json:"refreshUrl,omitempty" url:"refreshUrl,omitempty"`
+	Scopes           map[string]string `json:"scopes,omitempty" url:"scopes,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OAuthFlow) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OAuthFlow) UnmarshalJSON(data []byte) error {
+	type unmarshaler OAuthFlow
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OAuthFlow(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *OAuthFlow) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
+type OAuthFlows struct {
+	Implicit          *OAuthFlow `json:"implicit,omitempty" url:"implicit,omitempty"`
+	Password          *OAuthFlow `json:"password,omitempty" url:"password,omitempty"`
+	ClientCredentials *OAuthFlow `json:"clientCredentials,omitempty" url:"clientCredentials,omitempty"`
+	AuthorizationCode *OAuthFlow `json:"authorizationCode,omitempty" url:"authorizationCode,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (o *OAuthFlows) GetExtraProperties() map[string]interface{} {
+	return o.extraProperties
+}
+
+func (o *OAuthFlows) UnmarshalJSON(data []byte) error {
+	type unmarshaler OAuthFlows
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*o = OAuthFlows(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *o)
+	if err != nil {
+		return err
+	}
+	o.extraProperties = extraProperties
+
+	o._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (o *OAuthFlows) String() string {
+	if len(o._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(o._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(o); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", o)
+}
+
 type Route struct {
-	Path        string   `json:"path" url:"path"`
-	QueryParams []string `json:"queryParams,omitempty" url:"queryParams,omitempty"`
-	Auth        *string  `json:"auth,omitempty" url:"auth,omitempty"`
-	Method      string   `json:"method" url:"method"`
-	Type        ApiType  `json:"type" url:"type"`
-	Description string   `json:"description" url:"description"`
+	Path        string               `json:"path" url:"path"`
+	QueryParams []string             `json:"queryParams,omitempty" url:"queryParams,omitempty"`
+	Security    *SecurityRequirement `json:"security,omitempty" url:"security,omitempty"`
+	Method      string               `json:"method" url:"method"`
+	Type        ApiType              `json:"type" url:"type"`
+	Description string               `json:"description" url:"description"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -767,15 +855,17 @@ func (r *Route) String() string {
 }
 
 type RoutesReport struct {
-	Target          string          `json:"target" url:"target"`
-	AppType         ApiType         `json:"appType" url:"appType"`
-	BaseEndpointUrl string          `json:"baseEndpointUrl" url:"baseEndpointUrl"`
-	Version         *string         `json:"version,omitempty" url:"version,omitempty"`
-	SchemaUrl       *string         `json:"schemaUrl,omitempty" url:"schemaUrl,omitempty"`
-	Routes          []*Route        `json:"routes,omitempty" url:"routes,omitempty"`
-	Queries         []*GraphQlQuery `json:"queries,omitempty" url:"queries,omitempty"`
-	Raw             string          `json:"raw" url:"raw"`
-	Errors          []string        `json:"errors,omitempty" url:"errors,omitempty"`
+	Target          string                                 `json:"target" url:"target"`
+	AppType         ApiType                                `json:"appType" url:"appType"`
+	BaseEndpointUrl string                                 `json:"baseEndpointUrl" url:"baseEndpointUrl"`
+	Version         *string                                `json:"version,omitempty" url:"version,omitempty"`
+	SchemaUrl       *string                                `json:"schemaUrl,omitempty" url:"schemaUrl,omitempty"`
+	Routes          []*Route                               `json:"routes,omitempty" url:"routes,omitempty"`
+	SecuritySchemes map[SecuritySchemeName]*SecurityScheme `json:"securitySchemes,omitempty" url:"securitySchemes,omitempty"`
+	Security        []*SecurityRequirement                 `json:"security,omitempty" url:"security,omitempty"`
+	Queries         []*GraphQlQuery                        `json:"queries,omitempty" url:"queries,omitempty"`
+	Raw             string                                 `json:"raw" url:"raw"`
+	Errors          []string                               `json:"errors,omitempty" url:"errors,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -814,6 +904,101 @@ func (r *RoutesReport) String() string {
 	}
 	return fmt.Sprintf("%#v", r)
 }
+
+type SecurityRequirement struct {
+	Schemes map[string][]string `json:"schemes,omitempty" url:"schemes,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SecurityRequirement) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SecurityRequirement) UnmarshalJSON(data []byte) error {
+	type unmarshaler SecurityRequirement
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SecurityRequirement(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SecurityRequirement) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+type SecurityScheme struct {
+	Type             string              `json:"type" url:"type"`
+	Description      *string             `json:"description,omitempty" url:"description,omitempty"`
+	Name             *SecuritySchemeName `json:"name,omitempty" url:"name,omitempty"`
+	In               *string             `json:"in,omitempty" url:"in,omitempty"`
+	Scheme           *string             `json:"scheme,omitempty" url:"scheme,omitempty"`
+	BearerFormat     *string             `json:"bearerFormat,omitempty" url:"bearerFormat,omitempty"`
+	Flow             *string             `json:"flow,omitempty" url:"flow,omitempty"`
+	AuthorizationUrl *string             `json:"authorizationUrl,omitempty" url:"authorizationUrl,omitempty"`
+	TokenUrl         *string             `json:"tokenUrl,omitempty" url:"tokenUrl,omitempty"`
+	Scopes           map[string]string   `json:"scopes,omitempty" url:"scopes,omitempty"`
+	Flows            *OAuthFlows         `json:"flows,omitempty" url:"flows,omitempty"`
+	OpenIdConnectUrl *string             `json:"openIdConnectUrl,omitempty" url:"openIdConnectUrl,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SecurityScheme) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SecurityScheme) UnmarshalJSON(data []byte) error {
+	type unmarshaler SecurityScheme
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SecurityScheme(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SecurityScheme) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+type SecuritySchemeName = string
 
 type WebpageCaptureReport struct {
 	Target      string   `json:"target" url:"target"`
