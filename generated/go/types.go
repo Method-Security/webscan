@@ -947,7 +947,7 @@ func (s *SecurityRequirement) String() string {
 }
 
 type SecurityScheme struct {
-	Type             string              `json:"type" url:"type"`
+	Type             SecuritySchemeType  `json:"type" url:"type"`
 	Description      *string             `json:"description,omitempty" url:"description,omitempty"`
 	Name             *SecuritySchemeName `json:"name,omitempty" url:"name,omitempty"`
 	In               *string             `json:"in,omitempty" url:"in,omitempty"`
@@ -999,6 +999,40 @@ func (s *SecurityScheme) String() string {
 }
 
 type SecuritySchemeName = string
+
+type SecuritySchemeType string
+
+const (
+	SecuritySchemeTypeBasic         SecuritySchemeType = "basic"
+	SecuritySchemeTypeApiKey        SecuritySchemeType = "apiKey"
+	SecuritySchemeTypeHttp          SecuritySchemeType = "http"
+	SecuritySchemeTypeOauth2        SecuritySchemeType = "oauth2"
+	SecuritySchemeTypeOpenIdConnect SecuritySchemeType = "openIdConnect"
+	SecuritySchemeTypeMutualTls     SecuritySchemeType = "mutualTLS"
+)
+
+func NewSecuritySchemeTypeFromString(s string) (SecuritySchemeType, error) {
+	switch s {
+	case "basic":
+		return SecuritySchemeTypeBasic, nil
+	case "apiKey":
+		return SecuritySchemeTypeApiKey, nil
+	case "http":
+		return SecuritySchemeTypeHttp, nil
+	case "oauth2":
+		return SecuritySchemeTypeOauth2, nil
+	case "openIdConnect":
+		return SecuritySchemeTypeOpenIdConnect, nil
+	case "mutualTLS":
+		return SecuritySchemeTypeMutualTls, nil
+	}
+	var t SecuritySchemeType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s SecuritySchemeType) Ptr() *SecuritySchemeType {
+	return &s
+}
 
 type WebpageCaptureReport struct {
 	Target      string   `json:"target" url:"target"`

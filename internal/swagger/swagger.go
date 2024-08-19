@@ -351,7 +351,7 @@ func convertSecurityDefinitionsV2(securityDefinitions map[string]*v2.SecuritySch
 	schemes := make(map[string]*webscan.SecurityScheme)
 	for name, scheme := range securityDefinitions {
 		webscanScheme := &webscan.SecurityScheme{
-			Type:        scheme.Type,
+			Type:        webscan.SecuritySchemeType(scheme.Type),
 			Description: &scheme.Description,
 			Name:        &name,
 		}
@@ -386,7 +386,7 @@ func convertSecurityDefinitionsV3(securityDefinitions map[string]*v3.SecuritySch
 	schemes := make(map[string]*webscan.SecurityScheme)
 	for name, scheme := range securityDefinitions {
 		webscanScheme := &webscan.SecurityScheme{
-			Type:        scheme.Type,
+			Type:        webscan.SecuritySchemeType(scheme.Type),
 			Description: &scheme.Description,
 			Name:        &name,
 		}

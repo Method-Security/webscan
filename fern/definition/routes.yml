@@ -2,20 +2,28 @@ imports:
   graphql: ./graphql.yml
 types:
   SecuritySchemeName: string
+  SecuritySchemeType:
+    enum:
+      - basic
+      - apiKey
+      - http
+      - oauth2
+      - openIdConnect
+      - mutualTLS
   SecurityScheme:
     properties:
-      type: string        # Can be 'basic', 'apiKey', 'http', 'oauth2', 'openIdConnect', 'mutualTLS'
+      type: SecuritySchemeType
       description: optional<string>
-      name: optional<SecuritySchemeName>  # For apiKey
-      in: optional<string>    # Can be 'query', 'header', or 'cookie' for apiKey
-      scheme: optional<string>  # For http, e.g., 'bearer', 'basic'
-      bearerFormat: optional<string>  # For http with scheme 'bearer'
-      flow: optional<string>  # For oauth2 v2
-      authorizationUrl: optional<string>  # For oauth2 v2
-      tokenUrl: optional<string>  # For oauth2 v2
-      scopes: optional<map<string, string>>  # For oauth2 v2
-      flows: optional<OAuthFlows>  # For oauth2 v3
-      openIdConnectUrl: optional<string>  # For openIdConnect
+      name: optional<SecuritySchemeName>
+      in: optional<string>
+      scheme: optional<string>
+      bearerFormat: optional<string>
+      flow: optional<string> # oauth v2
+      authorizationUrl: optional<string> # oauth v2
+      tokenUrl: optional<string> # oauth v2
+      scopes: optional<map<string, string>>
+      flows: optional<OAuthFlows> # oauth v3
+      openIdConnectUrl: optional<string>
   OAuthFlows:
     properties:
       implicit: optional<OAuthFlow>
@@ -30,12 +38,12 @@ types:
       scopes: optional<map<string, string>>
   SecurityRequirement:
     properties:
-      schemes: map<string, list<string>>  # Map of security scheme names to required scopes or empty list
+      schemes: map<string, list<string>>
   Route:
     properties:
       path: string
       queryParams: optional<list<string>>
-      security: optional<SecurityRequirement>  # Replaced with SecurityRequirement for detailed auth handling
+      security: optional<SecurityRequirement>
       method: string
       type: APIType
       description: string
@@ -47,8 +55,8 @@ types:
       version: optional<string>
       schemaUrl: optional<string>
       routes: list<Route>
-      securitySchemes: optional<map<SecuritySchemeName, SecurityScheme>>  # New: Contains security schemes defined at the app level
-      security: optional<list<SecurityRequirement>>  # New: Security at the app level
+      securitySchemes: optional<map<SecuritySchemeName, SecurityScheme>>
+      security: optional<list<SecurityRequirement>>
       queries: optional<list<graphql.GraphQLQuery>>
       raw: string
       errors: optional<list<string>>

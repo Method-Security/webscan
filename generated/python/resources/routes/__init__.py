@@ -8,6 +8,7 @@ from .routes_report import RoutesReport
 from .security_requirement import SecurityRequirement
 from .security_scheme import SecurityScheme
 from .security_scheme_name import SecuritySchemeName
+from .security_scheme_type import SecuritySchemeType
 
 __all__ = [
     "ApiType",
@@ -18,4 +19,5 @@ __all__ = [
     "SecurityRequirement",
     "SecurityScheme",
     "SecuritySchemeName",
+    "SecuritySchemeType",
 ]

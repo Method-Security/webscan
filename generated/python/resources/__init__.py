@@ -14,6 +14,7 @@ from .routes import (
     SecurityRequirement,
     SecurityScheme,
     SecuritySchemeName,
+    SecuritySchemeType,
 )
 from .webpagecapture import WebpageCaptureReport
 
@@ -37,6 +38,7 @@ __all__ = [
     "SecurityRequirement",
     "SecurityScheme",
     "SecuritySchemeName",
+    "SecuritySchemeType",
     "SignatureAlgorithm",
     "TlsInfo",
     "TlsVersion",
