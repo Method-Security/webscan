@@ -59,7 +59,7 @@ func addTopLevelRoute(report *webscan.RoutesReport, basePath string) {
 	baseRoute := webscan.Route{
 		Path:        basePath,
 		QueryParams: nil,
-		Auth:        nil,
+		Security:    nil,
 		Method:      "POST",
 		Type:        webscan.ApiTypeGraphQl,
 		Description: "Top-level GraphQL route",

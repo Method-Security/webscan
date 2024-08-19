@@ -6,12 +6,13 @@ import pydantic
 
 from ...core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .api_type import ApiType
+from .security_requirement import SecurityRequirement
 
 
 class Route(UniversalBaseModel):
     path: str
     query_params: typing.Optional[typing.List[str]] = pydantic.Field(alias="queryParams", default=None)
-    auth: typing.Optional[str] = None
+    security: typing.Optional[SecurityRequirement] = None
     method: str
     type: ApiType
     description: str

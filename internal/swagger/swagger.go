@@ -18,6 +18,7 @@ import (
 	"github.com/pb33f/libopenapi/datamodel/high/base"
 	v2 "github.com/pb33f/libopenapi/datamodel/high/v2"
 	v3 "github.com/pb33f/libopenapi/datamodel/high/v3"
+	"github.com/pb33f/libopenapi/orderedmap"
 	"golang.org/x/net/html"
 )
 
@@ -229,6 +230,12 @@ func handleSwaggerV2(document libopenapi.Document, report *webscan.RoutesReport)
 		securityDefinitions[pair.Key] = pair.Value
 	}
 
+	// Add security schemes to the report
+	report.SecuritySchemes = convertSecurityDefinitionsV2(securityDefinitions)
+
+	// Add app-level security requirements to the report
+	report.Security = []*webscan.SecurityRequirement{convertSecurityRequirementsV2(model.Security)}
+
 	// Iterate over paths and methods to populate the report
 	for pair := model.Paths.PathItems.Oldest(); pair != nil; pair = pair.Next() {
 		path := pair.Key
@@ -236,12 +243,12 @@ func handleSwaggerV2(document libopenapi.Document, report *webscan.RoutesReport)
 		for opPair := pathItem.GetOperations().Oldest(); opPair != nil; opPair = opPair.Next() {
 			method := opPair.Key
 			operation := opPair.Value
-			authType := getAuthTypeV2(convertSecurityRequirementsV2(operation.Security), securityDefinitions)
+			securityRequirements := convertSecurityRequirementsV2(operation.Security)
 			route := webscan.Route{
 				Path:        path,
 				Method:      method,
 				QueryParams: getQueryParamsV2(operation.Parameters),
-				Auth:        &authType,
+				Security:    securityRequirements,
 				Type:        webscan.ApiTypeSwaggerV2,
 				Description: operation.Description,
 			}
@@ -289,6 +296,12 @@ func handleOpenAPIV3(document libopenapi.Document, report *webscan.RoutesReport,
 		securityDefinitions[pair.Key] = pair.Value
 	}
 
+	// Add security schemes to the report
+	report.SecuritySchemes = convertSecurityDefinitionsV3(securityDefinitions)
+
+	// Add app-level security requirements to the report
+	report.Security = []*webscan.SecurityRequirement{convertSecurityRequirementsV3(model.Security)}
+
 	// Iterate over paths and methods to populate the report
 	for pair := model.Paths.PathItems.Oldest(); pair != nil; pair = pair.Next() {
 		path := pair.Key
@@ -296,12 +309,12 @@ func handleOpenAPIV3(document libopenapi.Document, report *webscan.RoutesReport,
 		for opPair := pathItem.GetOperations().Oldest(); opPair != nil; opPair = opPair.Next() {
 			method := opPair.Key
 			operation := opPair.Value
-			authType := getAuthTypeV3(convertSecurityRequirementsV3(operation.Security), securityDefinitions)
+			securityRequirements := convertSecurityRequirementsV3(operation.Security)
 			route := webscan.Route{
 				Path:        path,
 				Method:      method,
 				QueryParams: getQueryParamsV3(operation.Parameters),
-				Auth:        &authType,
+				Security:    securityRequirements,
 				Type:        webscan.ApiTypeSwaggerV3,
 				Description: operation.Description,
 			}
@@ -334,66 +347,128 @@ func getQueryParamsV3(params []*v3.Parameter) []string {
 	return queryParams
 }
 
-// getAuthTypeV2 determines the authentication type from the security requirements for Swagger (OpenAPI 2.0)
-func getAuthTypeV2(security map[string][]string, securityDefinitions map[string]*v2.SecurityScheme) string {
-	if len(security) == 0 {
-		return "none"
-	}
-	for name := range security {
-		if secDef, ok := securityDefinitions[name]; ok {
-			switch secDef.Type {
-			case "apiKey":
-				return "apiKey"
-			case "oauth2":
-				return "oauth2"
-			case "basic":
-				return "basic"
-			default:
-				return "unknown"
-			}
+func convertSecurityDefinitionsV2(securityDefinitions map[string]*v2.SecurityScheme) map[string]*webscan.SecurityScheme {
+	schemes := make(map[string]*webscan.SecurityScheme)
+	for name, scheme := range securityDefinitions {
+		webscanScheme := &webscan.SecurityScheme{
+			Type:        webscan.SecuritySchemeType(scheme.Type),
+			Description: &scheme.Description,
+			Name:        &name,
 		}
+
+		switch scheme.Type {
+		case "apiKey":
+			webscanScheme.In = &scheme.In
+		case "oauth2":
+			webscanScheme.Flow = &scheme.Flow
+			webscanScheme.AuthorizationUrl = &scheme.AuthorizationUrl
+			webscanScheme.TokenUrl = &scheme.TokenUrl
+			webscanScheme.Scopes = convertV2ScopesToMap(scheme.Scopes)
+		}
+
+		schemes[name] = webscanScheme
 	}
-	return "unknown"
+	return schemes
 }
 
-// getAuthTypeV3 determines the authentication type from the security requirements for OpenAPI 3.0+
-func getAuthTypeV3(security map[string][]string, securityDefinitions map[string]*v3.SecurityScheme) string {
-	if len(security) == 0 {
-		return "none"
+func convertV2ScopesToMap(scopes *v2.Scopes) map[string]string {
+	if scopes == nil {
+		return nil
 	}
-	for name := range security {
-		if secDef, ok := securityDefinitions[name]; ok {
-			switch secDef.Type {
-			case "apiKey":
-				return "apiKey"
-			case "oauth2":
-				return "oauth2"
-			case "http":
-				return "http"
-			default:
-				return "unknown"
-			}
-		}
+	result := make(map[string]string)
+	for pair := scopes.Values.Oldest(); pair != nil; pair = pair.Next() {
+		result[pair.Key] = pair.Value
 	}
-	return "unknown"
+	return result
 }
 
-func convertSecurityRequirementsV2(security []*base.SecurityRequirement) map[string][]string {
-	securityMap := make(map[string][]string)
+func convertSecurityDefinitionsV3(securityDefinitions map[string]*v3.SecurityScheme) map[string]*webscan.SecurityScheme {
+	schemes := make(map[string]*webscan.SecurityScheme)
+	for name, scheme := range securityDefinitions {
+		webscanScheme := &webscan.SecurityScheme{
+			Type:        webscan.SecuritySchemeType(scheme.Type),
+			Description: &scheme.Description,
+			Name:        &name,
+		}
+
+		switch scheme.Type {
+		case "apiKey":
+			webscanScheme.In = &scheme.In
+		case "http":
+			webscanScheme.Scheme = &scheme.Scheme
+			webscanScheme.BearerFormat = &scheme.BearerFormat
+		case "oauth2":
+			webscanScheme.Flows = convertOAuthFlowsV3(scheme.Flows)
+		case "openIdConnect":
+			webscanScheme.OpenIdConnectUrl = &scheme.OpenIdConnectUrl
+		}
+
+		schemes[name] = webscanScheme
+	}
+	return schemes
+}
+
+func convertOAuthFlowsV3(flows *v3.OAuthFlows) *webscan.OAuthFlows {
+	if flows == nil {
+		return nil
+	}
+	return &webscan.OAuthFlows{
+		Implicit:          convertOAuthFlowV3(flows.Implicit),
+		Password:          convertOAuthFlowV3(flows.Password),
+		ClientCredentials: convertOAuthFlowV3(flows.ClientCredentials),
+		AuthorizationCode: convertOAuthFlowV3(flows.AuthorizationCode),
+	}
+}
+
+func convertOAuthFlowV3(flow *v3.OAuthFlow) *webscan.OAuthFlow {
+	if flow == nil {
+		return nil
+	}
+	return &webscan.OAuthFlow{
+		AuthorizationUrl: &flow.AuthorizationUrl,
+		TokenUrl:         &flow.TokenUrl,
+		RefreshUrl:       &flow.RefreshUrl,
+		Scopes:           convertOrderedMapToMap(flow.Scopes),
+	}
+}
+
+func convertOrderedMapToMap(orderedMap *orderedmap.Map[string, string]) map[string]string {
+	if orderedMap == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	for pair := orderedMap.Oldest(); pair != nil; pair = pair.Next() {
+		result[pair.Key] = pair.Value
+	}
+	return result
+}
+
+func convertSecurityRequirementsV2(security []*base.SecurityRequirement) *webscan.SecurityRequirement {
+	if len(security) == 0 {
+		return nil
+	}
+	req := &webscan.SecurityRequirement{
+		Schemes: make(map[string][]string),
+	}
 	for _, secReq := range security {
 		for pair := secReq.Requirements.Oldest(); pair != nil; pair = pair.Next() {
-			securityMap[pair.Key] = pair.Value
+			req.Schemes[pair.Key] = pair.Value
 		}
 	}
-	return securityMap
+	return req
 }
 
-func convertSecurityRequirementsV3(security []*base.SecurityRequirement) map[string][]string {
-	securityMap := make(map[string][]string)
+func convertSecurityRequirementsV3(security []*base.SecurityRequirement) *webscan.SecurityRequirement {
+	if len(security) == 0 {
+		return nil
+	}
+	req := &webscan.SecurityRequirement{
+		Schemes: make(map[string][]string),
+	}
 	for _, secReq := range security {
 		for pair := secReq.Requirements.Oldest(); pair != nil; pair = pair.Next() {
-			securityMap[pair.Key] = pair.Value
+			req.Schemes[pair.Key] = pair.Value
 		}
 	}
-	return securityMap
+	return req
 }
