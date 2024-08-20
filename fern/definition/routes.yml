@@ -38,7 +38,7 @@ types:
       scopes: optional<map<string, string>>
   SecurityRequirement:
     properties:
-      schemes: map<string, list<string>>
+      schemes: map<string, optional<list<string>>>
   Route:
     properties:
       path: string
