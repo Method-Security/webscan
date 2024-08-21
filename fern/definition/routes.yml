@@ -54,7 +54,7 @@ types:
       baseEndpointUrl: string
       version: optional<string>
       schemaUrl: optional<string>
-      routes: list<Route>
+      routes: optional<list<Route>>
       securitySchemes: optional<map<SecuritySchemeName, SecurityScheme>>
       security: optional<list<SecurityRequirement>>
       queries: optional<list<graphql.GraphQLQuery>>
