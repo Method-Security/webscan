@@ -2,7 +2,9 @@ package vuln
 
 import (
 	"context"
+	"net"
 	"net/url"
+	"regexp"
 	"strings"
 
 	nuclei "github.com/projectdiscovery/nuclei/v3/lib"
@@ -33,6 +35,23 @@ type VulnerabilityFinding struct {
 type VulnerabilityReport struct {
 	Target  string                 `json:"target"`
 	Reports []VulnerabilityFinding `json:"report"`
+}
+
+func isValidIP(ip string) bool {
+	ipv4Pattern := `^([0-9]{1,3}\.){3}[0-9]{1,3}$`
+	ipv6Pattern := `^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$`
+	matchIPv4, _ := regexp.MatchString(ipv4Pattern, ip)
+	matchIPv6, _ := regexp.MatchString(ipv6Pattern, ip)
+
+	return matchIPv4 || matchIPv6
+}
+
+func ipToAddress(ip string) (string, error) {
+	names, err := net.LookupAddr(ip)
+	if err != nil || len(names) == 0 {
+		return "", err
+	}
+	return names[0], nil
 }
 
 func parseResultIntoContext(result nucleiOutput.ResultEvent) VulnerabilityContext {
@@ -69,6 +88,14 @@ func PerformVulnScan(ctx context.Context, target string, tags []string, severity
 		return VulnerabilityReport{}, err
 	}
 	address := strings.TrimPrefix(parsedURL.String(), parsedURL.Scheme+"://")
+
+	// If target is an ip, convert to address
+	if isValidIP(address) {
+		humanReadableAddress, err := ipToAddress(address)
+		if err == nil {
+			address = humanReadableAddress
+		}
+	}
 
 	ne.LoadTargets([]string{address}, true)
 	results := []nucleiOutput.ResultEvent{}
