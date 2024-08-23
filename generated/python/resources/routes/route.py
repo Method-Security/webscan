@@ -16,6 +16,9 @@ class Route(UniversalBaseModel):
     method: str
     type: ApiType
     description: str
+    response_properties: typing.Optional[typing.Dict[str, typing.List[str]]] = pydantic.Field(
+        alias="responseProperties", default=None
+    )
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow")  # type: ignore # Pydantic v2

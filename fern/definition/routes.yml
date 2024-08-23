@@ -47,6 +47,7 @@ types:
       method: string
       type: APIType
       description: string
+      responseProperties: optional<map<string, list<string>>>
   RoutesReport:
     properties:
       target: string
