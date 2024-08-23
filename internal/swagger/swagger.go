@@ -249,22 +249,29 @@ func handleSwaggerV2(document libopenapi.Document, report *webscan.RoutesReport)
 			method := opPair.Key
 			operation := opPair.Value
 
-			// Only get response properties for GET methods
 			var responseProperties map[string][]string
 			if strings.ToUpper(method) == "GET" {
-				responseProperties, _ = extractResponsePropertiesV2(operation)
+				var err error
+				responseProperties, err = extractResponsePropertiesV2(operation)
+				if err != nil {
+					responseProperties = nil
+				}
 			}
 
 			securityRequirements := convertSecurityRequirementsV2(operation.Security)
 			route := webscan.Route{
-				Path:               path,
-				Method:             method,
-				QueryParams:        getQueryParamsV2(operation.Parameters),
-				Security:           securityRequirements,
-				Type:               webscan.ApiTypeSwaggerV2,
-				Description:        operation.Description,
-				ResponseProperties: responseProperties,
+				Path:        path,
+				Method:      method,
+				QueryParams: getQueryParamsV2(operation.Parameters),
+				Security:    securityRequirements,
+				Type:        webscan.ApiTypeSwaggerV2,
+				Description: operation.Description,
 			}
+
+			if responseProperties != nil {
+				route.ResponseProperties = responseProperties
+			}
+
 			report.Routes = append(report.Routes, &route)
 		}
 	}
@@ -326,22 +333,29 @@ func handleOpenAPIV3(document libopenapi.Document, report *webscan.RoutesReport,
 			method := opPair.Key
 			operation := opPair.Value
 
-			// Only get response properties for GET methods
 			var responseProperties map[string][]string
 			if strings.ToUpper(method) == "GET" {
-				responseProperties, _ = extractResponsePropertiesV3(operation)
+				var err error
+				responseProperties, err = extractResponsePropertiesV3(operation)
+				if err != nil {
+					responseProperties = nil
+				}
 			}
 
 			securityRequirements := convertSecurityRequirementsV3(operation.Security)
 			route := webscan.Route{
-				Path:               path,
-				Method:             method,
-				QueryParams:        getQueryParamsV3(operation.Parameters),
-				Security:           securityRequirements,
-				Type:               webscan.ApiTypeSwaggerV3,
-				Description:        operation.Description,
-				ResponseProperties: responseProperties,
+				Path:        path,
+				Method:      method,
+				QueryParams: getQueryParamsV3(operation.Parameters),
+				Security:    securityRequirements,
+				Type:        webscan.ApiTypeSwaggerV3,
+				Description: operation.Description,
 			}
+
+			if responseProperties != nil {
+				route.ResponseProperties = responseProperties
+			}
+
 			report.Routes = append(report.Routes, &route)
 		}
 	}
@@ -349,13 +363,19 @@ func handleOpenAPIV3(document libopenapi.Document, report *webscan.RoutesReport,
 	return nil
 }
 
-// Helper function to get the first layer of schema properties
-func getSchemaProperties(schema *base.Schema) []string {
+// Helper function to get the first layer of schema properties recursively
+func getSchemaPropertiesRecursive(schema *base.Schema) []string {
 	var properties []string
 	if schema.Properties != nil {
 		for pair := schema.Properties.Oldest(); pair != nil; pair = pair.Next() {
 			propName := pair.Key
 			properties = append(properties, propName)
+			// Recursively get properties of nested schemas
+			nestedSchema := pair.Value.Schema()
+			if nestedSchema != nil {
+				nestedProperties := getSchemaPropertiesRecursive(nestedSchema)
+				properties = append(properties, nestedProperties...)
+			}
 		}
 	}
 	return properties
@@ -547,7 +567,7 @@ func extractResponsePropertiesV2(operation *v2.Operation) (map[string][]string, 
 			if response.Schema != nil {
 				schema := response.Schema.Schema()
 				if schema != nil {
-					properties := getSchemaProperties(schema)
+					properties := getSchemaPropertiesRecursive(schema)
 					if len(properties) > 0 {
 						responseProperties[statusCode] = properties
 					}
@@ -574,7 +594,7 @@ func extractResponsePropertiesV3(operation *v3.Operation) (map[string][]string, 
 					if mediaTypeObject.Schema != nil {
 						schema := mediaTypeObject.Schema.Schema()
 						if schema != nil {
-							properties := getSchemaProperties(schema)
+							properties := getSchemaPropertiesRecursive(schema)
 							if len(properties) > 0 {
 								responseProperties[statusCode] = properties
 							}
