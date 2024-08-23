@@ -226,8 +226,10 @@ func handleSwaggerV2(document libopenapi.Document, report *webscan.RoutesReport)
 
 	// Extract security definitions
 	securityDefinitions := make(map[string]*v2.SecurityScheme)
-	for pair := model.SecurityDefinitions.Definitions.Oldest(); pair != nil; pair = pair.Next() {
-		securityDefinitions[pair.Key] = pair.Value
+	if model.SecurityDefinitions != nil {
+		for pair := model.SecurityDefinitions.Definitions.Oldest(); pair != nil; pair = pair.Next() {
+			securityDefinitions[pair.Key] = pair.Value
+		}
 	}
 
 	// Add security schemes to the report
@@ -246,14 +248,22 @@ func handleSwaggerV2(document libopenapi.Document, report *webscan.RoutesReport)
 		for opPair := pathItem.GetOperations().Oldest(); opPair != nil; opPair = opPair.Next() {
 			method := opPair.Key
 			operation := opPair.Value
+
+			// Only get response properties for GET methods
+			var responseProperties map[string][]string
+			if strings.ToUpper(method) == "GET" {
+				responseProperties, _ = extractResponsePropertiesV2(operation)
+			}
+
 			securityRequirements := convertSecurityRequirementsV2(operation.Security)
 			route := webscan.Route{
-				Path:        path,
-				Method:      method,
-				QueryParams: getQueryParamsV2(operation.Parameters),
-				Security:    securityRequirements,
-				Type:        webscan.ApiTypeSwaggerV2,
-				Description: operation.Description,
+				Path:               path,
+				Method:             method,
+				QueryParams:        getQueryParamsV2(operation.Parameters),
+				Security:           securityRequirements,
+				Type:               webscan.ApiTypeSwaggerV2,
+				Description:        operation.Description,
+				ResponseProperties: responseProperties,
 			}
 			report.Routes = append(report.Routes, &route)
 		}
@@ -315,20 +325,40 @@ func handleOpenAPIV3(document libopenapi.Document, report *webscan.RoutesReport,
 		for opPair := pathItem.GetOperations().Oldest(); opPair != nil; opPair = opPair.Next() {
 			method := opPair.Key
 			operation := opPair.Value
+
+			// Only get response properties for GET methods
+			var responseProperties map[string][]string
+			if strings.ToUpper(method) == "GET" {
+				responseProperties, _ = extractResponsePropertiesV3(operation)
+			}
+
 			securityRequirements := convertSecurityRequirementsV3(operation.Security)
 			route := webscan.Route{
-				Path:        path,
-				Method:      method,
-				QueryParams: getQueryParamsV3(operation.Parameters),
-				Security:    securityRequirements,
-				Type:        webscan.ApiTypeSwaggerV3,
-				Description: operation.Description,
+				Path:               path,
+				Method:             method,
+				QueryParams:        getQueryParamsV3(operation.Parameters),
+				Security:           securityRequirements,
+				Type:               webscan.ApiTypeSwaggerV3,
+				Description:        operation.Description,
+				ResponseProperties: responseProperties,
 			}
 			report.Routes = append(report.Routes, &route)
 		}
 	}
 
 	return nil
+}
+
+// Helper function to get the first layer of schema properties
+func getSchemaProperties(schema *base.Schema) []string {
+	var properties []string
+	if schema.Properties != nil {
+		for pair := schema.Properties.Oldest(); pair != nil; pair = pair.Next() {
+			propName := pair.Key
+			properties = append(properties, propName)
+		}
+	}
+	return properties
 }
 
 // getQueryParamsV2 extracts query parameters from the operation parameters for Swagger (OpenAPI 2.0)
@@ -505,4 +535,57 @@ func convertSecurityRequirementsV3(security []*base.SecurityRequirement) *websca
 		return nil
 	}
 	return req
+}
+
+func extractResponsePropertiesV2(operation *v2.Operation) (map[string][]string, error) {
+	responseProperties := make(map[string][]string)
+	if operation.Responses != nil && operation.Responses.Codes != nil {
+		for respPair := operation.Responses.Codes.Oldest(); respPair != nil; respPair = respPair.Next() {
+			statusCode := respPair.Key
+			response := respPair.Value
+
+			if response.Schema != nil {
+				schema := response.Schema.Schema()
+				if schema != nil {
+					properties := getSchemaProperties(schema)
+					if len(properties) > 0 {
+						responseProperties[statusCode] = properties
+					}
+				}
+			}
+		}
+	}
+	if len(responseProperties) == 0 {
+		return nil, fmt.Errorf("no response properties found")
+	}
+	return responseProperties, nil
+}
+
+func extractResponsePropertiesV3(operation *v3.Operation) (map[string][]string, error) {
+	responseProperties := make(map[string][]string)
+	if operation.Responses != nil && operation.Responses.Codes != nil {
+		for respPair := operation.Responses.Codes.Oldest(); respPair != nil; respPair = respPair.Next() {
+			statusCode := respPair.Key
+			response := respPair.Value
+
+			if response.Content != nil {
+				for contentPair := response.Content.Oldest(); contentPair != nil; contentPair = contentPair.Next() {
+					mediaTypeObject := contentPair.Value
+					if mediaTypeObject.Schema != nil {
+						schema := mediaTypeObject.Schema.Schema()
+						if schema != nil {
+							properties := getSchemaProperties(schema)
+							if len(properties) > 0 {
+								responseProperties[statusCode] = properties
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	if len(responseProperties) == 0 {
+		return nil, fmt.Errorf("no response properties found")
+	}
+	return responseProperties, nil
 }

@@ -809,12 +809,13 @@ func (o *OAuthFlows) String() string {
 }
 
 type Route struct {
-	Path        string               `json:"path" url:"path"`
-	QueryParams []string             `json:"queryParams,omitempty" url:"queryParams,omitempty"`
-	Security    *SecurityRequirement `json:"security,omitempty" url:"security,omitempty"`
-	Method      string               `json:"method" url:"method"`
-	Type        ApiType              `json:"type" url:"type"`
-	Description string               `json:"description" url:"description"`
+	Path               string               `json:"path" url:"path"`
+	QueryParams        []string             `json:"queryParams,omitempty" url:"queryParams,omitempty"`
+	Security           *SecurityRequirement `json:"security,omitempty" url:"security,omitempty"`
+	Method             string               `json:"method" url:"method"`
+	Type               ApiType              `json:"type" url:"type"`
+	Description        string               `json:"description" url:"description"`
+	ResponseProperties map[string][]string  `json:"responseProperties,omitempty" url:"responseProperties,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
