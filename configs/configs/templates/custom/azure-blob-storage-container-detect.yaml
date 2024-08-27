@@ -1,0 +1,34 @@
+id: azure-blob-storage-container-detect
+
+info:
+  name: Azure Blob Storage Container - Detect
+  author: MethodSecurity
+  severity: info
+  description: Azure Blob Storage Container was detected.
+  reference: https://learn.microsoft.com/en-us/azure/storage/blobs/
+  tags: exposure,bucket,azure
+
+variables:
+  ContainerPath: '{{replace_regex(BaseURL, "^(https?://[^/]+/[^/]+).*", "${1}")}}'
+
+requests:
+  - method: GET
+    path:
+      - "{{ContainerPath}}?restype=container&comp=metadata"
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+
+      - type: regex
+        part: host
+        regex:
+          - '[a-z0-9]+\.blob\.core\.windows\.net'
+
+    extractors:        
+      - type: dsl
+        name: container_name
+        dsl:
+          - to_lower(ContainerPath)
