@@ -1066,6 +1066,8 @@
 <h2 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">#</a></h2>
 <h3 id="fingerprint">Fingerprint<a class="headerlink" href="#fingerprint" title="Permanent link">#</a></h3>
 <p>The <code>webscan app fingerprint</code> command fingerprints a URL by identifying the web application type.</p>
+<p>Fingerprint uses <a href="https://github.com/projectdiscovery/nuclei">Nuclei</a> as the means for identifying an application type.
+For example, <code>--tags swagger</code> finds an active Swagger API. <code>--tags bucket</code> finds AWS S3 buckets of Azure Blob Storage Containers.</p>
 <h4 id="usage_1">Usage<a class="headerlink" href="#usage_1" title="Permanent link">#</a></h4>
 <div class="highlight"><pre><span></span><code>webscan<span class="w"> </span>app<span class="w"> </span>fingerprint<span class="w"> </span>--target<span class="w"> </span>https://example.com<span class="w"> </span>--tags<span class="w"> </span>swagger<span class="w"> </span>--severity<span class="w"> </span>INFO<span class="w"> </span>--defaultTemplateDirectory<span class="w"> </span>/path/to/default/templates<span class="w"> </span>--customTemplateDirectory<span class="w"> </span>/path/to/custom/templates
 </code></pre></div>
