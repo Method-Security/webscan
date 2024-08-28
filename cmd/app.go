@@ -30,7 +30,8 @@ func (a *WebScan) initFingerprintCommand() {
 		Long: `Perform a fingerprint scan against a target using specified types.
 		
 The fingerprint command identifies the type of web application running on the target URL. 
-It uses custom templates to match URLs hosting different types of web applications such as Swagger, gRPC, GraphQL, and Kubernetes.`,
+It uses custom templates to match URLs hosting different types of web applications or cloud services
+such as Swagger, gRPC, GraphQL, Kubernetes, and cloud buckets.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
@@ -55,7 +56,7 @@ It uses custom templates to match URLs hosting different types of web applicatio
 				return
 			}
 			if len(tags) == 0 {
-				tags = []string{"swagger", "k8s", "graphql", "grpc"}
+				tags = []string{"swagger", "k8s", "graphql", "grpc", "bucket"}
 			}
 			rawSeverity, err := cmd.Flags().GetStringSlice("severity")
 			if err != nil {

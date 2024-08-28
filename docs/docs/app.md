@@ -13,6 +13,9 @@ webscan app [command]
 
 The `webscan app fingerprint` command fingerprints a URL by identifying the web application type.
 
+Fingerprint uses [Nuclei](https://github.com/projectdiscovery/nuclei) as the means for identifying an application type.
+For example, `--tags swagger` finds an active Swagger API. `--tags bucket` finds AWS S3 buckets of Azure Blob Storage Containers.
+
 #### Usage
 
 ```bash

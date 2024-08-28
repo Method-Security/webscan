@@ -1,0 +1,34 @@
+id: aws-s3-detect
+
+info:
+  name: AWS S3 Bucket - Detect
+  author: MethodSecurity
+  severity: info
+  description: AWS S3 Bucket was detected.
+  reference: https://docs.aws.amazon.com/s3/
+  tags: exposure,bucket,s3
+
+http:
+  - method: GET
+    path:
+      - "{{RootURL}}"
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 403
+
+      - type: dsl
+        dsl:
+          - 'contains(to_lower(server), "amazons3")'
+          - 'contains(to_lower(header), "x-amz-bucket-region")'
+          - 'contains(to_lower(header), "x-amz-request-id")'
+        condition: and
+
+    extractors:        
+      - type: dsl
+        name: bucket_url
+        dsl:
+          - to_lower(RootURL)
