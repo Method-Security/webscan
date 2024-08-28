@@ -26,3 +26,9 @@ http:
           - 'contains(to_lower(header), "x-amz-bucket-region")'
           - 'contains(to_lower(header), "x-amz-request-id")'
         condition: and
+
+    extractors:        
+      - type: dsl
+        name: bucket_url
+        dsl:
+          - to_lower(RootURL)

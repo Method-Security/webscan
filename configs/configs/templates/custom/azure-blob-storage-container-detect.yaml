@@ -29,6 +29,6 @@ requests:
 
     extractors:        
       - type: dsl
-        name: container_name
+        name: container_url
         dsl:
           - to_lower(ContainerPath)
