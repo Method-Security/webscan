@@ -723,6 +723,98 @@ func (h HttpMethod) Ptr() *HttpMethod {
 	return &h
 }
 
+type ParsedParams struct {
+	PathParams      map[string]string `json:"pathParams,omitempty" url:"pathParams,omitempty"`
+	QueryParams     map[string]string `json:"queryParams,omitempty" url:"queryParams,omitempty"`
+	HeaderParams    map[string]string `json:"headerParams,omitempty" url:"headerParams,omitempty"`
+	BodyParams      string            `json:"bodyParams" url:"bodyParams"`
+	FormParams      map[string]string `json:"formParams,omitempty" url:"formParams,omitempty"`
+	MultipartParams map[string]string `json:"multipartParams,omitempty" url:"multipartParams,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ParsedParams) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ParsedParams) UnmarshalJSON(data []byte) error {
+	type unmarshaler ParsedParams
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ParsedParams(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *ParsedParams) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type RequestParams struct {
+	PathParams      string `json:"pathParams" url:"pathParams"`
+	QueryParams     string `json:"queryParams" url:"queryParams"`
+	HeaderParams    string `json:"headerParams" url:"headerParams"`
+	BodyParams      string `json:"bodyParams" url:"bodyParams"`
+	FormParams      string `json:"formParams" url:"formParams"`
+	MultipartParams string `json:"multipartParams" url:"multipartParams"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RequestParams) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RequestParams) UnmarshalJSON(data []byte) error {
+	type unmarshaler RequestParams
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RequestParams(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RequestParams) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
 type RequestReport struct {
 	BaseUrl         string            `json:"baseUrl" url:"baseUrl"`
 	Path            string            `json:"path" url:"path"`

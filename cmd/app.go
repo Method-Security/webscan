@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	webscan "github.com/Method-Security/webscan/generated/go"
 	"github.com/Method-Security/webscan/internal/graphql"
 	"github.com/Method-Security/webscan/internal/grpc"
 	"github.com/Method-Security/webscan/internal/requests"
@@ -252,15 +253,18 @@ The requests command allows you to send custom HTTP requests to a target URL wit
 				return
 			}
 
-			pathParams, _ := cmd.Flags().GetString("pathParams")
-			queryParams, _ := cmd.Flags().GetString("queryParams")
-			headerParams, _ := cmd.Flags().GetString("headerParams")
-			bodyParams, _ := cmd.Flags().GetString("bodyParams")
-			formParams, _ := cmd.Flags().GetString("formParams")
-			multipartParams, _ := cmd.Flags().GetString("multipartParams")
+			params := webscan.RequestParams{
+				PathParams:      cmd.Flag("pathParams").Value.String(),
+				QueryParams:     cmd.Flag("queryParams").Value.String(),
+				HeaderParams:    cmd.Flag("headerParams").Value.String(),
+				BodyParams:      cmd.Flag("bodyParams").Value.String(),
+				FormParams:      cmd.Flag("formParams").Value.String(),
+				MultipartParams: cmd.Flag("multipartParams").Value.String(),
+			}
+
 			vulnTypes, _ := cmd.Flags().GetStringSlice("vulnType")
 
-			report := requests.PerformRequestScan(baseURL, path, method, pathParams, queryParams, headerParams, bodyParams, formParams, multipartParams, vulnTypes)
+			report := requests.PerformRequestScan(baseURL, path, method, params, vulnTypes)
 
 			if len(report.Errors) > 0 {
 				for _, err := range report.Errors {

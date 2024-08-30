@@ -26,3 +26,21 @@ types:
       responseBody: string
       responseHeaders: map<string, string>
       errors: optional<list<string>>
+
+  RequestParams:
+    properties:
+      pathParams: string
+      queryParams: string
+      headerParams: string
+      bodyParams: string
+      formParams: string
+      multipartParams: string
+
+  ParsedParams:
+    properties:
+      pathParams: map<string, string>
+      queryParams: map<string, string>
+      headerParams: map<string, string>
+      bodyParams: string
+      formParams: map<string, string>
+      multipartParams: map<string, string>
