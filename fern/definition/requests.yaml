@@ -1,0 +1,28 @@
+imports:
+  routes: ./routes.yml
+
+types:
+  HttpMethod:
+    enum:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+
+  RequestReport:
+    properties:
+      baseUrl: string
+      path: string
+      method: HttpMethod
+      pathParams: optional<map<string, string>>
+      queryParams: optional<map<string, string>>
+      headerParams: optional<map<string, string>>
+      bodyParams: optional<string>  
+      formParams: optional<map<string, string>>  
+      multipartParams: optional<map<string, string>>  
+      vulnTypes: optional<list<string>>
+      statusCode: integer
+      responseBody: string
+      responseHeaders: map<string, string>
+      errors: optional<list<string>>

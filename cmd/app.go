@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/Method-Security/webscan/internal/graphql"
 	"github.com/Method-Security/webscan/internal/grpc"
+	"github.com/Method-Security/webscan/internal/requests"
 	"github.com/Method-Security/webscan/internal/swagger"
 	"github.com/Method-Security/webscan/internal/vuln"
 	"github.com/spf13/cobra"
@@ -21,6 +23,7 @@ func (a *WebScan) InitAppCommand() {
 	a.RootCmd.AddCommand(a.AppCmd)
 	a.initFingerprintCommand()
 	a.initEnumerateCommand()
+	a.initRequestsCommand()
 }
 
 func (a *WebScan) initFingerprintCommand() {
@@ -221,4 +224,70 @@ and extracting details about the fields and their types.`,
 
 	graphqlCmd.Flags().String("target", "", "URL target to perform GraphQL enumeration against")
 	return graphqlCmd
+}
+
+func (a *WebScan) initRequestsCommand() {
+	requestsCmd := &cobra.Command{
+		Use:   "requests",
+		Short: "Perform custom requests against a target route",
+		Long: `Perform custom requests against a target route of an API Application using specified parameters.
+		
+The requests command allows you to send custom HTTP requests to a target URL with specified method, path, and optional parameters including query, path, header, body, form, and multipart form data.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			baseURL, err := cmd.Flags().GetString("baseUrl")
+			if err != nil || baseURL == "" {
+				a.handleError(cmd, "baseUrl flag is required")
+				return
+			}
+
+			path, err := cmd.Flags().GetString("path")
+			if err != nil || path == "" {
+				a.handleError(cmd, "path flag is required")
+				return
+			}
+
+			method, err := cmd.Flags().GetString("method")
+			if err != nil || method == "" {
+				a.handleError(cmd, "method flag is required")
+				return
+			}
+
+			pathParams, _ := cmd.Flags().GetString("pathParams")
+			queryParams, _ := cmd.Flags().GetString("queryParams")
+			headerParams, _ := cmd.Flags().GetString("headerParams")
+			bodyParams, _ := cmd.Flags().GetString("bodyParams")
+			formParams, _ := cmd.Flags().GetString("formParams")
+			multipartParams, _ := cmd.Flags().GetString("multipartParams")
+			vulnTypes, _ := cmd.Flags().GetStringSlice("vulnType")
+
+			report := requests.PerformRequestScan(baseURL, path, method, pathParams, queryParams, headerParams, bodyParams, formParams, multipartParams, vulnTypes)
+
+			if len(report.Errors) > 0 {
+				for _, err := range report.Errors {
+					fmt.Fprintf(cmd.ErrOrStderr(), "Error: %s\n", err)
+				}
+				a.OutputSignal.Status = 1
+			}
+
+			a.OutputSignal.Content = report
+		},
+	}
+
+	requestsCmd.Flags().String("baseUrl", "", "Base URL of the target")
+	requestsCmd.Flags().String("path", "", "Path to append to the base URL")
+	requestsCmd.Flags().String("method", "", "HTTP method to use (GET, POST, etc.)")
+	requestsCmd.Flags().String("pathParams", "", "Path parameters as a JSON string (optional)")
+	requestsCmd.Flags().String("queryParams", "", "Query parameters as a JSON string (optional)")
+	requestsCmd.Flags().String("headerParams", "", "Header parameters as a JSON string (optional)")
+	requestsCmd.Flags().String("bodyParams", "", "Body parameters as a JSON string (optional)")
+	requestsCmd.Flags().String("formParams", "", "Form parameters as a JSON string (optional)")
+	requestsCmd.Flags().String("multipartParams", "", "Multipart form parameters as a JSON string (optional)")
+	requestsCmd.Flags().StringSlice("vulnType", []string{}, "Types of vulnerabilities to check (optional)")
+
+	a.AppCmd.AddCommand(requestsCmd)
+}
+
+func (a *WebScan) handleError(cmd *cobra.Command, errMsg string) {
+	a.OutputSignal.ErrorMessage = &errMsg
+	a.OutputSignal.Status = 1
 }

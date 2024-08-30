@@ -692,6 +692,91 @@ func (g *GraphQlType) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
+type HttpMethod string
+
+const (
+	HttpMethodGet    HttpMethod = "GET"
+	HttpMethodPost   HttpMethod = "POST"
+	HttpMethodPut    HttpMethod = "PUT"
+	HttpMethodDelete HttpMethod = "DELETE"
+	HttpMethodPatch  HttpMethod = "PATCH"
+)
+
+func NewHttpMethodFromString(s string) (HttpMethod, error) {
+	switch s {
+	case "GET":
+		return HttpMethodGet, nil
+	case "POST":
+		return HttpMethodPost, nil
+	case "PUT":
+		return HttpMethodPut, nil
+	case "DELETE":
+		return HttpMethodDelete, nil
+	case "PATCH":
+		return HttpMethodPatch, nil
+	}
+	var t HttpMethod
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (h HttpMethod) Ptr() *HttpMethod {
+	return &h
+}
+
+type RequestReport struct {
+	BaseUrl         string            `json:"baseUrl" url:"baseUrl"`
+	Path            string            `json:"path" url:"path"`
+	Method          HttpMethod        `json:"method" url:"method"`
+	PathParams      map[string]string `json:"pathParams,omitempty" url:"pathParams,omitempty"`
+	QueryParams     map[string]string `json:"queryParams,omitempty" url:"queryParams,omitempty"`
+	HeaderParams    map[string]string `json:"headerParams,omitempty" url:"headerParams,omitempty"`
+	BodyParams      *string           `json:"bodyParams,omitempty" url:"bodyParams,omitempty"`
+	FormParams      map[string]string `json:"formParams,omitempty" url:"formParams,omitempty"`
+	MultipartParams map[string]string `json:"multipartParams,omitempty" url:"multipartParams,omitempty"`
+	VulnTypes       []string          `json:"vulnTypes,omitempty" url:"vulnTypes,omitempty"`
+	StatusCode      int               `json:"statusCode" url:"statusCode"`
+	ResponseBody    string            `json:"responseBody" url:"responseBody"`
+	ResponseHeaders map[string]string `json:"responseHeaders,omitempty" url:"responseHeaders,omitempty"`
+	Errors          []string          `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RequestReport) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RequestReport) UnmarshalJSON(data []byte) error {
+	type unmarshaler RequestReport
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RequestReport(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RequestReport) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
 type ApiType string
 
 const (
