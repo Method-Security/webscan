@@ -21,11 +21,13 @@ requests:
       - type: status
         status:
           - 200
+          - 403
 
-      - type: regex
-        part: host
-        regex:
-          - '[a-z0-9]+\.blob\.core\.windows\.net'
+      - type: dsl
+        dsl:
+          - 'contains(to_lower(server), "microsoft-httpapi/2.0")'
+          - 'contains(to_lower(header), "x-ms-request-id")'
+        condition: and
 
     extractors:        
       - type: dsl
