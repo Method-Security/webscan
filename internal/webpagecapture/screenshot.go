@@ -13,13 +13,13 @@ import (
 )
 
 func PerformWebpageScreenshot(ctx context.Context, path string, target string) webscan.WebpageScreenshotReport {
-	var browserUrl string
+	var browserURL string
 	if path != "" {
-		browserUrl = launcher.New().Headless(true).Bin(path).MustLaunch()
+		browserURL = launcher.New().Headless(true).Bin(path).MustLaunch()
 	} else {
-		browserUrl = launcher.New().Headless(true).MustLaunch()
+		browserURL = launcher.New().Headless(true).MustLaunch()
 	}
-	browser := rod.New().ControlURL(browserUrl).MustConnect()
+	browser := rod.New().ControlURL(browserURL).MustConnect()
 	defer browser.MustClose()
 
 	pageCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
