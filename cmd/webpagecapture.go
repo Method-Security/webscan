@@ -9,9 +9,10 @@ import (
 // the HTML of a webpage from a URL target.
 func (a *WebScan) InitWebpagecaptureCommand() {
 	webpagecaptureCmd := &cobra.Command{
-		Use:   "webpagecapture",
-		Short: "Perform a webpage HTML capture against a URL target",
-		Long:  `Perform a webpage HTML capture against a URL target`,
+		Use:     "webpagecapture",
+		Aliases: []string{"capture"},
+		Short:   "Perform a webpage HTML capture against a URL target",
+		Long:    `Perform a webpage HTML capture against a URL target`,
 		Run: func(cmd *cobra.Command, args []string) {
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
@@ -29,5 +30,28 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 
 	webpagecaptureCmd.Flags().String("target", "", "Url target to perform webpage HTML capture")
 
+	var chromiumPath string
+	webpageScreenshotCmd := &cobra.Command{
+		Use:   "screenshot",
+		Short: "Perform a webpage screenshot against a URL target",
+		Long:  `Perform a webpage screenshot against a URL target`,
+		Run: func(cmd *cobra.Command, args []string) {
+			target, err := cmd.Flags().GetString("target")
+			if err != nil {
+				errorMessage := err.Error()
+				a.OutputSignal.ErrorMessage = &errorMessage
+				a.OutputSignal.Status = 1
+				return
+			}
+
+			report := webpagecapture.PerformWebpageScreenshot(cmd.Context(), chromiumPath, target)
+			a.OutputSignal.Content = report
+		},
+	}
+
+	webpageScreenshotCmd.Flags().String("target", "", "Url target to perform webpage screenshot")
+	webpageScreenshotCmd.Flags().StringVar(&chromiumPath, "chromium-path", "", "Path to an instance of Chromium to use for the screenshot")
+
+	webpagecaptureCmd.AddCommand(webpageScreenshotCmd)
 	a.RootCmd.AddCommand(webpagecaptureCmd)
 }
