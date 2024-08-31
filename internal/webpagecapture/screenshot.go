@@ -2,11 +2,10 @@ package webpagecapture
 
 import (
 	"context"
-	"encoding/base64"
+	"strings"
 	"time"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
-	"github.com/chromedp/chromedp"
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/proto"
@@ -23,7 +22,27 @@ func PerformWebpageScreenshot(ctx context.Context, path string, target string) w
 	browser := rod.New().ControlURL(browserUrl).MustConnect()
 	defer browser.MustClose()
 
-	img, err := browser.MustPage(target).MustWaitStable().ScrollScreenshot(&rod.ScrollScreenshotOptions{
+	pageCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
+	var page *rod.Page
+	err := rod.Try(func() {
+		page = browser.MustPage(target).Context(pageCtx)
+	})
+	if err != nil {
+		errorMsg := err.Error()
+		if strings.Contains(errorMsg, "net::ERR_NAME_NOT_RESOLVED") {
+			errorMsg = "Unable to resolve the domain name. Please check if the URL is correct and the domain exists."
+		} else {
+			errorMsg = "Failed to load the page: " + errorMsg
+		}
+		return webscan.WebpageScreenshotReport{
+			Target: target,
+			Errors: []string{errorMsg},
+		}
+	}
+
+	img, err := page.MustWaitStable().ScrollScreenshot(&rod.ScrollScreenshotOptions{
 		Format:  proto.PageCaptureScreenshotFormatPng,
 		Quality: gson.Int(100),
 	})
@@ -38,39 +57,5 @@ func PerformWebpageScreenshot(ctx context.Context, path string, target string) w
 		Target:     target,
 		Screenshot: img,
 		Errors:     nil,
-	}
-}
-
-func PerformChromeDpWebpageScreenshot(ctx context.Context, target string, noSandbox bool) (string, error) {
-	opts := chromedp.DefaultExecAllocatorOptions[:]
-	if noSandbox {
-		opts = append(opts, chromedp.Flag("no-sandbox", true))
-	}
-
-	ctx, cancel := chromedp.NewExecAllocator(ctx, opts...)
-	defer cancel()
-
-	ctx, cancel = chromedp.NewContext(ctx, chromedp.WithLogf(func(string, ...interface{}) {}))
-	defer cancel()
-
-	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
-	defer cancel()
-
-	var buf []byte
-	if err := chromedp.Run(ctx, fullScreenshot(target, 100, &buf)); err != nil {
-		return "", err
-	}
-	encodedImg := base64.StdEncoding.EncodeToString(buf)
-	return encodedImg, nil
-}
-
-// fullScreenshot takes a screenshot of the entire browser viewport.
-//
-// Note: chromedp.FullScreenshot overrides the device's emulation settings. Use
-// device.Reset to reset the emulation and viewport settings.
-func fullScreenshot(urlstr string, quality int, res *[]byte) chromedp.Tasks {
-	return chromedp.Tasks{
-		chromedp.Navigate(urlstr),
-		chromedp.FullScreenshot(res, quality),
 	}
 }
