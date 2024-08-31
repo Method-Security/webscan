@@ -2,6 +2,10 @@
 
 package proto
 
+import (
+	"github.com/ysmood/gson"
+)
+
 /*
 
 Storage
@@ -15,46 +19,46 @@ type StorageSerializedStorageKey string
 type StorageStorageType string
 
 const (
-	// StorageStorageTypeAppcache enum const
+	// StorageStorageTypeAppcache enum const.
 	StorageStorageTypeAppcache StorageStorageType = "appcache"
 
-	// StorageStorageTypeCookies enum const
+	// StorageStorageTypeCookies enum const.
 	StorageStorageTypeCookies StorageStorageType = "cookies"
 
-	// StorageStorageTypeFileSystems enum const
+	// StorageStorageTypeFileSystems enum const.
 	StorageStorageTypeFileSystems StorageStorageType = "file_systems"
 
-	// StorageStorageTypeIndexeddb enum const
+	// StorageStorageTypeIndexeddb enum const.
 	StorageStorageTypeIndexeddb StorageStorageType = "indexeddb"
 
-	// StorageStorageTypeLocalStorage enum const
+	// StorageStorageTypeLocalStorage enum const.
 	StorageStorageTypeLocalStorage StorageStorageType = "local_storage"
 
-	// StorageStorageTypeShaderCache enum const
+	// StorageStorageTypeShaderCache enum const.
 	StorageStorageTypeShaderCache StorageStorageType = "shader_cache"
 
-	// StorageStorageTypeWebsql enum const
+	// StorageStorageTypeWebsql enum const.
 	StorageStorageTypeWebsql StorageStorageType = "websql"
 
-	// StorageStorageTypeServiceWorkers enum const
+	// StorageStorageTypeServiceWorkers enum const.
 	StorageStorageTypeServiceWorkers StorageStorageType = "service_workers"
 
-	// StorageStorageTypeCacheStorage enum const
+	// StorageStorageTypeCacheStorage enum const.
 	StorageStorageTypeCacheStorage StorageStorageType = "cache_storage"
 
-	// StorageStorageTypeInterestGroups enum const
+	// StorageStorageTypeInterestGroups enum const.
 	StorageStorageTypeInterestGroups StorageStorageType = "interest_groups"
 
-	// StorageStorageTypeSharedStorage enum const
+	// StorageStorageTypeSharedStorage enum const.
 	StorageStorageTypeSharedStorage StorageStorageType = "shared_storage"
 
-	// StorageStorageTypeStorageBuckets enum const
+	// StorageStorageTypeStorageBuckets enum const.
 	StorageStorageTypeStorageBuckets StorageStorageType = "storage_buckets"
 
-	// StorageStorageTypeAll enum const
+	// StorageStorageTypeAll enum const.
 	StorageStorageTypeAll StorageStorageType = "all"
 
-	// StorageStorageTypeOther enum const
+	// StorageStorageTypeOther enum const.
 	StorageStorageTypeOther StorageStorageType = "other"
 )
 
@@ -77,128 +81,144 @@ type StorageTrustTokens struct {
 	Count float64 `json:"count"`
 }
 
+// StorageInterestGroupAuctionID Protected audience interest group auction identifier.
+type StorageInterestGroupAuctionID string
+
 // StorageInterestGroupAccessType Enum of interest group access types.
 type StorageInterestGroupAccessType string
 
 const (
-	// StorageInterestGroupAccessTypeJoin enum const
+	// StorageInterestGroupAccessTypeJoin enum const.
 	StorageInterestGroupAccessTypeJoin StorageInterestGroupAccessType = "join"
 
-	// StorageInterestGroupAccessTypeLeave enum const
+	// StorageInterestGroupAccessTypeLeave enum const.
 	StorageInterestGroupAccessTypeLeave StorageInterestGroupAccessType = "leave"
 
-	// StorageInterestGroupAccessTypeUpdate enum const
+	// StorageInterestGroupAccessTypeUpdate enum const.
 	StorageInterestGroupAccessTypeUpdate StorageInterestGroupAccessType = "update"
 
-	// StorageInterestGroupAccessTypeLoaded enum const
+	// StorageInterestGroupAccessTypeLoaded enum const.
 	StorageInterestGroupAccessTypeLoaded StorageInterestGroupAccessType = "loaded"
 
-	// StorageInterestGroupAccessTypeBid enum const
+	// StorageInterestGroupAccessTypeBid enum const.
 	StorageInterestGroupAccessTypeBid StorageInterestGroupAccessType = "bid"
 
-	// StorageInterestGroupAccessTypeWin enum const
+	// StorageInterestGroupAccessTypeWin enum const.
 	StorageInterestGroupAccessTypeWin StorageInterestGroupAccessType = "win"
+
+	// StorageInterestGroupAccessTypeAdditionalBid enum const.
+	StorageInterestGroupAccessTypeAdditionalBid StorageInterestGroupAccessType = "additionalBid"
+
+	// StorageInterestGroupAccessTypeAdditionalBidWin enum const.
+	StorageInterestGroupAccessTypeAdditionalBidWin StorageInterestGroupAccessType = "additionalBidWin"
+
+	// StorageInterestGroupAccessTypeTopLevelBid enum const.
+	StorageInterestGroupAccessTypeTopLevelBid StorageInterestGroupAccessType = "topLevelBid"
+
+	// StorageInterestGroupAccessTypeTopLevelAdditionalBid enum const.
+	StorageInterestGroupAccessTypeTopLevelAdditionalBid StorageInterestGroupAccessType = "topLevelAdditionalBid"
+
+	// StorageInterestGroupAccessTypeClear enum const.
+	StorageInterestGroupAccessTypeClear StorageInterestGroupAccessType = "clear"
 )
 
-// StorageInterestGroupAd Ad advertising element inside an interest group.
-type StorageInterestGroupAd struct {
-	// RenderURL ...
-	RenderURL string `json:"renderUrl"`
+// StorageInterestGroupAuctionEventType Enum of auction events.
+type StorageInterestGroupAuctionEventType string
 
-	// Metadata (optional) ...
-	Metadata string `json:"metadata,omitempty"`
-}
+const (
+	// StorageInterestGroupAuctionEventTypeStarted enum const.
+	StorageInterestGroupAuctionEventTypeStarted StorageInterestGroupAuctionEventType = "started"
 
-// StorageInterestGroupDetails The full details of an interest group.
-type StorageInterestGroupDetails struct {
-	// OwnerOrigin ...
-	OwnerOrigin string `json:"ownerOrigin"`
+	// StorageInterestGroupAuctionEventTypeConfigResolved enum const.
+	StorageInterestGroupAuctionEventTypeConfigResolved StorageInterestGroupAuctionEventType = "configResolved"
+)
 
-	// Name ...
-	Name string `json:"name"`
+// StorageInterestGroupAuctionFetchType Enum of network fetches auctions can do.
+type StorageInterestGroupAuctionFetchType string
 
-	// ExpirationTime ...
-	ExpirationTime TimeSinceEpoch `json:"expirationTime"`
+const (
+	// StorageInterestGroupAuctionFetchTypeBidderJs enum const.
+	StorageInterestGroupAuctionFetchTypeBidderJs StorageInterestGroupAuctionFetchType = "bidderJs"
 
-	// JoiningOrigin ...
-	JoiningOrigin string `json:"joiningOrigin"`
+	// StorageInterestGroupAuctionFetchTypeBidderWasm enum const.
+	StorageInterestGroupAuctionFetchTypeBidderWasm StorageInterestGroupAuctionFetchType = "bidderWasm"
 
-	// BiddingURL (optional) ...
-	BiddingURL string `json:"biddingUrl,omitempty"`
+	// StorageInterestGroupAuctionFetchTypeSellerJs enum const.
+	StorageInterestGroupAuctionFetchTypeSellerJs StorageInterestGroupAuctionFetchType = "sellerJs"
 
-	// BiddingWasmHelperURL (optional) ...
-	BiddingWasmHelperURL string `json:"biddingWasmHelperUrl,omitempty"`
+	// StorageInterestGroupAuctionFetchTypeBidderTrustedSignals enum const.
+	StorageInterestGroupAuctionFetchTypeBidderTrustedSignals StorageInterestGroupAuctionFetchType = "bidderTrustedSignals"
 
-	// UpdateURL (optional) ...
-	UpdateURL string `json:"updateUrl,omitempty"`
-
-	// TrustedBiddingSignalsURL (optional) ...
-	TrustedBiddingSignalsURL string `json:"trustedBiddingSignalsUrl,omitempty"`
-
-	// TrustedBiddingSignalsKeys ...
-	TrustedBiddingSignalsKeys []string `json:"trustedBiddingSignalsKeys"`
-
-	// UserBiddingSignals (optional) ...
-	UserBiddingSignals string `json:"userBiddingSignals,omitempty"`
-
-	// Ads ...
-	Ads []*StorageInterestGroupAd `json:"ads"`
-
-	// AdComponents ...
-	AdComponents []*StorageInterestGroupAd `json:"adComponents"`
-}
+	// StorageInterestGroupAuctionFetchTypeSellerTrustedSignals enum const.
+	StorageInterestGroupAuctionFetchTypeSellerTrustedSignals StorageInterestGroupAuctionFetchType = "sellerTrustedSignals"
+)
 
 // StorageSharedStorageAccessType Enum of shared storage access types.
 type StorageSharedStorageAccessType string
 
 const (
-	// StorageSharedStorageAccessTypeDocumentAddModule enum const
+	// StorageSharedStorageAccessTypeDocumentAddModule enum const.
 	StorageSharedStorageAccessTypeDocumentAddModule StorageSharedStorageAccessType = "documentAddModule"
 
-	// StorageSharedStorageAccessTypeDocumentSelectURL enum const
+	// StorageSharedStorageAccessTypeDocumentSelectURL enum const.
 	StorageSharedStorageAccessTypeDocumentSelectURL StorageSharedStorageAccessType = "documentSelectURL"
 
-	// StorageSharedStorageAccessTypeDocumentRun enum const
+	// StorageSharedStorageAccessTypeDocumentRun enum const.
 	StorageSharedStorageAccessTypeDocumentRun StorageSharedStorageAccessType = "documentRun"
 
-	// StorageSharedStorageAccessTypeDocumentSet enum const
+	// StorageSharedStorageAccessTypeDocumentSet enum const.
 	StorageSharedStorageAccessTypeDocumentSet StorageSharedStorageAccessType = "documentSet"
 
-	// StorageSharedStorageAccessTypeDocumentAppend enum const
+	// StorageSharedStorageAccessTypeDocumentAppend enum const.
 	StorageSharedStorageAccessTypeDocumentAppend StorageSharedStorageAccessType = "documentAppend"
 
-	// StorageSharedStorageAccessTypeDocumentDelete enum const
+	// StorageSharedStorageAccessTypeDocumentDelete enum const.
 	StorageSharedStorageAccessTypeDocumentDelete StorageSharedStorageAccessType = "documentDelete"
 
-	// StorageSharedStorageAccessTypeDocumentClear enum const
+	// StorageSharedStorageAccessTypeDocumentClear enum const.
 	StorageSharedStorageAccessTypeDocumentClear StorageSharedStorageAccessType = "documentClear"
 
-	// StorageSharedStorageAccessTypeWorkletSet enum const
+	// StorageSharedStorageAccessTypeDocumentGet enum const.
+	StorageSharedStorageAccessTypeDocumentGet StorageSharedStorageAccessType = "documentGet"
+
+	// StorageSharedStorageAccessTypeWorkletSet enum const.
 	StorageSharedStorageAccessTypeWorkletSet StorageSharedStorageAccessType = "workletSet"
 
-	// StorageSharedStorageAccessTypeWorkletAppend enum const
+	// StorageSharedStorageAccessTypeWorkletAppend enum const.
 	StorageSharedStorageAccessTypeWorkletAppend StorageSharedStorageAccessType = "workletAppend"
 
-	// StorageSharedStorageAccessTypeWorkletDelete enum const
+	// StorageSharedStorageAccessTypeWorkletDelete enum const.
 	StorageSharedStorageAccessTypeWorkletDelete StorageSharedStorageAccessType = "workletDelete"
 
-	// StorageSharedStorageAccessTypeWorkletClear enum const
+	// StorageSharedStorageAccessTypeWorkletClear enum const.
 	StorageSharedStorageAccessTypeWorkletClear StorageSharedStorageAccessType = "workletClear"
 
-	// StorageSharedStorageAccessTypeWorkletGet enum const
+	// StorageSharedStorageAccessTypeWorkletGet enum const.
 	StorageSharedStorageAccessTypeWorkletGet StorageSharedStorageAccessType = "workletGet"
 
-	// StorageSharedStorageAccessTypeWorkletKeys enum const
+	// StorageSharedStorageAccessTypeWorkletKeys enum const.
 	StorageSharedStorageAccessTypeWorkletKeys StorageSharedStorageAccessType = "workletKeys"
 
-	// StorageSharedStorageAccessTypeWorkletEntries enum const
+	// StorageSharedStorageAccessTypeWorkletEntries enum const.
 	StorageSharedStorageAccessTypeWorkletEntries StorageSharedStorageAccessType = "workletEntries"
 
-	// StorageSharedStorageAccessTypeWorkletLength enum const
+	// StorageSharedStorageAccessTypeWorkletLength enum const.
 	StorageSharedStorageAccessTypeWorkletLength StorageSharedStorageAccessType = "workletLength"
 
-	// StorageSharedStorageAccessTypeWorkletRemainingBudget enum const
+	// StorageSharedStorageAccessTypeWorkletRemainingBudget enum const.
 	StorageSharedStorageAccessTypeWorkletRemainingBudget StorageSharedStorageAccessType = "workletRemainingBudget"
+
+	// StorageSharedStorageAccessTypeHeaderSet enum const.
+	StorageSharedStorageAccessTypeHeaderSet StorageSharedStorageAccessType = "headerSet"
+
+	// StorageSharedStorageAccessTypeHeaderAppend enum const.
+	StorageSharedStorageAccessTypeHeaderAppend StorageSharedStorageAccessType = "headerAppend"
+
+	// StorageSharedStorageAccessTypeHeaderDelete enum const.
+	StorageSharedStorageAccessTypeHeaderDelete StorageSharedStorageAccessType = "headerDelete"
+
+	// StorageSharedStorageAccessTypeHeaderClear enum const.
+	StorageSharedStorageAccessTypeHeaderClear StorageSharedStorageAccessType = "headerClear"
 )
 
 // StorageSharedStorageEntry Struct for a single key-value pair in an origin's shared storage.
@@ -212,14 +232,18 @@ type StorageSharedStorageEntry struct {
 
 // StorageSharedStorageMetadata Details for an origin's shared storage.
 type StorageSharedStorageMetadata struct {
-	// CreationTime ...
+	// CreationTime Time when the origin's shared storage was last created.
 	CreationTime TimeSinceEpoch `json:"creationTime"`
 
-	// Length ...
+	// Length Number of key-value pairs stored in origin's shared storage.
 	Length int `json:"length"`
 
-	// RemainingBudget ...
+	// RemainingBudget Current amount of bits of entropy remaining in the navigation budget.
 	RemainingBudget float64 `json:"remainingBudget"`
+
+	// BytesUsed Total number of bytes stored as key-value pairs in origin's shared
+	// storage.
+	BytesUsed int `json:"bytesUsed"`
 }
 
 // StorageSharedStorageReportingMetadata Pair of reporting metadata details for a candidate URL for `selectURL()`.
@@ -267,20 +291,26 @@ type StorageSharedStorageAccessParams struct {
 	// SharedStorageAccessType.documentDelete,
 	// SharedStorageAccessType.workletSet,
 	// SharedStorageAccessType.workletAppend,
-	// SharedStorageAccessType.workletDelete, and
-	// SharedStorageAccessType.workletGet.
+	// SharedStorageAccessType.workletDelete,
+	// SharedStorageAccessType.workletGet,
+	// SharedStorageAccessType.headerSet,
+	// SharedStorageAccessType.headerAppend, and
+	// SharedStorageAccessType.headerDelete.
 	Key string `json:"key,omitempty"`
 
 	// Value (optional) Value for a specific entry in an origin's shared storage.
 	// Present only for SharedStorageAccessType.documentSet,
 	// SharedStorageAccessType.documentAppend,
-	// SharedStorageAccessType.workletSet, and
-	// SharedStorageAccessType.workletAppend.
+	// SharedStorageAccessType.workletSet,
+	// SharedStorageAccessType.workletAppend,
+	// SharedStorageAccessType.headerSet, and
+	// SharedStorageAccessType.headerAppend.
 	Value string `json:"value,omitempty"`
 
 	// IgnoreIfPresent (optional) Whether or not to set an entry for a key if that key is already present.
-	// Present only for SharedStorageAccessType.documentSet and
-	// SharedStorageAccessType.workletSet.
+	// Present only for SharedStorageAccessType.documentSet,
+	// SharedStorageAccessType.workletSet, and
+	// SharedStorageAccessType.headerSet.
 	IgnoreIfPresent bool `json:"ignoreIfPresent,omitempty"`
 }
 
@@ -288,26 +318,29 @@ type StorageSharedStorageAccessParams struct {
 type StorageStorageBucketsDurability string
 
 const (
-	// StorageStorageBucketsDurabilityRelaxed enum const
+	// StorageStorageBucketsDurabilityRelaxed enum const.
 	StorageStorageBucketsDurabilityRelaxed StorageStorageBucketsDurability = "relaxed"
 
-	// StorageStorageBucketsDurabilityStrict enum const
+	// StorageStorageBucketsDurabilityStrict enum const.
 	StorageStorageBucketsDurabilityStrict StorageStorageBucketsDurability = "strict"
 )
 
-// StorageStorageBucketInfo ...
-type StorageStorageBucketInfo struct {
+// StorageStorageBucket ...
+type StorageStorageBucket struct {
 	// StorageKey ...
 	StorageKey StorageSerializedStorageKey `json:"storageKey"`
 
+	// Name (optional) If not specified, it is the default bucket of the storageKey.
+	Name string `json:"name,omitempty"`
+}
+
+// StorageStorageBucketInfo ...
+type StorageStorageBucketInfo struct {
+	// Bucket ...
+	Bucket *StorageStorageBucket `json:"bucket"`
+
 	// ID ...
 	ID string `json:"id"`
-
-	// Name ...
-	Name string `json:"name"`
-
-	// IsDefault ...
-	IsDefault bool `json:"isDefault"`
 
 	// Expiration ...
 	Expiration TimeSinceEpoch `json:"expiration"`
@@ -322,16 +355,414 @@ type StorageStorageBucketInfo struct {
 	Durability StorageStorageBucketsDurability `json:"durability"`
 }
 
+// StorageAttributionReportingSourceType (experimental) ...
+type StorageAttributionReportingSourceType string
+
+const (
+	// StorageAttributionReportingSourceTypeNavigation enum const.
+	StorageAttributionReportingSourceTypeNavigation StorageAttributionReportingSourceType = "navigation"
+
+	// StorageAttributionReportingSourceTypeEvent enum const.
+	StorageAttributionReportingSourceTypeEvent StorageAttributionReportingSourceType = "event"
+)
+
+// StorageUnsignedInt64AsBase10 (experimental) ...
+type StorageUnsignedInt64AsBase10 string
+
+// StorageUnsignedInt128AsBase16 (experimental) ...
+type StorageUnsignedInt128AsBase16 string
+
+// StorageSignedInt64AsBase10 (experimental) ...
+type StorageSignedInt64AsBase10 string
+
+// StorageAttributionReportingFilterDataEntry (experimental) ...
+type StorageAttributionReportingFilterDataEntry struct {
+	// Key ...
+	Key string `json:"key"`
+
+	// Values ...
+	Values []string `json:"values"`
+}
+
+// StorageAttributionReportingFilterConfig (experimental) ...
+type StorageAttributionReportingFilterConfig struct {
+	// FilterValues ...
+	FilterValues []*StorageAttributionReportingFilterDataEntry `json:"filterValues"`
+
+	// LookbackWindow (optional) duration in seconds
+	LookbackWindow *int `json:"lookbackWindow,omitempty"`
+}
+
+// StorageAttributionReportingFilterPair (experimental) ...
+type StorageAttributionReportingFilterPair struct {
+	// Filters ...
+	Filters []*StorageAttributionReportingFilterConfig `json:"filters"`
+
+	// NotFilters ...
+	NotFilters []*StorageAttributionReportingFilterConfig `json:"notFilters"`
+}
+
+// StorageAttributionReportingAggregationKeysEntry (experimental) ...
+type StorageAttributionReportingAggregationKeysEntry struct {
+	// Key ...
+	Key string `json:"key"`
+
+	// Value ...
+	Value StorageUnsignedInt128AsBase16 `json:"value"`
+}
+
+// StorageAttributionReportingEventReportWindows (experimental) ...
+type StorageAttributionReportingEventReportWindows struct {
+	// Start duration in seconds
+	Start int `json:"start"`
+
+	// Ends duration in seconds
+	Ends []int `json:"ends"`
+}
+
+// StorageAttributionReportingTriggerSpec (experimental) ...
+type StorageAttributionReportingTriggerSpec struct {
+	// TriggerData number instead of integer because not all uint32 can be represented by
+	// int
+	TriggerData []float64 `json:"triggerData"`
+
+	// EventReportWindows ...
+	EventReportWindows *StorageAttributionReportingEventReportWindows `json:"eventReportWindows"`
+}
+
+// StorageAttributionReportingTriggerDataMatching (experimental) ...
+type StorageAttributionReportingTriggerDataMatching string
+
+const (
+	// StorageAttributionReportingTriggerDataMatchingExact enum const.
+	StorageAttributionReportingTriggerDataMatchingExact StorageAttributionReportingTriggerDataMatching = "exact"
+
+	// StorageAttributionReportingTriggerDataMatchingModulus enum const.
+	StorageAttributionReportingTriggerDataMatchingModulus StorageAttributionReportingTriggerDataMatching = "modulus"
+)
+
+// StorageAttributionReportingSourceRegistration (experimental) ...
+type StorageAttributionReportingSourceRegistration struct {
+	// Time ...
+	Time TimeSinceEpoch `json:"time"`
+
+	// Expiry duration in seconds
+	Expiry int `json:"expiry"`
+
+	// TriggerSpecs ...
+	TriggerSpecs []*StorageAttributionReportingTriggerSpec `json:"triggerSpecs"`
+
+	// AggregatableReportWindow duration in seconds
+	AggregatableReportWindow int `json:"aggregatableReportWindow"`
+
+	// Type ...
+	Type StorageAttributionReportingSourceType `json:"type"`
+
+	// SourceOrigin ...
+	SourceOrigin string `json:"sourceOrigin"`
+
+	// ReportingOrigin ...
+	ReportingOrigin string `json:"reportingOrigin"`
+
+	// DestinationSites ...
+	DestinationSites []string `json:"destinationSites"`
+
+	// EventID ...
+	EventID StorageUnsignedInt64AsBase10 `json:"eventId"`
+
+	// Priority ...
+	Priority StorageSignedInt64AsBase10 `json:"priority"`
+
+	// FilterData ...
+	FilterData []*StorageAttributionReportingFilterDataEntry `json:"filterData"`
+
+	// AggregationKeys ...
+	AggregationKeys []*StorageAttributionReportingAggregationKeysEntry `json:"aggregationKeys"`
+
+	// DebugKey (optional) ...
+	DebugKey StorageUnsignedInt64AsBase10 `json:"debugKey,omitempty"`
+
+	// TriggerDataMatching ...
+	TriggerDataMatching StorageAttributionReportingTriggerDataMatching `json:"triggerDataMatching"`
+}
+
+// StorageAttributionReportingSourceRegistrationResult (experimental) ...
+type StorageAttributionReportingSourceRegistrationResult string
+
+const (
+	// StorageAttributionReportingSourceRegistrationResultSuccess enum const.
+	StorageAttributionReportingSourceRegistrationResultSuccess StorageAttributionReportingSourceRegistrationResult = "success"
+
+	// StorageAttributionReportingSourceRegistrationResultInternalError enum const.
+	StorageAttributionReportingSourceRegistrationResultInternalError StorageAttributionReportingSourceRegistrationResult = "internalError"
+
+	// StorageAttributionReportingSourceRegistrationResultInsufficientSourceCapacity enum const.
+	StorageAttributionReportingSourceRegistrationResultInsufficientSourceCapacity StorageAttributionReportingSourceRegistrationResult = "insufficientSourceCapacity"
+
+	// StorageAttributionReportingSourceRegistrationResultInsufficientUniqueDestinationCapacity enum const.
+	StorageAttributionReportingSourceRegistrationResultInsufficientUniqueDestinationCapacity StorageAttributionReportingSourceRegistrationResult = "insufficientUniqueDestinationCapacity"
+
+	// StorageAttributionReportingSourceRegistrationResultExcessiveReportingOrigins enum const.
+	StorageAttributionReportingSourceRegistrationResultExcessiveReportingOrigins StorageAttributionReportingSourceRegistrationResult = "excessiveReportingOrigins"
+
+	// StorageAttributionReportingSourceRegistrationResultProhibitedByBrowserPolicy enum const.
+	StorageAttributionReportingSourceRegistrationResultProhibitedByBrowserPolicy StorageAttributionReportingSourceRegistrationResult = "prohibitedByBrowserPolicy"
+
+	// StorageAttributionReportingSourceRegistrationResultSuccessNoised enum const.
+	StorageAttributionReportingSourceRegistrationResultSuccessNoised StorageAttributionReportingSourceRegistrationResult = "successNoised"
+
+	// StorageAttributionReportingSourceRegistrationResultDestinationReportingLimitReached enum const.
+	StorageAttributionReportingSourceRegistrationResultDestinationReportingLimitReached StorageAttributionReportingSourceRegistrationResult = "destinationReportingLimitReached"
+
+	// StorageAttributionReportingSourceRegistrationResultDestinationGlobalLimitReached enum const.
+	StorageAttributionReportingSourceRegistrationResultDestinationGlobalLimitReached StorageAttributionReportingSourceRegistrationResult = "destinationGlobalLimitReached"
+
+	// StorageAttributionReportingSourceRegistrationResultDestinationBothLimitsReached enum const.
+	StorageAttributionReportingSourceRegistrationResultDestinationBothLimitsReached StorageAttributionReportingSourceRegistrationResult = "destinationBothLimitsReached"
+
+	// StorageAttributionReportingSourceRegistrationResultReportingOriginsPerSiteLimitReached enum const.
+	StorageAttributionReportingSourceRegistrationResultReportingOriginsPerSiteLimitReached StorageAttributionReportingSourceRegistrationResult = "reportingOriginsPerSiteLimitReached"
+
+	// StorageAttributionReportingSourceRegistrationResultExceedsMaxChannelCapacity enum const.
+	StorageAttributionReportingSourceRegistrationResultExceedsMaxChannelCapacity StorageAttributionReportingSourceRegistrationResult = "exceedsMaxChannelCapacity"
+
+	// StorageAttributionReportingSourceRegistrationResultExceedsMaxTriggerStateCardinality enum const.
+	StorageAttributionReportingSourceRegistrationResultExceedsMaxTriggerStateCardinality StorageAttributionReportingSourceRegistrationResult = "exceedsMaxTriggerStateCardinality"
+
+	// StorageAttributionReportingSourceRegistrationResultDestinationPerDayReportingLimitReached enum const.
+	StorageAttributionReportingSourceRegistrationResultDestinationPerDayReportingLimitReached StorageAttributionReportingSourceRegistrationResult = "destinationPerDayReportingLimitReached"
+)
+
+// StorageAttributionReportingSourceRegistrationTimeConfig (experimental) ...
+type StorageAttributionReportingSourceRegistrationTimeConfig string
+
+const (
+	// StorageAttributionReportingSourceRegistrationTimeConfigInclude enum const.
+	StorageAttributionReportingSourceRegistrationTimeConfigInclude StorageAttributionReportingSourceRegistrationTimeConfig = "include"
+
+	// StorageAttributionReportingSourceRegistrationTimeConfigExclude enum const.
+	StorageAttributionReportingSourceRegistrationTimeConfigExclude StorageAttributionReportingSourceRegistrationTimeConfig = "exclude"
+)
+
+// StorageAttributionReportingAggregatableValueDictEntry (experimental) ...
+type StorageAttributionReportingAggregatableValueDictEntry struct {
+	// Key ...
+	Key string `json:"key"`
+
+	// Value number instead of integer because not all uint32 can be represented by
+	// int
+	Value float64 `json:"value"`
+}
+
+// StorageAttributionReportingAggregatableValueEntry (experimental) ...
+type StorageAttributionReportingAggregatableValueEntry struct {
+	// Values ...
+	Values []*StorageAttributionReportingAggregatableValueDictEntry `json:"values"`
+
+	// Filters ...
+	Filters *StorageAttributionReportingFilterPair `json:"filters"`
+}
+
+// StorageAttributionReportingEventTriggerData (experimental) ...
+type StorageAttributionReportingEventTriggerData struct {
+	// Data ...
+	Data StorageUnsignedInt64AsBase10 `json:"data"`
+
+	// Priority ...
+	Priority StorageSignedInt64AsBase10 `json:"priority"`
+
+	// DedupKey (optional) ...
+	DedupKey StorageUnsignedInt64AsBase10 `json:"dedupKey,omitempty"`
+
+	// Filters ...
+	Filters *StorageAttributionReportingFilterPair `json:"filters"`
+}
+
+// StorageAttributionReportingAggregatableTriggerData (experimental) ...
+type StorageAttributionReportingAggregatableTriggerData struct {
+	// KeyPiece ...
+	KeyPiece StorageUnsignedInt128AsBase16 `json:"keyPiece"`
+
+	// SourceKeys ...
+	SourceKeys []string `json:"sourceKeys"`
+
+	// Filters ...
+	Filters *StorageAttributionReportingFilterPair `json:"filters"`
+}
+
+// StorageAttributionReportingAggregatableDedupKey (experimental) ...
+type StorageAttributionReportingAggregatableDedupKey struct {
+	// DedupKey (optional) ...
+	DedupKey StorageUnsignedInt64AsBase10 `json:"dedupKey,omitempty"`
+
+	// Filters ...
+	Filters *StorageAttributionReportingFilterPair `json:"filters"`
+}
+
+// StorageAttributionReportingTriggerRegistration (experimental) ...
+type StorageAttributionReportingTriggerRegistration struct {
+	// Filters ...
+	Filters *StorageAttributionReportingFilterPair `json:"filters"`
+
+	// DebugKey (optional) ...
+	DebugKey StorageUnsignedInt64AsBase10 `json:"debugKey,omitempty"`
+
+	// AggregatableDedupKeys ...
+	AggregatableDedupKeys []*StorageAttributionReportingAggregatableDedupKey `json:"aggregatableDedupKeys"`
+
+	// EventTriggerData ...
+	EventTriggerData []*StorageAttributionReportingEventTriggerData `json:"eventTriggerData"`
+
+	// AggregatableTriggerData ...
+	AggregatableTriggerData []*StorageAttributionReportingAggregatableTriggerData `json:"aggregatableTriggerData"`
+
+	// AggregatableValues ...
+	AggregatableValues []*StorageAttributionReportingAggregatableValueEntry `json:"aggregatableValues"`
+
+	// DebugReporting ...
+	DebugReporting bool `json:"debugReporting"`
+
+	// AggregationCoordinatorOrigin (optional) ...
+	AggregationCoordinatorOrigin string `json:"aggregationCoordinatorOrigin,omitempty"`
+
+	// SourceRegistrationTimeConfig ...
+	SourceRegistrationTimeConfig StorageAttributionReportingSourceRegistrationTimeConfig `json:"sourceRegistrationTimeConfig"`
+
+	// TriggerContextID (optional) ...
+	TriggerContextID string `json:"triggerContextId,omitempty"`
+}
+
+// StorageAttributionReportingEventLevelResult (experimental) ...
+type StorageAttributionReportingEventLevelResult string
+
+const (
+	// StorageAttributionReportingEventLevelResultSuccess enum const.
+	StorageAttributionReportingEventLevelResultSuccess StorageAttributionReportingEventLevelResult = "success"
+
+	// StorageAttributionReportingEventLevelResultSuccessDroppedLowerPriority enum const.
+	StorageAttributionReportingEventLevelResultSuccessDroppedLowerPriority StorageAttributionReportingEventLevelResult = "successDroppedLowerPriority"
+
+	// StorageAttributionReportingEventLevelResultInternalError enum const.
+	StorageAttributionReportingEventLevelResultInternalError StorageAttributionReportingEventLevelResult = "internalError"
+
+	// StorageAttributionReportingEventLevelResultNoCapacityForAttributionDestination enum const.
+	StorageAttributionReportingEventLevelResultNoCapacityForAttributionDestination StorageAttributionReportingEventLevelResult = "noCapacityForAttributionDestination"
+
+	// StorageAttributionReportingEventLevelResultNoMatchingSources enum const.
+	StorageAttributionReportingEventLevelResultNoMatchingSources StorageAttributionReportingEventLevelResult = "noMatchingSources"
+
+	// StorageAttributionReportingEventLevelResultDeduplicated enum const.
+	StorageAttributionReportingEventLevelResultDeduplicated StorageAttributionReportingEventLevelResult = "deduplicated"
+
+	// StorageAttributionReportingEventLevelResultExcessiveAttributions enum const.
+	StorageAttributionReportingEventLevelResultExcessiveAttributions StorageAttributionReportingEventLevelResult = "excessiveAttributions"
+
+	// StorageAttributionReportingEventLevelResultPriorityTooLow enum const.
+	StorageAttributionReportingEventLevelResultPriorityTooLow StorageAttributionReportingEventLevelResult = "priorityTooLow"
+
+	// StorageAttributionReportingEventLevelResultNeverAttributedSource enum const.
+	StorageAttributionReportingEventLevelResultNeverAttributedSource StorageAttributionReportingEventLevelResult = "neverAttributedSource"
+
+	// StorageAttributionReportingEventLevelResultExcessiveReportingOrigins enum const.
+	StorageAttributionReportingEventLevelResultExcessiveReportingOrigins StorageAttributionReportingEventLevelResult = "excessiveReportingOrigins"
+
+	// StorageAttributionReportingEventLevelResultNoMatchingSourceFilterData enum const.
+	StorageAttributionReportingEventLevelResultNoMatchingSourceFilterData StorageAttributionReportingEventLevelResult = "noMatchingSourceFilterData"
+
+	// StorageAttributionReportingEventLevelResultProhibitedByBrowserPolicy enum const.
+	StorageAttributionReportingEventLevelResultProhibitedByBrowserPolicy StorageAttributionReportingEventLevelResult = "prohibitedByBrowserPolicy"
+
+	// StorageAttributionReportingEventLevelResultNoMatchingConfigurations enum const.
+	StorageAttributionReportingEventLevelResultNoMatchingConfigurations StorageAttributionReportingEventLevelResult = "noMatchingConfigurations"
+
+	// StorageAttributionReportingEventLevelResultExcessiveReports enum const.
+	StorageAttributionReportingEventLevelResultExcessiveReports StorageAttributionReportingEventLevelResult = "excessiveReports"
+
+	// StorageAttributionReportingEventLevelResultFalselyAttributedSource enum const.
+	StorageAttributionReportingEventLevelResultFalselyAttributedSource StorageAttributionReportingEventLevelResult = "falselyAttributedSource"
+
+	// StorageAttributionReportingEventLevelResultReportWindowPassed enum const.
+	StorageAttributionReportingEventLevelResultReportWindowPassed StorageAttributionReportingEventLevelResult = "reportWindowPassed"
+
+	// StorageAttributionReportingEventLevelResultNotRegistered enum const.
+	StorageAttributionReportingEventLevelResultNotRegistered StorageAttributionReportingEventLevelResult = "notRegistered"
+
+	// StorageAttributionReportingEventLevelResultReportWindowNotStarted enum const.
+	StorageAttributionReportingEventLevelResultReportWindowNotStarted StorageAttributionReportingEventLevelResult = "reportWindowNotStarted"
+
+	// StorageAttributionReportingEventLevelResultNoMatchingTriggerData enum const.
+	StorageAttributionReportingEventLevelResultNoMatchingTriggerData StorageAttributionReportingEventLevelResult = "noMatchingTriggerData"
+)
+
+// StorageAttributionReportingAggregatableResult (experimental) ...
+type StorageAttributionReportingAggregatableResult string
+
+const (
+	// StorageAttributionReportingAggregatableResultSuccess enum const.
+	StorageAttributionReportingAggregatableResultSuccess StorageAttributionReportingAggregatableResult = "success"
+
+	// StorageAttributionReportingAggregatableResultInternalError enum const.
+	StorageAttributionReportingAggregatableResultInternalError StorageAttributionReportingAggregatableResult = "internalError"
+
+	// StorageAttributionReportingAggregatableResultNoCapacityForAttributionDestination enum const.
+	StorageAttributionReportingAggregatableResultNoCapacityForAttributionDestination StorageAttributionReportingAggregatableResult = "noCapacityForAttributionDestination"
+
+	// StorageAttributionReportingAggregatableResultNoMatchingSources enum const.
+	StorageAttributionReportingAggregatableResultNoMatchingSources StorageAttributionReportingAggregatableResult = "noMatchingSources"
+
+	// StorageAttributionReportingAggregatableResultExcessiveAttributions enum const.
+	StorageAttributionReportingAggregatableResultExcessiveAttributions StorageAttributionReportingAggregatableResult = "excessiveAttributions"
+
+	// StorageAttributionReportingAggregatableResultExcessiveReportingOrigins enum const.
+	StorageAttributionReportingAggregatableResultExcessiveReportingOrigins StorageAttributionReportingAggregatableResult = "excessiveReportingOrigins"
+
+	// StorageAttributionReportingAggregatableResultNoHistograms enum const.
+	StorageAttributionReportingAggregatableResultNoHistograms StorageAttributionReportingAggregatableResult = "noHistograms"
+
+	// StorageAttributionReportingAggregatableResultInsufficientBudget enum const.
+	StorageAttributionReportingAggregatableResultInsufficientBudget StorageAttributionReportingAggregatableResult = "insufficientBudget"
+
+	// StorageAttributionReportingAggregatableResultNoMatchingSourceFilterData enum const.
+	StorageAttributionReportingAggregatableResultNoMatchingSourceFilterData StorageAttributionReportingAggregatableResult = "noMatchingSourceFilterData"
+
+	// StorageAttributionReportingAggregatableResultNotRegistered enum const.
+	StorageAttributionReportingAggregatableResultNotRegistered StorageAttributionReportingAggregatableResult = "notRegistered"
+
+	// StorageAttributionReportingAggregatableResultProhibitedByBrowserPolicy enum const.
+	StorageAttributionReportingAggregatableResultProhibitedByBrowserPolicy StorageAttributionReportingAggregatableResult = "prohibitedByBrowserPolicy"
+
+	// StorageAttributionReportingAggregatableResultDeduplicated enum const.
+	StorageAttributionReportingAggregatableResultDeduplicated StorageAttributionReportingAggregatableResult = "deduplicated"
+
+	// StorageAttributionReportingAggregatableResultReportWindowPassed enum const.
+	StorageAttributionReportingAggregatableResultReportWindowPassed StorageAttributionReportingAggregatableResult = "reportWindowPassed"
+
+	// StorageAttributionReportingAggregatableResultExcessiveReports enum const.
+	StorageAttributionReportingAggregatableResultExcessiveReports StorageAttributionReportingAggregatableResult = "excessiveReports"
+)
+
+// StorageRelatedWebsiteSet (experimental) A single Related Website Set object.
+type StorageRelatedWebsiteSet struct {
+	// PrimarySites The primary site of this set, along with the ccTLDs if there is any.
+	PrimarySites []string `json:"primarySites"`
+
+	// AssociatedSites The associated sites of this set, along with the ccTLDs if there is any.
+	AssociatedSites []string `json:"associatedSites"`
+
+	// ServiceSites The service sites of this set, along with the ccTLDs if there is any.
+	ServiceSites []string `json:"serviceSites"`
+}
+
 // StorageGetStorageKeyForFrame Returns a storage key given a frame id.
 type StorageGetStorageKeyForFrame struct {
 	// FrameID ...
 	FrameID PageFrameID `json:"frameId"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageGetStorageKeyForFrame) ProtoReq() string { return "Storage.getStorageKeyForFrame" }
 
-// Call the request
+// Call the request.
 func (m StorageGetStorageKeyForFrame) Call(c Client) (*StorageGetStorageKeyForFrameResult, error) {
 	var res StorageGetStorageKeyForFrameResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -352,10 +783,10 @@ type StorageClearDataForOrigin struct {
 	StorageTypes string `json:"storageTypes"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageClearDataForOrigin) ProtoReq() string { return "Storage.clearDataForOrigin" }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageClearDataForOrigin) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -369,10 +800,10 @@ type StorageClearDataForStorageKey struct {
 	StorageTypes string `json:"storageTypes"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageClearDataForStorageKey) ProtoReq() string { return "Storage.clearDataForStorageKey" }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageClearDataForStorageKey) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -383,10 +814,10 @@ type StorageGetCookies struct {
 	BrowserContextID BrowserBrowserContextID `json:"browserContextId,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageGetCookies) ProtoReq() string { return "Storage.getCookies" }
 
-// Call the request
+// Call the request.
 func (m StorageGetCookies) Call(c Client) (*StorageGetCookiesResult, error) {
 	var res StorageGetCookiesResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -400,17 +831,17 @@ type StorageGetCookiesResult struct {
 
 // StorageSetCookies Sets given cookies.
 type StorageSetCookies struct {
-	// Cookies Cookies to be set.
+	// Cookies to be set.
 	Cookies []*NetworkCookieParam `json:"cookies"`
 
 	// BrowserContextID (optional) Browser context to use when called on the browser endpoint.
 	BrowserContextID BrowserBrowserContextID `json:"browserContextId,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageSetCookies) ProtoReq() string { return "Storage.setCookies" }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageSetCookies) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -421,10 +852,10 @@ type StorageClearCookies struct {
 	BrowserContextID BrowserBrowserContextID `json:"browserContextId,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageClearCookies) ProtoReq() string { return "Storage.clearCookies" }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageClearCookies) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -435,10 +866,10 @@ type StorageGetUsageAndQuota struct {
 	Origin string `json:"origin"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageGetUsageAndQuota) ProtoReq() string { return "Storage.getUsageAndQuota" }
 
-// Call the request
+// Call the request.
 func (m StorageGetUsageAndQuota) Call(c Client) (*StorageGetUsageAndQuotaResult, error) {
 	var res StorageGetUsageAndQuotaResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -459,7 +890,7 @@ type StorageGetUsageAndQuotaResult struct {
 	UsageBreakdown []*StorageUsageForType `json:"usageBreakdown"`
 }
 
-// StorageOverrideQuotaForOrigin (experimental) Override quota for the specified origin
+// StorageOverrideQuotaForOrigin (experimental) Override quota for the specified origin.
 type StorageOverrideQuotaForOrigin struct {
 	// Origin Security origin.
 	Origin string `json:"origin"`
@@ -474,10 +905,10 @@ type StorageOverrideQuotaForOrigin struct {
 	QuotaSize *float64 `json:"quotaSize,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageOverrideQuotaForOrigin) ProtoReq() string { return "Storage.overrideQuotaForOrigin" }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageOverrideQuotaForOrigin) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -488,12 +919,12 @@ type StorageTrackCacheStorageForOrigin struct {
 	Origin string `json:"origin"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageTrackCacheStorageForOrigin) ProtoReq() string {
 	return "Storage.trackCacheStorageForOrigin"
 }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageTrackCacheStorageForOrigin) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -504,12 +935,12 @@ type StorageTrackCacheStorageForStorageKey struct {
 	StorageKey string `json:"storageKey"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageTrackCacheStorageForStorageKey) ProtoReq() string {
 	return "Storage.trackCacheStorageForStorageKey"
 }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageTrackCacheStorageForStorageKey) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -520,10 +951,10 @@ type StorageTrackIndexedDBForOrigin struct {
 	Origin string `json:"origin"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageTrackIndexedDBForOrigin) ProtoReq() string { return "Storage.trackIndexedDBForOrigin" }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageTrackIndexedDBForOrigin) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -534,12 +965,12 @@ type StorageTrackIndexedDBForStorageKey struct {
 	StorageKey string `json:"storageKey"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageTrackIndexedDBForStorageKey) ProtoReq() string {
 	return "Storage.trackIndexedDBForStorageKey"
 }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageTrackIndexedDBForStorageKey) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -550,12 +981,12 @@ type StorageUntrackCacheStorageForOrigin struct {
 	Origin string `json:"origin"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageUntrackCacheStorageForOrigin) ProtoReq() string {
 	return "Storage.untrackCacheStorageForOrigin"
 }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageUntrackCacheStorageForOrigin) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -566,12 +997,12 @@ type StorageUntrackCacheStorageForStorageKey struct {
 	StorageKey string `json:"storageKey"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageUntrackCacheStorageForStorageKey) ProtoReq() string {
 	return "Storage.untrackCacheStorageForStorageKey"
 }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageUntrackCacheStorageForStorageKey) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -582,12 +1013,12 @@ type StorageUntrackIndexedDBForOrigin struct {
 	Origin string `json:"origin"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageUntrackIndexedDBForOrigin) ProtoReq() string {
 	return "Storage.untrackIndexedDBForOrigin"
 }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageUntrackIndexedDBForOrigin) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -598,12 +1029,12 @@ type StorageUntrackIndexedDBForStorageKey struct {
 	StorageKey string `json:"storageKey"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageUntrackIndexedDBForStorageKey) ProtoReq() string {
 	return "Storage.untrackIndexedDBForStorageKey"
 }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageUntrackIndexedDBForStorageKey) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -612,10 +1043,10 @@ func (m StorageUntrackIndexedDBForStorageKey) Call(c Client) error {
 // current browsing context.
 type StorageGetTrustTokens struct{}
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageGetTrustTokens) ProtoReq() string { return "Storage.getTrustTokens" }
 
-// Call the request
+// Call the request.
 func (m StorageGetTrustTokens) Call(c Client) (*StorageGetTrustTokensResult, error) {
 	var res StorageGetTrustTokensResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -634,10 +1065,10 @@ type StorageClearTrustTokens struct {
 	IssuerOrigin string `json:"issuerOrigin"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageClearTrustTokens) ProtoReq() string { return "Storage.clearTrustTokens" }
 
-// Call the request
+// Call the request.
 func (m StorageClearTrustTokens) Call(c Client) (*StorageClearTrustTokensResult, error) {
 	var res StorageClearTrustTokensResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -658,10 +1089,10 @@ type StorageGetInterestGroupDetails struct {
 	Name string `json:"name"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageGetInterestGroupDetails) ProtoReq() string { return "Storage.getInterestGroupDetails" }
 
-// Call the request
+// Call the request.
 func (m StorageGetInterestGroupDetails) Call(c Client) (*StorageGetInterestGroupDetailsResult, error) {
 	var res StorageGetInterestGroupDetailsResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -669,8 +1100,11 @@ func (m StorageGetInterestGroupDetails) Call(c Client) (*StorageGetInterestGroup
 
 // StorageGetInterestGroupDetailsResult (experimental) ...
 type StorageGetInterestGroupDetailsResult struct {
-	// Details ...
-	Details *StorageInterestGroupDetails `json:"details"`
+	// Details This largely corresponds to:
+	// https://wicg.github.io/turtledove/#dictdef-generatebidinterestgroup
+	// but has absolute expirationTime instead of relative lifetimeMs and
+	// also adds joiningOrigin.
+	Details map[string]gson.JSON `json:"details"`
 }
 
 // StorageSetInterestGroupTracking (experimental) Enables/Disables issuing of interestGroupAccessed events.
@@ -679,11 +1113,28 @@ type StorageSetInterestGroupTracking struct {
 	Enable bool `json:"enable"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageSetInterestGroupTracking) ProtoReq() string { return "Storage.setInterestGroupTracking" }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageSetInterestGroupTracking) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// StorageSetInterestGroupAuctionTracking (experimental) Enables/Disables issuing of interestGroupAuctionEventOccurred and
+// interestGroupAuctionNetworkRequestCreated.
+type StorageSetInterestGroupAuctionTracking struct {
+	// Enable ...
+	Enable bool `json:"enable"`
+}
+
+// ProtoReq name.
+func (m StorageSetInterestGroupAuctionTracking) ProtoReq() string {
+	return "Storage.setInterestGroupAuctionTracking"
+}
+
+// Call sends the request.
+func (m StorageSetInterestGroupAuctionTracking) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
@@ -693,10 +1144,10 @@ type StorageGetSharedStorageMetadata struct {
 	OwnerOrigin string `json:"ownerOrigin"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageGetSharedStorageMetadata) ProtoReq() string { return "Storage.getSharedStorageMetadata" }
 
-// Call the request
+// Call the request.
 func (m StorageGetSharedStorageMetadata) Call(c Client) (*StorageGetSharedStorageMetadataResult, error) {
 	var res StorageGetSharedStorageMetadataResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -714,10 +1165,10 @@ type StorageGetSharedStorageEntries struct {
 	OwnerOrigin string `json:"ownerOrigin"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageGetSharedStorageEntries) ProtoReq() string { return "Storage.getSharedStorageEntries" }
 
-// Call the request
+// Call the request.
 func (m StorageGetSharedStorageEntries) Call(c Client) (*StorageGetSharedStorageEntriesResult, error) {
 	var res StorageGetSharedStorageEntriesResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -745,10 +1196,10 @@ type StorageSetSharedStorageEntry struct {
 	IgnoreIfPresent bool `json:"ignoreIfPresent,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageSetSharedStorageEntry) ProtoReq() string { return "Storage.setSharedStorageEntry" }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageSetSharedStorageEntry) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -762,10 +1213,10 @@ type StorageDeleteSharedStorageEntry struct {
 	Key string `json:"key"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageDeleteSharedStorageEntry) ProtoReq() string { return "Storage.deleteSharedStorageEntry" }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageDeleteSharedStorageEntry) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -776,12 +1227,12 @@ type StorageClearSharedStorageEntries struct {
 	OwnerOrigin string `json:"ownerOrigin"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageClearSharedStorageEntries) ProtoReq() string {
 	return "Storage.clearSharedStorageEntries"
 }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageClearSharedStorageEntries) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -792,10 +1243,10 @@ type StorageResetSharedStorageBudget struct {
 	OwnerOrigin string `json:"ownerOrigin"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageResetSharedStorageBudget) ProtoReq() string { return "Storage.resetSharedStorageBudget" }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageResetSharedStorageBudget) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -806,10 +1257,10 @@ type StorageSetSharedStorageTracking struct {
 	Enable bool `json:"enable"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageSetSharedStorageTracking) ProtoReq() string { return "Storage.setSharedStorageTracking" }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageSetSharedStorageTracking) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -823,69 +1274,167 @@ type StorageSetStorageBucketTracking struct {
 	Enable bool `json:"enable"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageSetStorageBucketTracking) ProtoReq() string { return "Storage.setStorageBucketTracking" }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageSetStorageBucketTracking) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
 // StorageDeleteStorageBucket (experimental) Deletes the Storage Bucket with the given storage key and bucket name.
 type StorageDeleteStorageBucket struct {
-	// StorageKey ...
-	StorageKey string `json:"storageKey"`
-
-	// BucketName ...
-	BucketName string `json:"bucketName"`
+	// Bucket ...
+	Bucket *StorageStorageBucket `json:"bucket"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m StorageDeleteStorageBucket) ProtoReq() string { return "Storage.deleteStorageBucket" }
 
-// Call sends the request
+// Call sends the request.
 func (m StorageDeleteStorageBucket) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
+// StorageRunBounceTrackingMitigations (experimental) Deletes state for sites identified as potential bounce trackers, immediately.
+type StorageRunBounceTrackingMitigations struct{}
+
+// ProtoReq name.
+func (m StorageRunBounceTrackingMitigations) ProtoReq() string {
+	return "Storage.runBounceTrackingMitigations"
+}
+
+// Call the request.
+func (m StorageRunBounceTrackingMitigations) Call(c Client) (*StorageRunBounceTrackingMitigationsResult, error) {
+	var res StorageRunBounceTrackingMitigationsResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// StorageRunBounceTrackingMitigationsResult (experimental) ...
+type StorageRunBounceTrackingMitigationsResult struct {
+	// DeletedSites ...
+	DeletedSites []string `json:"deletedSites"`
+}
+
+// StorageSetAttributionReportingLocalTestingMode (experimental) https://wicg.github.io/attribution-reporting-api/
+type StorageSetAttributionReportingLocalTestingMode struct {
+	// Enabled If enabled, noise is suppressed and reports are sent immediately.
+	Enabled bool `json:"enabled"`
+}
+
+// ProtoReq name.
+func (m StorageSetAttributionReportingLocalTestingMode) ProtoReq() string {
+	return "Storage.setAttributionReportingLocalTestingMode"
+}
+
+// Call sends the request.
+func (m StorageSetAttributionReportingLocalTestingMode) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// StorageSetAttributionReportingTracking (experimental) Enables/disables issuing of Attribution Reporting events.
+type StorageSetAttributionReportingTracking struct {
+	// Enable ...
+	Enable bool `json:"enable"`
+}
+
+// ProtoReq name.
+func (m StorageSetAttributionReportingTracking) ProtoReq() string {
+	return "Storage.setAttributionReportingTracking"
+}
+
+// Call sends the request.
+func (m StorageSetAttributionReportingTracking) Call(c Client) error {
+	return call(m.ProtoReq(), m, nil, c)
+}
+
+// StorageSendPendingAttributionReports (experimental) Sends all pending Attribution Reports immediately, regardless of their
+// scheduled report time.
+type StorageSendPendingAttributionReports struct{}
+
+// ProtoReq name.
+func (m StorageSendPendingAttributionReports) ProtoReq() string {
+	return "Storage.sendPendingAttributionReports"
+}
+
+// Call the request.
+func (m StorageSendPendingAttributionReports) Call(c Client) (*StorageSendPendingAttributionReportsResult, error) {
+	var res StorageSendPendingAttributionReportsResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// StorageSendPendingAttributionReportsResult (experimental) ...
+type StorageSendPendingAttributionReportsResult struct {
+	// NumSent The number of reports that were sent.
+	NumSent int `json:"numSent"`
+}
+
+// StorageGetRelatedWebsiteSets (experimental) Returns the effective Related Website Sets in use by this profile for the browser
+// session. The effective Related Website Sets will not change during a browser session.
+type StorageGetRelatedWebsiteSets struct{}
+
+// ProtoReq name.
+func (m StorageGetRelatedWebsiteSets) ProtoReq() string { return "Storage.getRelatedWebsiteSets" }
+
+// Call the request.
+func (m StorageGetRelatedWebsiteSets) Call(c Client) (*StorageGetRelatedWebsiteSetsResult, error) {
+	var res StorageGetRelatedWebsiteSetsResult
+	return &res, call(m.ProtoReq(), m, &res, c)
+}
+
+// StorageGetRelatedWebsiteSetsResult (experimental) ...
+type StorageGetRelatedWebsiteSetsResult struct {
+	// Sets ...
+	Sets []*StorageRelatedWebsiteSet `json:"sets"`
+}
+
 // StorageCacheStorageContentUpdated A cache's contents have been modified.
 type StorageCacheStorageContentUpdated struct {
-	// Origin Origin to update.
+	// Origin to update.
 	Origin string `json:"origin"`
 
 	// StorageKey Storage key to update.
 	StorageKey string `json:"storageKey"`
 
+	// BucketID Storage bucket to update.
+	BucketID string `json:"bucketId"`
+
 	// CacheName Name of cache in origin.
 	CacheName string `json:"cacheName"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt StorageCacheStorageContentUpdated) ProtoEvent() string {
 	return "Storage.cacheStorageContentUpdated"
 }
 
 // StorageCacheStorageListUpdated A cache has been added/deleted.
 type StorageCacheStorageListUpdated struct {
-	// Origin Origin to update.
+	// Origin to update.
 	Origin string `json:"origin"`
 
 	// StorageKey Storage key to update.
 	StorageKey string `json:"storageKey"`
+
+	// BucketID Storage bucket to update.
+	BucketID string `json:"bucketId"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt StorageCacheStorageListUpdated) ProtoEvent() string {
 	return "Storage.cacheStorageListUpdated"
 }
 
 // StorageIndexedDBContentUpdated The origin's IndexedDB object store has been modified.
 type StorageIndexedDBContentUpdated struct {
-	// Origin Origin to update.
+	// Origin to update.
 	Origin string `json:"origin"`
 
 	// StorageKey Storage key to update.
 	StorageKey string `json:"storageKey"`
+
+	// BucketID Storage bucket to update.
+	BucketID string `json:"bucketId"`
 
 	// DatabaseName Database to update.
 	DatabaseName string `json:"databaseName"`
@@ -894,26 +1443,30 @@ type StorageIndexedDBContentUpdated struct {
 	ObjectStoreName string `json:"objectStoreName"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt StorageIndexedDBContentUpdated) ProtoEvent() string {
 	return "Storage.indexedDBContentUpdated"
 }
 
 // StorageIndexedDBListUpdated The origin's IndexedDB database list has been modified.
 type StorageIndexedDBListUpdated struct {
-	// Origin Origin to update.
+	// Origin to update.
 	Origin string `json:"origin"`
 
 	// StorageKey Storage key to update.
 	StorageKey string `json:"storageKey"`
+
+	// BucketID Storage bucket to update.
+	BucketID string `json:"bucketId"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt StorageIndexedDBListUpdated) ProtoEvent() string {
 	return "Storage.indexedDBListUpdated"
 }
 
-// StorageInterestGroupAccessed One of the interest groups was accessed by the associated page.
+// StorageInterestGroupAccessed One of the interest groups was accessed. Note that these events are global
+// to all targets sharing an interest group store.
 type StorageInterestGroupAccessed struct {
 	// AccessTime ...
 	AccessTime TimeSinceEpoch `json:"accessTime"`
@@ -926,11 +1479,70 @@ type StorageInterestGroupAccessed struct {
 
 	// Name ...
 	Name string `json:"name"`
+
+	// ComponentSellerOrigin (optional) For topLevelBid/topLevelAdditionalBid, and when appropriate,
+	// win and additionalBidWin
+	ComponentSellerOrigin string `json:"componentSellerOrigin,omitempty"`
+
+	// Bid (optional) For bid or somethingBid event, if done locally and not on a server.
+	Bid *float64 `json:"bid,omitempty"`
+
+	// BidCurrency (optional) ...
+	BidCurrency string `json:"bidCurrency,omitempty"`
+
+	// UniqueAuctionID (optional) For non-global events --- links to interestGroupAuctionEvent
+	UniqueAuctionID StorageInterestGroupAuctionID `json:"uniqueAuctionId,omitempty"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt StorageInterestGroupAccessed) ProtoEvent() string {
 	return "Storage.interestGroupAccessed"
+}
+
+// StorageInterestGroupAuctionEventOccurred An auction involving interest groups is taking place. These events are
+// target-specific.
+type StorageInterestGroupAuctionEventOccurred struct {
+	// EventTime ...
+	EventTime TimeSinceEpoch `json:"eventTime"`
+
+	// Type ...
+	Type StorageInterestGroupAuctionEventType `json:"type"`
+
+	// UniqueAuctionID ...
+	UniqueAuctionID StorageInterestGroupAuctionID `json:"uniqueAuctionId"`
+
+	// ParentAuctionID (optional) Set for child auctions.
+	ParentAuctionID StorageInterestGroupAuctionID `json:"parentAuctionId,omitempty"`
+
+	// AuctionConfig (optional) Set for started and configResolved
+	AuctionConfig map[string]gson.JSON `json:"auctionConfig,omitempty"`
+}
+
+// ProtoEvent name.
+func (evt StorageInterestGroupAuctionEventOccurred) ProtoEvent() string {
+	return "Storage.interestGroupAuctionEventOccurred"
+}
+
+// StorageInterestGroupAuctionNetworkRequestCreated Specifies which auctions a particular network fetch may be related to, and
+// in what role. Note that it is not ordered with respect to
+// Network.requestWillBeSent (but will happen before loadingFinished
+// loadingFailed).
+type StorageInterestGroupAuctionNetworkRequestCreated struct {
+	// Type ...
+	Type StorageInterestGroupAuctionFetchType `json:"type"`
+
+	// RequestID ...
+	RequestID NetworkRequestID `json:"requestId"`
+
+	// Auctions This is the set of the auctions using the worklet that issued this
+	// request.  In the case of trusted signals, it's possible that only some of
+	// them actually care about the keys being queried.
+	Auctions []StorageInterestGroupAuctionID `json:"auctions"`
+}
+
+// ProtoEvent name.
+func (evt StorageInterestGroupAuctionNetworkRequestCreated) ProtoEvent() string {
+	return "Storage.interestGroupAuctionNetworkRequestCreated"
 }
 
 // StorageSharedStorageAccessed Shared storage was accessed by the associated page.
@@ -948,23 +1560,23 @@ type StorageSharedStorageAccessed struct {
 	// OwnerOrigin Serialized origin for the context that invoked the Shared Storage API.
 	OwnerOrigin string `json:"ownerOrigin"`
 
-	// Params The sub-parameters warapped by `params` are all optional and their
+	// Params The sub-parameters wrapped by `params` are all optional and their
 	// presence/absence depends on `type`.
 	Params *StorageSharedStorageAccessParams `json:"params"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt StorageSharedStorageAccessed) ProtoEvent() string {
 	return "Storage.sharedStorageAccessed"
 }
 
 // StorageStorageBucketCreatedOrUpdated ...
 type StorageStorageBucketCreatedOrUpdated struct {
-	// Bucket ...
-	Bucket *StorageStorageBucketInfo `json:"bucket"`
+	// BucketInfo ...
+	BucketInfo *StorageStorageBucketInfo `json:"bucketInfo"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt StorageStorageBucketCreatedOrUpdated) ProtoEvent() string {
 	return "Storage.storageBucketCreatedOrUpdated"
 }
@@ -975,7 +1587,38 @@ type StorageStorageBucketDeleted struct {
 	BucketID string `json:"bucketId"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt StorageStorageBucketDeleted) ProtoEvent() string {
 	return "Storage.storageBucketDeleted"
+}
+
+// StorageAttributionReportingSourceRegistered (experimental) ...
+type StorageAttributionReportingSourceRegistered struct {
+	// Registration ...
+	Registration *StorageAttributionReportingSourceRegistration `json:"registration"`
+
+	// Result ...
+	Result StorageAttributionReportingSourceRegistrationResult `json:"result"`
+}
+
+// ProtoEvent name.
+func (evt StorageAttributionReportingSourceRegistered) ProtoEvent() string {
+	return "Storage.attributionReportingSourceRegistered"
+}
+
+// StorageAttributionReportingTriggerRegistered (experimental) ...
+type StorageAttributionReportingTriggerRegistered struct {
+	// Registration ...
+	Registration *StorageAttributionReportingTriggerRegistration `json:"registration"`
+
+	// EventLevel ...
+	EventLevel StorageAttributionReportingEventLevelResult `json:"eventLevel"`
+
+	// Aggregatable ...
+	Aggregatable StorageAttributionReportingAggregatableResult `json:"aggregatable"`
+}
+
+// ProtoEvent name.
+func (evt StorageAttributionReportingTriggerRegistered) ProtoEvent() string {
+	return "Storage.attributionReportingTriggerRegistered"
 }

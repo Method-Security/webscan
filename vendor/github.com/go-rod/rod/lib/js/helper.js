@@ -284,7 +284,7 @@ const functions = {
         this.value = `${y}-${mon}-${d}T${h}:${min}`
         break
       case 'month':
-        this.value = mon
+        this.value = `${y}-${mon}`
         break
       case 'time':
         this.value = `${h}:${min}`
@@ -294,6 +294,11 @@ const functions = {
     functions.inputEvent.call(this)
   },
 
+  inputColor(color) {
+    this.value = `${color}`
+
+    functions.inputEvent.call(this)
+  },
   selectText(pattern) {
     const m = this.value.match(new RegExp(pattern))
     if (m) {
