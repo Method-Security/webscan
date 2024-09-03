@@ -6,3 +6,8 @@ types:
       target: string
       html_encoded: optional<string>
       errors: optional<list<string>>
+  WebpageScreenshotReport:
+    properties:
+      target: string
+      screenshot: base64
+      errors: optional<list<string>>

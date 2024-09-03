@@ -16,26 +16,26 @@ type TargetTargetID string
 // TargetSessionID Unique identifier of attached debugging session.
 type TargetSessionID string
 
-// TargetTargetInfoType enum
+// TargetTargetInfoType enum.
 type TargetTargetInfoType string
 
 const (
-	// TargetTargetInfoTypePage enum const
+	// TargetTargetInfoTypePage enum const.
 	TargetTargetInfoTypePage TargetTargetInfoType = "page"
 
-	// TargetTargetInfoTypeBackgroundPage enum const
+	// TargetTargetInfoTypeBackgroundPage enum const.
 	TargetTargetInfoTypeBackgroundPage TargetTargetInfoType = "background_page"
 
-	// TargetTargetInfoTypeServiceWorker enum const
+	// TargetTargetInfoTypeServiceWorker enum const.
 	TargetTargetInfoTypeServiceWorker TargetTargetInfoType = "service_worker"
 
-	// TargetTargetInfoTypeSharedWorker enum const
+	// TargetTargetInfoTypeSharedWorker enum const.
 	TargetTargetInfoTypeSharedWorker TargetTargetInfoType = "shared_worker"
 
-	// TargetTargetInfoTypeBrowser enum const
+	// TargetTargetInfoTypeBrowser enum const.
 	TargetTargetInfoTypeBrowser TargetTargetInfoType = "browser"
 
-	// TargetTargetInfoTypeOther enum const
+	// TargetTargetInfoTypeOther enum const.
 	TargetTargetInfoTypeOther TargetTargetInfoType = "other"
 )
 
@@ -44,7 +44,7 @@ type TargetTargetInfo struct {
 	// TargetID ...
 	TargetID TargetTargetID `json:"targetId"`
 
-	// Type ...
+	// Type List of types: https://source.chromium.org/chromium/chromium/src/+/main:content/browser/devtools/devtools_agent_host_impl.cc?ss=chromium&q=f:devtools%20-f:out%20%22::kTypeTab%5B%5D%22
 	Type TargetTargetInfoType `json:"type"`
 
 	// Title ...
@@ -75,7 +75,7 @@ type TargetTargetInfo struct {
 
 // TargetFilterEntry (experimental) A filter used by target query/discovery/auto-attach operations.
 type TargetFilterEntry struct {
-	// Exclude (optional) If set, causes exclusion of mathcing targets from the list.
+	// Exclude (optional) If set, causes exclusion of matching targets from the list.
 	Exclude bool `json:"exclude,omitempty"`
 
 	// Type (optional) If not present, matches any type.
@@ -105,10 +105,10 @@ type TargetActivateTarget struct {
 	TargetID TargetTargetID `json:"targetId"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetActivateTarget) ProtoReq() string { return "Target.activateTarget" }
 
-// Call sends the request
+// Call sends the request.
 func (m TargetActivateTarget) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -124,10 +124,10 @@ type TargetAttachToTarget struct {
 	Flatten bool `json:"flatten,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetAttachToTarget) ProtoReq() string { return "Target.attachToTarget" }
 
-// Call the request
+// Call the request.
 func (m TargetAttachToTarget) Call(c Client) (*TargetAttachToTargetResult, error) {
 	var res TargetAttachToTargetResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -142,10 +142,10 @@ type TargetAttachToTargetResult struct {
 // TargetAttachToBrowserTarget (experimental) Attaches to the browser target, only uses flat sessionId mode.
 type TargetAttachToBrowserTarget struct{}
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetAttachToBrowserTarget) ProtoReq() string { return "Target.attachToBrowserTarget" }
 
-// Call the request
+// Call the request.
 func (m TargetAttachToBrowserTarget) Call(c Client) (*TargetAttachToBrowserTargetResult, error) {
 	var res TargetAttachToBrowserTargetResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -163,10 +163,10 @@ type TargetCloseTarget struct {
 	TargetID TargetTargetID `json:"targetId"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetCloseTarget) ProtoReq() string { return "Target.closeTarget" }
 
-// Call the request
+// Call the request.
 func (m TargetCloseTarget) Call(c Client) (*TargetCloseTargetResult, error) {
 	var res TargetCloseTargetResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -183,7 +183,7 @@ type TargetCloseTargetResult struct {
 //
 // Injected object will be available as `window[bindingName]`.
 //
-// The object has the follwing API:
+// The object has the following API:
 // - `binding.send(json)` - a method to send messages over the remote debugging protocol
 // - `binding.onmessage = json => handleMessage(json)` - a callback that will be called for the protocol notifications and command responses.
 type TargetExposeDevToolsProtocol struct {
@@ -194,62 +194,62 @@ type TargetExposeDevToolsProtocol struct {
 	BindingName string `json:"bindingName,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetExposeDevToolsProtocol) ProtoReq() string { return "Target.exposeDevToolsProtocol" }
 
-// Call sends the request
+// Call sends the request.
 func (m TargetExposeDevToolsProtocol) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// TargetCreateBrowserContext (experimental) Creates a new empty BrowserContext. Similar to an incognito profile but you can have more than
+// TargetCreateBrowserContext Creates a new empty BrowserContext. Similar to an incognito profile but you can have more than
 // one.
 type TargetCreateBrowserContext struct {
-	// DisposeOnDetach (optional) If specified, disposes this context when debugging session disconnects.
+	// DisposeOnDetach (experimental) (optional) If specified, disposes this context when debugging session disconnects.
 	DisposeOnDetach bool `json:"disposeOnDetach,omitempty"`
 
-	// ProxyServer (optional) Proxy server, similar to the one passed to --proxy-server
+	// ProxyServer (experimental) (optional) Proxy server, similar to the one passed to --proxy-server
 	ProxyServer string `json:"proxyServer,omitempty"`
 
-	// ProxyBypassList (optional) Proxy bypass list, similar to the one passed to --proxy-bypass-list
+	// ProxyBypassList (experimental) (optional) Proxy bypass list, similar to the one passed to --proxy-bypass-list
 	ProxyBypassList string `json:"proxyBypassList,omitempty"`
 
-	// OriginsWithUniversalNetworkAccess (optional) An optional list of origins to grant unlimited cross-origin access to.
+	// OriginsWithUniversalNetworkAccess (experimental) (optional) An optional list of origins to grant unlimited cross-origin access to.
 	// Parts of the URL other than those constituting origin are ignored.
 	OriginsWithUniversalNetworkAccess []string `json:"originsWithUniversalNetworkAccess,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetCreateBrowserContext) ProtoReq() string { return "Target.createBrowserContext" }
 
-// Call the request
+// Call the request.
 func (m TargetCreateBrowserContext) Call(c Client) (*TargetCreateBrowserContextResult, error) {
 	var res TargetCreateBrowserContextResult
 	return &res, call(m.ProtoReq(), m, &res, c)
 }
 
-// TargetCreateBrowserContextResult (experimental) ...
+// TargetCreateBrowserContextResult ...
 type TargetCreateBrowserContextResult struct {
 	// BrowserContextID The id of the context created.
 	BrowserContextID BrowserBrowserContextID `json:"browserContextId"`
 }
 
-// TargetGetBrowserContexts (experimental) Returns all browser contexts created with `Target.createBrowserContext` method.
+// TargetGetBrowserContexts Returns all browser contexts created with `Target.createBrowserContext` method.
 type TargetGetBrowserContexts struct{}
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetGetBrowserContexts) ProtoReq() string { return "Target.getBrowserContexts" }
 
-// Call the request
+// Call the request.
 func (m TargetGetBrowserContexts) Call(c Client) (*TargetGetBrowserContextsResult, error) {
 	var res TargetGetBrowserContextsResult
 	return &res, call(m.ProtoReq(), m, &res, c)
 }
 
-// TargetGetBrowserContextsResult (experimental) ...
+// TargetGetBrowserContextsResult ...
 type TargetGetBrowserContextsResult struct {
-	// BrowserContextIds An array of browser context ids.
-	BrowserContextIds []BrowserBrowserContextID `json:"browserContextIds"`
+	// BrowserContextIDs An array of browser context ids.
+	BrowserContextIDs []BrowserBrowserContextID `json:"browserContextIds"`
 }
 
 // TargetCreateTarget Creates a new page.
@@ -281,10 +281,10 @@ type TargetCreateTarget struct {
 	ForTab bool `json:"forTab,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetCreateTarget) ProtoReq() string { return "Target.createTarget" }
 
-// Call the request
+// Call the request.
 func (m TargetCreateTarget) Call(c Client) (*TargetCreateTargetResult, error) {
 	var res TargetCreateTargetResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -305,25 +305,25 @@ type TargetDetachFromTarget struct {
 	TargetID TargetTargetID `json:"targetId,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetDetachFromTarget) ProtoReq() string { return "Target.detachFromTarget" }
 
-// Call sends the request
+// Call sends the request.
 func (m TargetDetachFromTarget) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// TargetDisposeBrowserContext (experimental) Deletes a BrowserContext. All the belonging pages will be closed without calling their
+// TargetDisposeBrowserContext Deletes a BrowserContext. All the belonging pages will be closed without calling their
 // beforeunload hooks.
 type TargetDisposeBrowserContext struct {
 	// BrowserContextID ...
 	BrowserContextID BrowserBrowserContextID `json:"browserContextId"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetDisposeBrowserContext) ProtoReq() string { return "Target.disposeBrowserContext" }
 
-// Call sends the request
+// Call sends the request.
 func (m TargetDisposeBrowserContext) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -334,10 +334,10 @@ type TargetGetTargetInfo struct {
 	TargetID TargetTargetID `json:"targetId,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetGetTargetInfo) ProtoReq() string { return "Target.getTargetInfo" }
 
-// Call the request
+// Call the request.
 func (m TargetGetTargetInfo) Call(c Client) (*TargetGetTargetInfoResult, error) {
 	var res TargetGetTargetInfoResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -357,10 +357,10 @@ type TargetGetTargets struct {
 	Filter TargetTargetFilter `json:"filter,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetGetTargets) ProtoReq() string { return "Target.getTargets" }
 
-// Call the request
+// Call the request.
 func (m TargetGetTargets) Call(c Client) (*TargetGetTargetsResult, error) {
 	var res TargetGetTargetsResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -386,15 +386,15 @@ type TargetSendMessageToTarget struct {
 	TargetID TargetTargetID `json:"targetId,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetSendMessageToTarget) ProtoReq() string { return "Target.sendMessageToTarget" }
 
-// Call sends the request
+// Call sends the request.
 func (m TargetSendMessageToTarget) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
-// TargetSetAutoAttach (experimental) Controls whether to automatically attach to new targets which are considered to be related to
+// TargetSetAutoAttach Controls whether to automatically attach to new targets which are considered to be related to
 // this one. When turned on, attaches to all existing related targets as well. When turned off,
 // automatically detaches from all currently attached targets.
 // This also clears all targets added by `autoAttachRelated` from the list of targets to watch
@@ -407,7 +407,7 @@ type TargetSetAutoAttach struct {
 	// to run paused targets.
 	WaitForDebuggerOnStart bool `json:"waitForDebuggerOnStart"`
 
-	// Flatten (optional) Enables "flat" access to the session via specifying sessionId attribute in the commands.
+	// Flatten (experimental) (optional) Enables "flat" access to the session via specifying sessionId attribute in the commands.
 	// We plan to make this the default, deprecate non-flattened mode,
 	// and eventually retire it. See crbug.com/991325.
 	Flatten bool `json:"flatten,omitempty"`
@@ -416,10 +416,10 @@ type TargetSetAutoAttach struct {
 	Filter TargetTargetFilter `json:"filter,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetSetAutoAttach) ProtoReq() string { return "Target.setAutoAttach" }
 
-// Call sends the request
+// Call sends the request.
 func (m TargetSetAutoAttach) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -441,10 +441,10 @@ type TargetAutoAttachRelated struct {
 	Filter TargetTargetFilter `json:"filter,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetAutoAttachRelated) ProtoReq() string { return "Target.autoAttachRelated" }
 
-// Call sends the request
+// Call sends the request.
 func (m TargetAutoAttachRelated) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -460,10 +460,10 @@ type TargetSetDiscoverTargets struct {
 	Filter TargetTargetFilter `json:"filter,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetSetDiscoverTargets) ProtoReq() string { return "Target.setDiscoverTargets" }
 
-// Call sends the request
+// Call sends the request.
 func (m TargetSetDiscoverTargets) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -475,10 +475,10 @@ type TargetSetRemoteLocations struct {
 	Locations []*TargetRemoteLocation `json:"locations"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m TargetSetRemoteLocations) ProtoReq() string { return "Target.setRemoteLocations" }
 
-// Call sends the request
+// Call sends the request.
 func (m TargetSetRemoteLocations) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -495,7 +495,7 @@ type TargetAttachedToTarget struct {
 	WaitingForDebugger bool `json:"waitingForDebugger"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt TargetAttachedToTarget) ProtoEvent() string {
 	return "Target.attachedToTarget"
 }
@@ -510,7 +510,7 @@ type TargetDetachedFromTarget struct {
 	TargetID TargetTargetID `json:"targetId,omitempty"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt TargetDetachedFromTarget) ProtoEvent() string {
 	return "Target.detachedFromTarget"
 }
@@ -528,7 +528,7 @@ type TargetReceivedMessageFromTarget struct {
 	TargetID TargetTargetID `json:"targetId,omitempty"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt TargetReceivedMessageFromTarget) ProtoEvent() string {
 	return "Target.receivedMessageFromTarget"
 }
@@ -539,7 +539,7 @@ type TargetTargetCreated struct {
 	TargetInfo *TargetTargetInfo `json:"targetInfo"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt TargetTargetCreated) ProtoEvent() string {
 	return "Target.targetCreated"
 }
@@ -550,7 +550,7 @@ type TargetTargetDestroyed struct {
 	TargetID TargetTargetID `json:"targetId"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt TargetTargetDestroyed) ProtoEvent() string {
 	return "Target.targetDestroyed"
 }
@@ -567,7 +567,7 @@ type TargetTargetCrashed struct {
 	ErrorCode int `json:"errorCode"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt TargetTargetCrashed) ProtoEvent() string {
 	return "Target.targetCrashed"
 }
@@ -579,7 +579,7 @@ type TargetTargetInfoChanged struct {
 	TargetInfo *TargetTargetInfo `json:"targetInfo"`
 }
 
-// ProtoEvent name
+// ProtoEvent name.
 func (evt TargetTargetInfoChanged) ProtoEvent() string {
 	return "Target.targetInfoChanged"
 }

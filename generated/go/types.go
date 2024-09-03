@@ -1254,3 +1254,46 @@ func (w *WebpageCaptureReport) String() string {
 	}
 	return fmt.Sprintf("%#v", w)
 }
+
+type WebpageScreenshotReport struct {
+	Target     string   `json:"target" url:"target"`
+	Screenshot []byte   `json:"screenshot" url:"screenshot"`
+	Errors     []string `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (w *WebpageScreenshotReport) GetExtraProperties() map[string]interface{} {
+	return w.extraProperties
+}
+
+func (w *WebpageScreenshotReport) UnmarshalJSON(data []byte) error {
+	type unmarshaler WebpageScreenshotReport
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*w = WebpageScreenshotReport(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+
+	w._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (w *WebpageScreenshotReport) String() string {
+	if len(w._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(w._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(w); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", w)
+}

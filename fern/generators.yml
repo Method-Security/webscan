@@ -3,7 +3,7 @@ groups:
   local:
     generators:
       - name: fernapi/fern-go-sdk
-        version: 0.22.2
+        version: 0.23.2
         config:
           importpath: github.com/Method-Security/webscan/generated/go
         output:
@@ -12,14 +12,14 @@ groups:
   pypi-local:
     generators:
       - name: fernapi/fern-pydantic-model
-        version: 1.3.1
+        version: 1.4.4
         output:
           location: local-file-system
           path: ../generated/python
   pypi-test:
     generators:
       - name: fernapi/fern-pydantic-model
-        version:  1.3.1
+        version: 1.4.4
         config:
           package_name: webscan
         output:
@@ -30,7 +30,7 @@ groups:
   pypi:
     generators:
       - name: fernapi/fern-pydantic-model
-        version: 1.3.1
+        version: 1.4.4
         config:
           package_name: webscan
         output:

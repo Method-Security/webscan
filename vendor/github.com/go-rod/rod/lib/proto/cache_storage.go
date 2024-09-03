@@ -11,26 +11,26 @@ CacheStorage
 // CacheStorageCacheID Unique identifier of the Cache object.
 type CacheStorageCacheID string
 
-// CacheStorageCachedResponseType type of HTTP response cached
+// CacheStorageCachedResponseType type of HTTP response cached.
 type CacheStorageCachedResponseType string
 
 const (
-	// CacheStorageCachedResponseTypeBasic enum const
+	// CacheStorageCachedResponseTypeBasic enum const.
 	CacheStorageCachedResponseTypeBasic CacheStorageCachedResponseType = "basic"
 
-	// CacheStorageCachedResponseTypeCors enum const
+	// CacheStorageCachedResponseTypeCors enum const.
 	CacheStorageCachedResponseTypeCors CacheStorageCachedResponseType = "cors"
 
-	// CacheStorageCachedResponseTypeDefault enum const
+	// CacheStorageCachedResponseTypeDefault enum const.
 	CacheStorageCachedResponseTypeDefault CacheStorageCachedResponseType = "default"
 
-	// CacheStorageCachedResponseTypeError enum const
+	// CacheStorageCachedResponseTypeError enum const.
 	CacheStorageCachedResponseTypeError CacheStorageCachedResponseType = "error"
 
-	// CacheStorageCachedResponseTypeOpaqueResponse enum const
+	// CacheStorageCachedResponseTypeOpaqueResponse enum const.
 	CacheStorageCachedResponseTypeOpaqueResponse CacheStorageCachedResponseType = "opaqueResponse"
 
-	// CacheStorageCachedResponseTypeOpaqueRedirect enum const
+	// CacheStorageCachedResponseTypeOpaqueRedirect enum const.
 	CacheStorageCachedResponseTypeOpaqueRedirect CacheStorageCachedResponseType = "opaqueRedirect"
 )
 
@@ -72,6 +72,9 @@ type CacheStorageCache struct {
 	// StorageKey Storage key of the cache.
 	StorageKey string `json:"storageKey"`
 
+	// StorageBucket (optional) Storage bucket of the cache.
+	StorageBucket *StorageStorageBucket `json:"storageBucket,omitempty"`
+
 	// CacheName The name of the cache.
 	CacheName string `json:"cacheName"`
 }
@@ -85,7 +88,7 @@ type CacheStorageHeader struct {
 	Value string `json:"value"`
 }
 
-// CacheStorageCachedResponse Cached response
+// CacheStorageCachedResponse Cached response.
 type CacheStorageCachedResponse struct {
 	// Body Entry content, base64-encoded.
 	Body []byte `json:"body"`
@@ -97,10 +100,10 @@ type CacheStorageDeleteCache struct {
 	CacheID CacheStorageCacheID `json:"cacheId"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m CacheStorageDeleteCache) ProtoReq() string { return "CacheStorage.deleteCache" }
 
-// Call sends the request
+// Call sends the request.
 func (m CacheStorageDeleteCache) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
@@ -114,28 +117,31 @@ type CacheStorageDeleteEntry struct {
 	Request string `json:"request"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m CacheStorageDeleteEntry) ProtoReq() string { return "CacheStorage.deleteEntry" }
 
-// Call sends the request
+// Call sends the request.
 func (m CacheStorageDeleteEntry) Call(c Client) error {
 	return call(m.ProtoReq(), m, nil, c)
 }
 
 // CacheStorageRequestCacheNames Requests cache names.
 type CacheStorageRequestCacheNames struct {
-	// SecurityOrigin (optional) At least and at most one of securityOrigin, storageKey must be specified.
+	// SecurityOrigin (optional) At least and at most one of securityOrigin, storageKey, storageBucket must be specified.
 	// Security origin.
 	SecurityOrigin string `json:"securityOrigin,omitempty"`
 
 	// StorageKey (optional) Storage key.
 	StorageKey string `json:"storageKey,omitempty"`
+
+	// StorageBucket (optional) Storage bucket. If not specified, it uses the default bucket.
+	StorageBucket *StorageStorageBucket `json:"storageBucket,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m CacheStorageRequestCacheNames) ProtoReq() string { return "CacheStorage.requestCacheNames" }
 
-// Call the request
+// Call the request.
 func (m CacheStorageRequestCacheNames) Call(c Client) (*CacheStorageRequestCacheNamesResult, error) {
 	var res CacheStorageRequestCacheNamesResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -143,7 +149,7 @@ func (m CacheStorageRequestCacheNames) Call(c Client) (*CacheStorageRequestCache
 
 // CacheStorageRequestCacheNamesResult ...
 type CacheStorageRequestCacheNamesResult struct {
-	// Caches Caches for the security origin.
+	// Caches for the security origin.
 	Caches []*CacheStorageCache `json:"caches"`
 }
 
@@ -159,12 +165,12 @@ type CacheStorageRequestCachedResponse struct {
 	RequestHeaders []*CacheStorageHeader `json:"requestHeaders"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m CacheStorageRequestCachedResponse) ProtoReq() string {
 	return "CacheStorage.requestCachedResponse"
 }
 
-// Call the request
+// Call the request.
 func (m CacheStorageRequestCachedResponse) Call(c Client) (*CacheStorageRequestCachedResponseResult, error) {
 	var res CacheStorageRequestCachedResponseResult
 	return &res, call(m.ProtoReq(), m, &res, c)
@@ -172,7 +178,7 @@ func (m CacheStorageRequestCachedResponse) Call(c Client) (*CacheStorageRequestC
 
 // CacheStorageRequestCachedResponseResult ...
 type CacheStorageRequestCachedResponseResult struct {
-	// Response Response read from the cache.
+	// Response read from the cache.
 	Response *CacheStorageCachedResponse `json:"response"`
 }
 
@@ -191,10 +197,10 @@ type CacheStorageRequestEntries struct {
 	PathFilter string `json:"pathFilter,omitempty"`
 }
 
-// ProtoReq name
+// ProtoReq name.
 func (m CacheStorageRequestEntries) ProtoReq() string { return "CacheStorage.requestEntries" }
 
-// Call the request
+// Call the request.
 func (m CacheStorageRequestEntries) Call(c Client) (*CacheStorageRequestEntriesResult, error) {
 	var res CacheStorageRequestEntriesResult
 	return &res, call(m.ProtoReq(), m, &res, c)

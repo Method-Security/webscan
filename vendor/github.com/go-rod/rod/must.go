@@ -10,7 +10,7 @@ package rod
 
 import (
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -126,7 +126,7 @@ func (b *Browser) MustWaitDownload() func() []byte {
 		info := wait()
 		path := filepath.Join(tmpDir, info.GUID)
 		defer func() { _ = os.Remove(path) }()
-		data, err := ioutil.ReadFile(path)
+		data, err := os.ReadFile(path)
 		b.e(err)
 		return data
 	}
@@ -230,6 +230,12 @@ func (p *Page) MustSetBlockedURLs(urls ...string) *Page {
 // MustNavigate is similar to [Page.Navigate].
 func (p *Page) MustNavigate(url string) *Page {
 	p.e(p.Navigate(url))
+	return p
+}
+
+// MustResetNavigationHistory is similar to [Page.ResetNavigationHistory].
+func (p *Page) MustResetNavigationHistory() *Page {
+	p.e(p.ResetNavigationHistory())
 	return p
 }
 
@@ -387,12 +393,21 @@ func (p *Page) MustScreenshotFullPage(toFile ...string) []byte {
 	return bin
 }
 
+// MustScrollScreenshot is similar to [Page.ScrollScreenshot].
+// If the toFile is "", it Page.will save output to "tmp/screenshots" folder, time as the file name.
+func (p *Page) MustScrollScreenshot(toFile ...string) []byte {
+	bin, err := p.ScrollScreenshot(nil)
+	p.e(err)
+	p.e(saveFile(saveFileTypeScreenshot, bin, toFile))
+	return bin
+}
+
 // MustPDF is similar to [Page.PDF].
 // If the toFile is "", it Page.will save output to "tmp/pdf" folder, time as the file name.
 func (p *Page) MustPDF(toFile ...string) []byte {
 	r, err := p.PDF(&proto.PagePrintToPDF{})
 	p.e(err)
-	bin, err := ioutil.ReadAll(r)
+	bin, err := io.ReadAll(r)
 	p.e(err)
 
 	p.e(saveFile(saveFileTypePDF, bin, toFile))
@@ -776,7 +791,7 @@ func (el *Element) MustTap() *Element {
 // MustInteractable is similar to [Element.Interactable].
 func (el *Element) MustInteractable() bool {
 	_, err := el.Interactable()
-	if errors.Is(err, &ErrNotInteractable{}) {
+	if errors.Is(err, &NotInteractableError{}) {
 		return false
 	}
 	el.e(err)
@@ -823,6 +838,12 @@ func (el *Element) MustInput(text string) *Element {
 // MustInputTime is similar to [Element.Input].
 func (el *Element) MustInputTime(t time.Time) *Element {
 	el.e(el.InputTime(t))
+	return el
+}
+
+// MustInputColor is similar to [Element.InputColor].
+func (el *Element) MustInputColor(color string) *Element {
+	el.e(el.InputColor(color))
 	return el
 }
 
@@ -1139,4 +1160,13 @@ func (el *Element) MustGetXPath(optimized bool) string {
 	xpath, err := el.GetXPath(optimized)
 	el.e(err)
 	return xpath
+}
+
+// MustGet an elem from the pool. Use the [Pool[T].Put] to make it reusable later.
+func (p Pool[T]) MustGet(create func() *T) *T {
+	elem := <-p
+	if elem == nil {
+		elem = create()
+	}
+	return elem
 }
