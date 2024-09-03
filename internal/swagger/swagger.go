@@ -5,10 +5,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -258,18 +260,18 @@ func handleSwaggerV2(document libopenapi.Document, report *webscan.RoutesReport)
 				}
 			}
 
+			requestSchema := extractRequestSchemaV2(operation, document)
+
 			securityRequirements := convertSecurityRequirementsV2(operation.Security)
 			route := webscan.Route{
-				Path:        path,
-				Method:      method,
-				QueryParams: getQueryParamsV2(operation.Parameters),
-				Security:    securityRequirements,
-				Type:        webscan.ApiTypeSwaggerV2,
-				Description: operation.Description,
-			}
-
-			if responseProperties != nil {
-				route.ResponseProperties = responseProperties
+				Path:               path,
+				Method:             method,
+				QueryParams:        getQueryParamsV2(operation.Parameters),
+				Security:           securityRequirements,
+				Type:               webscan.ApiTypeSwaggerV2,
+				Description:        operation.Description,
+				RequestSchema:      requestSchema,
+				ResponseProperties: responseProperties,
 			}
 
 			report.Routes = append(report.Routes, &route)
@@ -342,18 +344,18 @@ func handleOpenAPIV3(document libopenapi.Document, report *webscan.RoutesReport,
 				}
 			}
 
+			requestSchema := extractRequestSchemaV3(operation, document)
+
 			securityRequirements := convertSecurityRequirementsV3(operation.Security)
 			route := webscan.Route{
-				Path:        path,
-				Method:      method,
-				QueryParams: getQueryParamsV3(operation.Parameters),
-				Security:    securityRequirements,
-				Type:        webscan.ApiTypeSwaggerV3,
-				Description: operation.Description,
-			}
-
-			if responseProperties != nil {
-				route.ResponseProperties = responseProperties
+				Path:               path,
+				Method:             method,
+				QueryParams:        getQueryParamsV3(operation.Parameters),
+				Security:           securityRequirements,
+				Type:               webscan.ApiTypeSwaggerV3,
+				Description:        operation.Description,
+				RequestSchema:      requestSchema,
+				ResponseProperties: responseProperties,
 			}
 
 			report.Routes = append(report.Routes, &route)
@@ -608,4 +610,245 @@ func extractResponsePropertiesV3(operation *v3.Operation) (map[string][]string, 
 		return nil, fmt.Errorf("no response properties found")
 	}
 	return responseProperties, nil
+}
+
+func convertSchemaToRequestSchema(s *base.Schema, seenSchemas map[*base.Schema]bool) *webscan.RequestSchema {
+	if s == nil {
+		return nil
+	}
+
+	// Check for circular references
+	if seenSchemas[s] {
+		return &webscan.RequestSchema{
+			Type:        []string{"circular_reference"},
+			Description: strPtr("Circular reference detected"),
+		}
+	}
+	seenSchemas[s] = true
+
+	rs := &webscan.RequestSchema{
+		Type:        s.Type,
+		Required:    s.Required,
+		Description: strPtr(s.Description),
+		Format:      strPtr(s.Format),
+	}
+
+	if s.Default != nil {
+		defaultStr := fmt.Sprintf("%v", s.Default)
+		rs.Default = &defaultStr
+	}
+
+	if s.Example != nil {
+		rs.Example = s.Example
+	}
+
+	if len(s.Enum) > 0 {
+		rs.Enum = make([]interface{}, len(s.Enum))
+		for i, v := range s.Enum {
+			// v is a *yaml.Node, we need to convert it to the appropriate Go type
+			switch v.Kind {
+			case yaml.ScalarNode:
+				switch v.Tag {
+				case "!!str":
+					rs.Enum[i] = v.Value
+				case "!!int":
+					if val, err := strconv.ParseInt(v.Value, 10, 64); err == nil {
+						rs.Enum[i] = val
+					}
+				case "!!float":
+					if val, err := strconv.ParseFloat(v.Value, 64); err == nil {
+						rs.Enum[i] = val
+					}
+				case "!!bool":
+					if val, err := strconv.ParseBool(v.Value); err == nil {
+						rs.Enum[i] = val
+					}
+				default:
+					rs.Enum[i] = v.Value // fallback to string
+				}
+			case yaml.SequenceNode, yaml.MappingNode:
+				// For complex types, we store them as is
+				rs.Enum[i] = v
+			}
+		}
+	}
+
+	if s.MultipleOf != nil {
+		rs.MultipleOf = s.MultipleOf
+	}
+
+	if s.Maximum != nil {
+		rs.Maximum = s.Maximum
+	}
+
+	if s.ExclusiveMaximum != nil {
+		if s.ExclusiveMaximum.IsA() {
+			boolVal := s.ExclusiveMaximum.A
+			rs.ExclusiveMaximum = &boolVal
+		} else if s.ExclusiveMaximum.IsB() {
+			boolVal := s.ExclusiveMaximum.B > 0
+			rs.ExclusiveMaximum = &boolVal
+		}
+	}
+
+	if s.Minimum != nil {
+		rs.Minimum = s.Minimum
+	}
+
+	if s.ExclusiveMinimum != nil {
+		if s.ExclusiveMinimum.IsA() {
+			boolVal := s.ExclusiveMinimum.A
+			rs.ExclusiveMinimum = &boolVal
+		} else if s.ExclusiveMinimum.IsB() {
+			boolVal := s.ExclusiveMinimum.B > 0
+			rs.ExclusiveMinimum = &boolVal
+		}
+	}
+
+	if s.MaxLength != nil {
+		intVal := int(*s.MaxLength)
+		rs.MaxLength = &intVal
+	}
+
+	if s.MinLength != nil {
+		intVal := int(*s.MinLength)
+		rs.MinLength = &intVal
+	}
+
+	if s.Pattern != "" {
+		rs.Pattern = &s.Pattern
+	}
+
+	if s.MaxItems != nil {
+		intVal := int(*s.MaxItems)
+		rs.MaxItems = &intVal
+	}
+
+	if s.MinItems != nil {
+		intVal := int(*s.MinItems)
+		rs.MinItems = &intVal
+	}
+
+	if s.UniqueItems != nil {
+		rs.UniqueItems = s.UniqueItems
+	}
+
+	if s.MaxProperties != nil {
+		intVal := int(*s.MaxProperties)
+		rs.MaxProperties = &intVal
+	}
+
+	if s.MinProperties != nil {
+		intVal := int(*s.MinProperties)
+		rs.MinProperties = &intVal
+	}
+
+	if s.Properties != nil {
+		rs.Properties = make([]*webscan.SchemaProperty, 0)
+		for pair := s.Properties.Oldest(); pair != nil; pair = pair.Next() {
+			propName := pair.Key
+			propSchema := pair.Value.Schema()
+			if propSchema != nil {
+				required := contains(s.Required, propName)
+				prop := &webscan.SchemaProperty{
+					Name:        propName,
+					Type:        propSchema.Type,
+					Format:      strPtr(propSchema.Format),
+					Description: strPtr(propSchema.Description),
+					Required:    &required,
+				}
+				if propSchema.Items != nil && propSchema.Items.A != nil {
+					prop.Items = convertSchemaToRequestSchema(propSchema.Items.A.Schema(), seenSchemas)
+				}
+				if propSchema.Properties != nil {
+					nestedSchema := convertSchemaToRequestSchema(propSchema, seenSchemas)
+					prop.Properties = nestedSchema.Properties
+				}
+				rs.Properties = append(rs.Properties, prop)
+			}
+		}
+	}
+
+	if s.Items != nil && s.Items.A != nil {
+		rs.Items = convertSchemaToRequestSchema(s.Items.A.Schema(), seenSchemas)
+	}
+
+	if s.AdditionalProperties != nil && s.AdditionalProperties.A != nil {
+		rs.AdditionalProperties = convertSchemaToRequestSchema(s.AdditionalProperties.A.Schema(), seenSchemas)
+	}
+
+	if len(s.AllOf) > 0 {
+		rs.AllOf = make([]*webscan.RequestSchema, len(s.AllOf))
+		for i, schema := range s.AllOf {
+			rs.AllOf[i] = convertSchemaToRequestSchema(schema.Schema(), seenSchemas)
+		}
+	}
+
+	if len(s.OneOf) > 0 {
+		rs.OneOf = make([]*webscan.RequestSchema, len(s.OneOf))
+		for i, schema := range s.OneOf {
+			rs.OneOf[i] = convertSchemaToRequestSchema(schema.Schema(), seenSchemas)
+		}
+	}
+
+	if len(s.AnyOf) > 0 {
+		rs.AnyOf = make([]*webscan.RequestSchema, len(s.AnyOf))
+		for i, schema := range s.AnyOf {
+			rs.AnyOf[i] = convertSchemaToRequestSchema(schema.Schema(), seenSchemas)
+		}
+	}
+
+	if s.Not != nil {
+		rs.Not = convertSchemaToRequestSchema(s.Not.Schema(), seenSchemas)
+	}
+
+	delete(seenSchemas, s)
+	return rs
+}
+
+func strPtr(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}
+
+func extractRequestSchemaV2(operation *v2.Operation, doc libopenapi.Document) *webscan.RequestSchema {
+	if operation.Parameters == nil {
+		return nil
+	}
+
+	for _, param := range operation.Parameters {
+		if param.In == "body" && param.Schema != nil {
+			if s := param.Schema.Schema(); s != nil {
+				return convertSchemaToRequestSchema(s, make(map[*base.Schema]bool))
+			}
+		}
+	}
+	return nil
+}
+
+func extractRequestSchemaV3(operation *v3.Operation, doc libopenapi.Document) *webscan.RequestSchema {
+	if operation.RequestBody == nil || operation.RequestBody.Content == nil {
+		return nil
+	}
+
+	for pair := operation.RequestBody.Content.Oldest(); pair != nil; pair = pair.Next() {
+		mediaType := pair.Value
+		if mediaType.Schema != nil {
+			if s := mediaType.Schema.Schema(); s != nil {
+				return convertSchemaToRequestSchema(s, make(map[*base.Schema]bool))
+			}
+		}
+	}
+	return nil
 }

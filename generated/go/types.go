@@ -985,6 +985,73 @@ func (o *OAuthFlows) String() string {
 	return fmt.Sprintf("%#v", o)
 }
 
+type RequestSchema struct {
+	Type                 []string          `json:"type,omitempty" url:"type,omitempty"`
+	Properties           []*SchemaProperty `json:"properties,omitempty" url:"properties,omitempty"`
+	Required             []string          `json:"required,omitempty" url:"required,omitempty"`
+	Items                *RequestSchema    `json:"items,omitempty" url:"items,omitempty"`
+	AdditionalProperties *RequestSchema    `json:"additionalProperties,omitempty" url:"additionalProperties,omitempty"`
+	AllOf                []*RequestSchema  `json:"allOf,omitempty" url:"allOf,omitempty"`
+	OneOf                []*RequestSchema  `json:"oneOf,omitempty" url:"oneOf,omitempty"`
+	AnyOf                []*RequestSchema  `json:"anyOf,omitempty" url:"anyOf,omitempty"`
+	Not                  *RequestSchema    `json:"not,omitempty" url:"not,omitempty"`
+	Description          *string           `json:"description,omitempty" url:"description,omitempty"`
+	Format               *string           `json:"format,omitempty" url:"format,omitempty"`
+	Default              *string           `json:"default,omitempty" url:"default,omitempty"`
+	Example              interface{}       `json:"example,omitempty" url:"example,omitempty"`
+	Enum                 []interface{}     `json:"enum,omitempty" url:"enum,omitempty"`
+	MultipleOf           *float64          `json:"multipleOf,omitempty" url:"multipleOf,omitempty"`
+	Maximum              *float64          `json:"maximum,omitempty" url:"maximum,omitempty"`
+	ExclusiveMaximum     *bool             `json:"exclusiveMaximum,omitempty" url:"exclusiveMaximum,omitempty"`
+	Minimum              *float64          `json:"minimum,omitempty" url:"minimum,omitempty"`
+	ExclusiveMinimum     *bool             `json:"exclusiveMinimum,omitempty" url:"exclusiveMinimum,omitempty"`
+	MaxLength            *int              `json:"maxLength,omitempty" url:"maxLength,omitempty"`
+	MinLength            *int              `json:"minLength,omitempty" url:"minLength,omitempty"`
+	Pattern              *string           `json:"pattern,omitempty" url:"pattern,omitempty"`
+	MaxItems             *int              `json:"maxItems,omitempty" url:"maxItems,omitempty"`
+	MinItems             *int              `json:"minItems,omitempty" url:"minItems,omitempty"`
+	UniqueItems          *bool             `json:"uniqueItems,omitempty" url:"uniqueItems,omitempty"`
+	MaxProperties        *int              `json:"maxProperties,omitempty" url:"maxProperties,omitempty"`
+	MinProperties        *int              `json:"minProperties,omitempty" url:"minProperties,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RequestSchema) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RequestSchema) UnmarshalJSON(data []byte) error {
+	type unmarshaler RequestSchema
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RequestSchema(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RequestSchema) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
 type Route struct {
 	Path               string               `json:"path" url:"path"`
 	QueryParams        []string             `json:"queryParams,omitempty" url:"queryParams,omitempty"`
@@ -993,6 +1060,7 @@ type Route struct {
 	Type               ApiType              `json:"type" url:"type"`
 	Description        string               `json:"description" url:"description"`
 	ResponseProperties map[string][]string  `json:"responseProperties,omitempty" url:"responseProperties,omitempty"`
+	RequestSchema      *RequestSchema       `json:"requestSchema,omitempty" url:"requestSchema,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -1081,6 +1149,56 @@ func (r *RoutesReport) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", r)
+}
+
+type SchemaProperty struct {
+	Name                 string            `json:"name" url:"name"`
+	Type                 []string          `json:"type,omitempty" url:"type,omitempty"`
+	Format               *string           `json:"format,omitempty" url:"format,omitempty"`
+	Description          *string           `json:"description,omitempty" url:"description,omitempty"`
+	Required             *bool             `json:"required,omitempty" url:"required,omitempty"`
+	Items                *RequestSchema    `json:"items,omitempty" url:"items,omitempty"`
+	Properties           []*SchemaProperty `json:"properties,omitempty" url:"properties,omitempty"`
+	AdditionalProperties *RequestSchema    `json:"additionalProperties,omitempty" url:"additionalProperties,omitempty"`
+	Enum                 []string          `json:"enum,omitempty" url:"enum,omitempty"`
+	Example              *string           `json:"example,omitempty" url:"example,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SchemaProperty) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SchemaProperty) UnmarshalJSON(data []byte) error {
+	type unmarshaler SchemaProperty
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SchemaProperty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SchemaProperty) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 type SecurityRequirement struct {

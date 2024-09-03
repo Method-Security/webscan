@@ -39,6 +39,50 @@ types:
   SecurityRequirement:
     properties:
       schemes: map<string, optional<list<string>>>
+
+  SchemaProperty:
+    properties:
+      name: string
+      type: list<string>
+      format: optional<string>
+      description: optional<string>
+      required: optional<boolean>
+      items: optional<RequestSchema>
+      properties: optional<list<SchemaProperty>>
+      additionalProperties: optional<RequestSchema>
+      enum: optional<list<string>>
+      example: optional<string>
+
+  RequestSchema:
+    properties:
+      type: list<string>
+      properties: optional<list<SchemaProperty>>
+      required: optional<list<string>>
+      items: optional<RequestSchema>
+      additionalProperties: optional<RequestSchema>
+      allOf: optional<list<RequestSchema>>
+      oneOf: optional<list<RequestSchema>>
+      anyOf: optional<list<RequestSchema>>
+      not: optional<RequestSchema>
+      description: optional<string>
+      format: optional<string>
+      default: optional<string>
+      example: optional<unknown>
+      enum: optional<list<unknown>>
+      multipleOf: optional<double>
+      maximum: optional<double>
+      exclusiveMaximum: optional<boolean>
+      minimum: optional<double>
+      exclusiveMinimum: optional<boolean>
+      maxLength: optional<integer>
+      minLength: optional<integer>
+      pattern: optional<string>
+      maxItems: optional<integer>
+      minItems: optional<integer>
+      uniqueItems: optional<boolean>
+      maxProperties: optional<integer>
+      minProperties: optional<integer>
+
   Route:
     properties:
       path: string
@@ -48,6 +92,8 @@ types:
       type: APIType
       description: string
       responseProperties: optional<map<string, list<string>>>
+      requestSchema: optional<RequestSchema>
+
   RoutesReport:
     properties:
       target: string
@@ -61,6 +107,7 @@ types:
       queries: optional<list<graphql.GraphQLQuery>>
       raw: string
       errors: optional<list<string>>
+
   APIType:
     enum:
       - Grpc
