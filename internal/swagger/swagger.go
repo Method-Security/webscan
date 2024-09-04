@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"io"
 	"log"
 	"net/http"
@@ -22,6 +21,7 @@ import (
 	v3 "github.com/pb33f/libopenapi/datamodel/high/v3"
 	"github.com/pb33f/libopenapi/orderedmap"
 	"golang.org/x/net/html"
+	"gopkg.in/yaml.v3"
 )
 
 // PerformSwaggerScan performs a Swagger scan against a target URL and returns the report.
@@ -260,7 +260,7 @@ func handleSwaggerV2(document libopenapi.Document, report *webscan.RoutesReport)
 				}
 			}
 
-			requestSchema := extractRequestSchemaV2(operation, document)
+			requestSchema := extractRequestSchemaV2(operation, document, report)
 
 			securityRequirements := convertSecurityRequirementsV2(operation.Security)
 			route := webscan.Route{
@@ -344,7 +344,7 @@ func handleOpenAPIV3(document libopenapi.Document, report *webscan.RoutesReport,
 				}
 			}
 
-			requestSchema := extractRequestSchemaV3(operation, document)
+			requestSchema := extractRequestSchemaV3(operation, document, report)
 
 			securityRequirements := convertSecurityRequirementsV3(operation.Security)
 			route := webscan.Route{
@@ -612,13 +612,15 @@ func extractResponsePropertiesV3(operation *v3.Operation) (map[string][]string, 
 	return responseProperties, nil
 }
 
-func convertSchemaToRequestSchema(s *base.Schema, seenSchemas map[*base.Schema]bool) *webscan.RequestSchema {
+func convertSchemaToRequestSchema(s *base.Schema, seenSchemas map[*base.Schema]bool, report *webscan.RoutesReport) *webscan.RequestSchema {
 	if s == nil {
+		report.Errors = append(report.Errors, "Encountered nil schema")
 		return nil
 	}
 
 	// Check for circular references
 	if seenSchemas[s] {
+		report.Errors = append(report.Errors, "Circular reference detected in schema")
 		return &webscan.RequestSchema{
 			Type:        []string{"circular_reference"},
 			Description: strPtr("Circular reference detected"),
@@ -654,14 +656,20 @@ func convertSchemaToRequestSchema(s *base.Schema, seenSchemas map[*base.Schema]b
 				case "!!int":
 					if val, err := strconv.ParseInt(v.Value, 10, 64); err == nil {
 						rs.Enum[i] = val
+					} else {
+						report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse int enum value: %s", err))
 					}
 				case "!!float":
 					if val, err := strconv.ParseFloat(v.Value, 64); err == nil {
 						rs.Enum[i] = val
+					} else {
+						report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse float enum value: %s", err))
 					}
 				case "!!bool":
 					if val, err := strconv.ParseBool(v.Value); err == nil {
 						rs.Enum[i] = val
+					} else {
+						report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse bool enum value: %s", err))
 					}
 				default:
 					rs.Enum[i] = v.Value // fallback to string
@@ -758,48 +766,50 @@ func convertSchemaToRequestSchema(s *base.Schema, seenSchemas map[*base.Schema]b
 					Required:    &required,
 				}
 				if propSchema.Items != nil && propSchema.Items.A != nil {
-					prop.Items = convertSchemaToRequestSchema(propSchema.Items.A.Schema(), seenSchemas)
+					prop.Items = convertSchemaToRequestSchema(propSchema.Items.A.Schema(), seenSchemas, report)
 				}
 				if propSchema.Properties != nil {
-					nestedSchema := convertSchemaToRequestSchema(propSchema, seenSchemas)
+					nestedSchema := convertSchemaToRequestSchema(propSchema, seenSchemas, report)
 					prop.Properties = nestedSchema.Properties
 				}
 				rs.Properties = append(rs.Properties, prop)
+			} else {
+				report.Errors = append(report.Errors, fmt.Sprintf("Nil property schema for property: %s", propName))
 			}
 		}
 	}
 
 	if s.Items != nil && s.Items.A != nil {
-		rs.Items = convertSchemaToRequestSchema(s.Items.A.Schema(), seenSchemas)
+		rs.Items = convertSchemaToRequestSchema(s.Items.A.Schema(), seenSchemas, report)
 	}
 
 	if s.AdditionalProperties != nil && s.AdditionalProperties.A != nil {
-		rs.AdditionalProperties = convertSchemaToRequestSchema(s.AdditionalProperties.A.Schema(), seenSchemas)
+		rs.AdditionalProperties = convertSchemaToRequestSchema(s.AdditionalProperties.A.Schema(), seenSchemas, report)
 	}
 
 	if len(s.AllOf) > 0 {
 		rs.AllOf = make([]*webscan.RequestSchema, len(s.AllOf))
 		for i, schema := range s.AllOf {
-			rs.AllOf[i] = convertSchemaToRequestSchema(schema.Schema(), seenSchemas)
+			rs.AllOf[i] = convertSchemaToRequestSchema(schema.Schema(), seenSchemas, report)
 		}
 	}
 
 	if len(s.OneOf) > 0 {
 		rs.OneOf = make([]*webscan.RequestSchema, len(s.OneOf))
 		for i, schema := range s.OneOf {
-			rs.OneOf[i] = convertSchemaToRequestSchema(schema.Schema(), seenSchemas)
+			rs.OneOf[i] = convertSchemaToRequestSchema(schema.Schema(), seenSchemas, report)
 		}
 	}
 
 	if len(s.AnyOf) > 0 {
 		rs.AnyOf = make([]*webscan.RequestSchema, len(s.AnyOf))
 		for i, schema := range s.AnyOf {
-			rs.AnyOf[i] = convertSchemaToRequestSchema(schema.Schema(), seenSchemas)
+			rs.AnyOf[i] = convertSchemaToRequestSchema(schema.Schema(), seenSchemas, report)
 		}
 	}
 
 	if s.Not != nil {
-		rs.Not = convertSchemaToRequestSchema(s.Not.Schema(), seenSchemas)
+		rs.Not = convertSchemaToRequestSchema(s.Not.Schema(), seenSchemas, report)
 	}
 
 	delete(seenSchemas, s)
@@ -822,23 +832,26 @@ func contains(slice []string, item string) bool {
 	return false
 }
 
-func extractRequestSchemaV2(operation *v2.Operation, doc libopenapi.Document) *webscan.RequestSchema {
+func extractRequestSchemaV2(operation *v2.Operation, doc libopenapi.Document, report *webscan.RoutesReport) *webscan.RequestSchema {
 	if operation.Parameters == nil {
+		report.Errors = append(report.Errors, "No parameters found in operation")
 		return nil
 	}
 
 	for _, param := range operation.Parameters {
 		if param.In == "body" && param.Schema != nil {
 			if s := param.Schema.Schema(); s != nil {
-				return convertSchemaToRequestSchema(s, make(map[*base.Schema]bool))
+				return convertSchemaToRequestSchema(s, make(map[*base.Schema]bool), report)
 			}
 		}
 	}
+	report.Errors = append(report.Errors, "No body parameter with schema found in operation")
 	return nil
 }
 
-func extractRequestSchemaV3(operation *v3.Operation, doc libopenapi.Document) *webscan.RequestSchema {
+func extractRequestSchemaV3(operation *v3.Operation, doc libopenapi.Document, report *webscan.RoutesReport) *webscan.RequestSchema {
 	if operation.RequestBody == nil || operation.RequestBody.Content == nil {
+		report.Errors = append(report.Errors, "No request body or content found in operation")
 		return nil
 	}
 
@@ -846,9 +859,10 @@ func extractRequestSchemaV3(operation *v3.Operation, doc libopenapi.Document) *w
 		mediaType := pair.Value
 		if mediaType.Schema != nil {
 			if s := mediaType.Schema.Schema(); s != nil {
-				return convertSchemaToRequestSchema(s, make(map[*base.Schema]bool))
+				return convertSchemaToRequestSchema(s, make(map[*base.Schema]bool), report)
 			}
 		}
 	}
+	report.Errors = append(report.Errors, "No schema found in request body content")
 	return nil
 }

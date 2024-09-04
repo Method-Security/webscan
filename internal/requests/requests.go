@@ -54,7 +54,11 @@ func PerformRequestScan(baseURL, path, method string, params webscan.RequestPara
 		report.Errors = append(report.Errors, err.Error())
 		return report
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			report.Errors = append(report.Errors, fmt.Sprintf("Error closing response body: %v", err))
+		}
+	}()
 
 	// Read response body
 	body, err := io.ReadAll(resp.Body)

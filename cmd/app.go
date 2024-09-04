@@ -267,9 +267,7 @@ The requests command allows you to send custom HTTP requests to a target URL wit
 			report := requests.PerformRequestScan(baseURL, path, method, params, vulnTypes)
 
 			if len(report.Errors) > 0 {
-				for _, err := range report.Errors {
-					fmt.Fprintf(cmd.ErrOrStderr(), "Error: %s\n", err)
-				}
+				_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Error: %s\n", err)
 				a.OutputSignal.Status = 1
 			}
 
