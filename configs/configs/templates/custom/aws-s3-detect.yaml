@@ -32,3 +32,16 @@ http:
         name: bucket_url
         dsl:
           - to_lower(RootURL)
+        internal: true
+
+      - type: regex
+        part: header
+        name: region
+        group: 1
+        regex:
+          - 'X-Amz-Bucket-Region\: ([a-zA-Z0-9\-]*)'
+        internal: true
+
+      - type: dsl
+        dsl:
+          - concat(bucket_url, ",", region)
