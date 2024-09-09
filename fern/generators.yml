@@ -21,10 +21,10 @@ groups:
       - name: fernapi/fern-pydantic-model
         version: 1.4.4
         config:
-          package_name: webscan
+          package_name: methodwebscan
         output:
           location: pypi
-          package-name: webscan
+          package-name: methodwebscan
           token: ${TEST_PYPI_TOKEN}
           url: https://test.pypi.org/legacy/
   pypi:
@@ -32,8 +32,8 @@ groups:
       - name: fernapi/fern-pydantic-model
         version: 1.4.4
         config:
-          package_name: webscan
+          package_name: methodwebscan
         output:
           location: pypi
-          package-name: webscan
+          package-name: methodwebscan
           token: ${PYPI_TOKEN}
