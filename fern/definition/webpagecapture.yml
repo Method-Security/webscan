@@ -9,5 +9,5 @@ types:
   WebpageScreenshotReport:
     properties:
       target: string
-      screenshot: base64
+      screenshot: optional<base64>
       errors: optional<list<string>>
