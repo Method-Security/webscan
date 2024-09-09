@@ -1080,7 +1080,7 @@ func (w *WebpageCaptureReport) String() string {
 
 type WebpageScreenshotReport struct {
 	Target     string   `json:"target" url:"target"`
-	Screenshot []byte   `json:"screenshot" url:"screenshot"`
+	Screenshot *[]byte  `json:"screenshot,omitempty" url:"screenshot,omitempty"`
 	Errors     []string `json:"errors,omitempty" url:"errors,omitempty"`
 
 	extraProperties map[string]interface{}
