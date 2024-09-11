@@ -8,6 +8,17 @@ info:
   reference: https://docs.aws.amazon.com/s3/
   tags: exposure,bucket,s3
 
+dns:
+  - name: "{{FQDN}}"
+    type: CNAME
+
+    extractors:
+      - type: regex
+        regex:
+          - "IN\tCNAME\t(.*)"
+        name: cname
+        internal: true
+
 http:
   - method: GET
     path:
@@ -43,5 +54,11 @@ http:
         internal: true
 
       - type: dsl
+        name: cname_info
         dsl:
-          - concat(bucket_url, ",", region)
+          - 'cname'
+        internal: true
+
+      - type: dsl
+        dsl:
+          - concat(bucket_url, ",", region, ",", cname_info)
