@@ -82,7 +82,7 @@ func PerformWebServerProbe(ctx context.Context, targets string, timeout time.Dur
 	// 1. Parse target list
 	targetList := strings.Split(targets, ",")
 
-	// 2. Perform web server probe with timeout (default 10s)
+	// 2. Perform web server probe with timeout
 	urls, errors, err := performWebServerProbe(ctx, targetList, timeout)
 	if err != nil {
 		errors = append(errors, err.Error())
