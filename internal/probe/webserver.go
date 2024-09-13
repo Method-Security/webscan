@@ -4,6 +4,7 @@ package probe
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/projectdiscovery/httpx/runner"
 )
@@ -22,9 +23,13 @@ type WebServerReport struct {
 	Errors  []string     `json:"errors" yaml:"errors"`
 }
 
-func performWebServerProbe(targets []string) ([]URLDetails, []string, error) {
+func performWebServerProbe(ctx context.Context, targets []string, timeout time.Duration) ([]URLDetails, []string, error) {
 	errors := []string{}
 	urls := []URLDetails{}
+
+	// Create a new context with timeout
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
 
 	options := runner.Options{
 		Methods:         "GET",
@@ -53,20 +58,32 @@ func performWebServerProbe(targets []string) ([]URLDetails, []string, error) {
 	}
 	defer httpxRunner.Close()
 
-	httpxRunner.RunEnumeration()
+	// Run the enumeration with a goroutine and select for timeout
+	done := make(chan struct{})
 
-	return urls, errors, nil
+	go func() {
+		httpxRunner.RunEnumeration()
+		close(done)
+	}()
 
+	select {
+	case <-ctx.Done():
+		// Timeout reached
+		return urls, errors, ctx.Err()
+	case <-done:
+		// Enumeration completed successfully
+		return urls, errors, nil
+	}
 }
 
 // PerformWebServerProbe performs a web server probe against the provided targets, returning a WebServerReport with the
 // results of the probe.
-func PerformWebServerProbe(ctx context.Context, targets string) (WebServerReport, error) {
+func PerformWebServerProbe(ctx context.Context, targets string, timeout time.Duration) (WebServerReport, error) {
 	// 1. Parse target list
 	targetList := strings.Split(targets, ",")
 
-	// 2. Perform web server probe
-	urls, errors, err := performWebServerProbe(targetList)
+	// 2. Perform web server probe with timeout (default 10s)
+	urls, errors, err := performWebServerProbe(ctx, targetList, timeout)
 	if err != nil {
 		errors = append(errors, err.Error())
 	}
