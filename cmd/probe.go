@@ -49,7 +49,7 @@ func (a *WebScan) InitProbeCommand() {
 	}
 
 	webserverCmd.Flags().String("targets", "", "Address targets to perform webserver probing agains, comma delimited list")
-	webserverCmd.Flags().Int("timeout", 10, "Timeout limit in seconds")
+	webserverCmd.Flags().Int("timeout", 30, "Timeout limit in seconds")
 
 	probeCmd.AddCommand(webserverCmd)
 	a.RootCmd.AddCommand(probeCmd)
