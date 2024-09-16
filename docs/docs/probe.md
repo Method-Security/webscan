@@ -22,6 +22,7 @@ Usage:
 Flags:
   -h, --help             help for webserver
       --targets string   Address targets to perform webserver probing agains, comma delimited list
+      --timeout int      Timeout limit in seconds
 
 Global Flags:
   -o, --output string        Output format (signal, json, yaml). Default value is signal (default "signal")
