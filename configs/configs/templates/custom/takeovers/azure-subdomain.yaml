@@ -1,0 +1,28 @@
+id: azure-subdomain-takeover
+info:
+  name: Azure Cloud Subdomain Takeover
+  author: MethodSecurity
+  severity: high
+  description: |
+    This template detects subdomain takeovers on Azure services by checking for specific error messages or response codes that indicate an unclaimed or misconfigured resource.
+  tags: subdomain,takeover,azure
+
+requests:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+    matchers-condition: or
+    matchers:
+      - type: word
+        words:
+          - "The requested resource does not exist"
+          - "404 WebSiteNotFound"
+          - "No such host"
+      - type: status
+        status:
+          - 404
+          - 400
+    extractors:
+      - type: regex
+        regex:
+          - "(The requested resource does not exist|404 WebSiteNotFound|No such host)"

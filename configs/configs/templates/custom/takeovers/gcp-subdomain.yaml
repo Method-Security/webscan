@@ -1,0 +1,27 @@
+id: gcp-subdomain-takeover
+info:
+  name: GCP Cloud Storage Subdomain Takeover
+  author: MethodSecurity
+  severity: high
+  description: |
+    This template detects subdomain takeovers on Google Cloud services, especially Cloud Storage, by looking for common error messages indicating misconfigured or unavailable buckets.
+  tags: subdomain,takeover,gcp
+
+requests:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+    matchers-condition: or
+    matchers:
+      - type: word
+        words:
+          - "NoSuchBucket"
+          - "The specified bucket does not exist"
+          - "404 Not Found"
+      - type: status
+        status:
+          - 404
+    extractors:
+      - type: regex
+        regex:
+          - "(NoSuchBucket|The specified bucket does not exist)"
