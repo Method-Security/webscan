@@ -848,23 +848,23 @@ func convertEnumValue(v *yaml.Node, report *webscan.RoutesReport) interface{} {
 		case "!!str":
 			return v.Value
 		case "!!int":
-			if val, err := strconv.ParseInt(v.Value, 10, 64); err == nil {
+			val, err := strconv.ParseInt(v.Value, 10, 64)
+			if err == nil {
 				return val
-			} else {
-				report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse int enum value: %s", err))
 			}
+			report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse int enum value: %s", err))
 		case "!!float":
-			if val, err := strconv.ParseFloat(v.Value, 64); err == nil {
+			val, err := strconv.ParseFloat(v.Value, 64)
+			if err == nil {
 				return val
-			} else {
-				report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse float enum value: %s", err))
 			}
+			report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse float enum value: %s", err))
 		case "!!bool":
-			if val, err := strconv.ParseBool(v.Value); err == nil {
+			val, err := strconv.ParseBool(v.Value)
+			if err == nil {
 				return val
-			} else {
-				report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse bool enum value: %s", err))
 			}
+			report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse bool enum value: %s", err))
 		}
 	case yaml.SequenceNode, yaml.MappingNode:
 		// For complex types, we return them as is
