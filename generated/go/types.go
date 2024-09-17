@@ -825,7 +825,7 @@ type RequestReport struct {
 	BodyParams      *string           `json:"bodyParams,omitempty" url:"bodyParams,omitempty"`
 	FormParams      map[string]string `json:"formParams,omitempty" url:"formParams,omitempty"`
 	MultipartParams map[string]string `json:"multipartParams,omitempty" url:"multipartParams,omitempty"`
-	VulnTypes       []string          `json:"vulnTypes,omitempty" url:"vulnTypes,omitempty"`
+	VulnTypes       []VulnType        `json:"vulnTypes,omitempty" url:"vulnTypes,omitempty"`
 	StatusCode      int               `json:"statusCode" url:"statusCode"`
 	ResponseBody    string            `json:"responseBody" url:"responseBody"`
 	ResponseHeaders map[string]string `json:"responseHeaders,omitempty" url:"responseHeaders,omitempty"`
@@ -867,6 +867,46 @@ func (r *RequestReport) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", r)
+}
+
+type VulnType string
+
+const (
+	VulnTypeCommand        VulnType = "Command"
+	VulnTypeSql            VulnType = "SQL"
+	VulnTypeXss            VulnType = "XSS"
+	VulnTypeAuth           VulnType = "Auth"
+	VulnTypeSensitiveError VulnType = "SensitiveError"
+	VulnTypeSqlinjection   VulnType = "SQLINJECTION"
+	VulnTypeTemplate       VulnType = "TEMPLATE"
+	VulnTypeNosql          VulnType = "NOSQL"
+)
+
+func NewVulnTypeFromString(s string) (VulnType, error) {
+	switch s {
+	case "Command":
+		return VulnTypeCommand, nil
+	case "SQL":
+		return VulnTypeSql, nil
+	case "XSS":
+		return VulnTypeXss, nil
+	case "Auth":
+		return VulnTypeAuth, nil
+	case "SensitiveError":
+		return VulnTypeSensitiveError, nil
+	case "SQLINJECTION":
+		return VulnTypeSqlinjection, nil
+	case "TEMPLATE":
+		return VulnTypeTemplate, nil
+	case "NOSQL":
+		return VulnTypeNosql, nil
+	}
+	var t VulnType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (v VulnType) Ptr() *VulnType {
+	return &v
 }
 
 type ApiType string

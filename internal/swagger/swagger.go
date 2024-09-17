@@ -644,42 +644,7 @@ func convertSchemaToRequestSchema(s *base.Schema, seenSchemas map[*base.Schema]b
 		rs.Example = s.Example
 	}
 
-	if len(s.Enum) > 0 {
-		rs.Enum = make([]interface{}, len(s.Enum))
-		for i, v := range s.Enum {
-			// v is a *yaml.Node, we need to convert it to the appropriate Go type
-			switch v.Kind {
-			case yaml.ScalarNode:
-				switch v.Tag {
-				case "!!str":
-					rs.Enum[i] = v.Value
-				case "!!int":
-					if val, err := strconv.ParseInt(v.Value, 10, 64); err == nil {
-						rs.Enum[i] = val
-					} else {
-						report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse int enum value: %s", err))
-					}
-				case "!!float":
-					if val, err := strconv.ParseFloat(v.Value, 64); err == nil {
-						rs.Enum[i] = val
-					} else {
-						report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse float enum value: %s", err))
-					}
-				case "!!bool":
-					if val, err := strconv.ParseBool(v.Value); err == nil {
-						rs.Enum[i] = val
-					} else {
-						report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse bool enum value: %s", err))
-					}
-				default:
-					rs.Enum[i] = v.Value // fallback to string
-				}
-			case yaml.SequenceNode, yaml.MappingNode:
-				// For complex types, we store them as is
-				rs.Enum[i] = v
-			}
-		}
-	}
+	convertEnumValues(s, rs, report)
 
 	if s.MultipleOf != nil {
 		rs.MultipleOf = s.MultipleOf
@@ -865,4 +830,45 @@ func extractRequestSchemaV3(operation *v3.Operation, doc libopenapi.Document, re
 	}
 	report.Errors = append(report.Errors, "No schema found in request body content")
 	return nil
+}
+
+func convertEnumValues(s *base.Schema, rs *webscan.RequestSchema, report *webscan.RoutesReport) {
+	if len(s.Enum) > 0 {
+		rs.Enum = make([]interface{}, len(s.Enum))
+		for i, v := range s.Enum {
+			rs.Enum[i] = convertEnumValue(v, report)
+		}
+	}
+}
+
+func convertEnumValue(v *yaml.Node, report *webscan.RoutesReport) interface{} {
+	switch v.Kind {
+	case yaml.ScalarNode:
+		switch v.Tag {
+		case "!!str":
+			return v.Value
+		case "!!int":
+			if val, err := strconv.ParseInt(v.Value, 10, 64); err == nil {
+				return val
+			} else {
+				report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse int enum value: %s", err))
+			}
+		case "!!float":
+			if val, err := strconv.ParseFloat(v.Value, 64); err == nil {
+				return val
+			} else {
+				report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse float enum value: %s", err))
+			}
+		case "!!bool":
+			if val, err := strconv.ParseBool(v.Value); err == nil {
+				return val
+			} else {
+				report.Errors = append(report.Errors, fmt.Sprintf("Failed to parse bool enum value: %s", err))
+			}
+		}
+	case yaml.SequenceNode, yaml.MappingNode:
+		// For complex types, we return them as is
+		return v
+	}
+	return v.Value // fallback to string
 }

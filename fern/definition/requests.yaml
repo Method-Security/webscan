@@ -21,11 +21,22 @@ types:
       bodyParams: optional<string>  
       formParams: optional<map<string, string>>  
       multipartParams: optional<map<string, string>>  
-      vulnTypes: optional<list<string>>
+      vulnTypes: optional<list<VulnType>>
       statusCode: integer
       responseBody: string
       responseHeaders: map<string, string>
       errors: optional<list<string>>
+
+  VulnType:
+    enum:
+      - Command
+      - SQL
+      - XSS
+      - Auth
+      - SensitiveError
+      - SQLINJECTION
+      - TEMPLATE
+      - NOSQL
 
   RequestParams:
     properties:

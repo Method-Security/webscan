@@ -249,6 +249,13 @@ func populateReport(report *webscan.RequestReport, resp *http.Response, body []b
 		report.MultipartParams = params.MultipartParams
 	}
 	if len(vulnTypes) > 0 {
-		report.VulnTypes = vulnTypes
+		report.VulnTypes = make([]webscan.VulnType, 0, len(vulnTypes))
+		for _, vt := range vulnTypes {
+			if vulnType, err := webscan.NewVulnTypeFromString(vt); err == nil {
+				report.VulnTypes = append(report.VulnTypes, vulnType)
+			} else {
+				report.Errors = append(report.Errors, fmt.Sprintf("Invalid vulnerability type: %s", vt))
+			}
+		}
 	}
 }
