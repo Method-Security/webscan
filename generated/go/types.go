@@ -692,6 +692,223 @@ func (g *GraphQlType) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
+type HttpMethod string
+
+const (
+	HttpMethodGet    HttpMethod = "GET"
+	HttpMethodPost   HttpMethod = "POST"
+	HttpMethodPut    HttpMethod = "PUT"
+	HttpMethodDelete HttpMethod = "DELETE"
+	HttpMethodPatch  HttpMethod = "PATCH"
+)
+
+func NewHttpMethodFromString(s string) (HttpMethod, error) {
+	switch s {
+	case "GET":
+		return HttpMethodGet, nil
+	case "POST":
+		return HttpMethodPost, nil
+	case "PUT":
+		return HttpMethodPut, nil
+	case "DELETE":
+		return HttpMethodDelete, nil
+	case "PATCH":
+		return HttpMethodPatch, nil
+	}
+	var t HttpMethod
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (h HttpMethod) Ptr() *HttpMethod {
+	return &h
+}
+
+type ParsedParams struct {
+	PathParams      map[string]string `json:"pathParams,omitempty" url:"pathParams,omitempty"`
+	QueryParams     map[string]string `json:"queryParams,omitempty" url:"queryParams,omitempty"`
+	HeaderParams    map[string]string `json:"headerParams,omitempty" url:"headerParams,omitempty"`
+	BodyParams      string            `json:"bodyParams" url:"bodyParams"`
+	FormParams      map[string]string `json:"formParams,omitempty" url:"formParams,omitempty"`
+	MultipartParams map[string]string `json:"multipartParams,omitempty" url:"multipartParams,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ParsedParams) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ParsedParams) UnmarshalJSON(data []byte) error {
+	type unmarshaler ParsedParams
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ParsedParams(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *ParsedParams) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type RequestParams struct {
+	PathParams      string `json:"pathParams" url:"pathParams"`
+	QueryParams     string `json:"queryParams" url:"queryParams"`
+	HeaderParams    string `json:"headerParams" url:"headerParams"`
+	BodyParams      string `json:"bodyParams" url:"bodyParams"`
+	FormParams      string `json:"formParams" url:"formParams"`
+	MultipartParams string `json:"multipartParams" url:"multipartParams"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RequestParams) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RequestParams) UnmarshalJSON(data []byte) error {
+	type unmarshaler RequestParams
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RequestParams(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RequestParams) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+type RequestReport struct {
+	BaseUrl         string            `json:"baseUrl" url:"baseUrl"`
+	Path            string            `json:"path" url:"path"`
+	Method          HttpMethod        `json:"method" url:"method"`
+	PathParams      map[string]string `json:"pathParams,omitempty" url:"pathParams,omitempty"`
+	QueryParams     map[string]string `json:"queryParams,omitempty" url:"queryParams,omitempty"`
+	HeaderParams    map[string]string `json:"headerParams,omitempty" url:"headerParams,omitempty"`
+	BodyParams      *string           `json:"bodyParams,omitempty" url:"bodyParams,omitempty"`
+	FormParams      map[string]string `json:"formParams,omitempty" url:"formParams,omitempty"`
+	MultipartParams map[string]string `json:"multipartParams,omitempty" url:"multipartParams,omitempty"`
+	VulnTypes       []VulnType        `json:"vulnTypes,omitempty" url:"vulnTypes,omitempty"`
+	StatusCode      int               `json:"statusCode" url:"statusCode"`
+	ResponseBody    string            `json:"responseBody" url:"responseBody"`
+	ResponseHeaders map[string]string `json:"responseHeaders,omitempty" url:"responseHeaders,omitempty"`
+	Errors          []string          `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RequestReport) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RequestReport) UnmarshalJSON(data []byte) error {
+	type unmarshaler RequestReport
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RequestReport(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RequestReport) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+type VulnType string
+
+const (
+	VulnTypeCommand        VulnType = "COMMAND"
+	VulnTypeSql            VulnType = "SQL"
+	VulnTypeXss            VulnType = "XSS"
+	VulnTypeAuth           VulnType = "AUTH"
+	VulnTypeSensitiveerror VulnType = "SENSITIVEERROR"
+	VulnTypeSqlinjection   VulnType = "SQLINJECTION"
+	VulnTypeTemplate       VulnType = "TEMPLATE"
+	VulnTypeNosql          VulnType = "NOSQL"
+)
+
+func NewVulnTypeFromString(s string) (VulnType, error) {
+	switch s {
+	case "COMMAND":
+		return VulnTypeCommand, nil
+	case "SQL":
+		return VulnTypeSql, nil
+	case "XSS":
+		return VulnTypeXss, nil
+	case "AUTH":
+		return VulnTypeAuth, nil
+	case "SENSITIVEERROR":
+		return VulnTypeSensitiveerror, nil
+	case "SQLINJECTION":
+		return VulnTypeSqlinjection, nil
+	case "TEMPLATE":
+		return VulnTypeTemplate, nil
+	case "NOSQL":
+		return VulnTypeNosql, nil
+	}
+	var t VulnType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (v VulnType) Ptr() *VulnType {
+	return &v
+}
+
 type ApiType string
 
 const (
@@ -808,6 +1025,73 @@ func (o *OAuthFlows) String() string {
 	return fmt.Sprintf("%#v", o)
 }
 
+type RequestSchema struct {
+	Type                 []string          `json:"type,omitempty" url:"type,omitempty"`
+	Properties           []*SchemaProperty `json:"properties,omitempty" url:"properties,omitempty"`
+	Required             []string          `json:"required,omitempty" url:"required,omitempty"`
+	Items                *RequestSchema    `json:"items,omitempty" url:"items,omitempty"`
+	AdditionalProperties *RequestSchema    `json:"additionalProperties,omitempty" url:"additionalProperties,omitempty"`
+	AllOf                []*RequestSchema  `json:"allOf,omitempty" url:"allOf,omitempty"`
+	OneOf                []*RequestSchema  `json:"oneOf,omitempty" url:"oneOf,omitempty"`
+	AnyOf                []*RequestSchema  `json:"anyOf,omitempty" url:"anyOf,omitempty"`
+	Not                  *RequestSchema    `json:"not,omitempty" url:"not,omitempty"`
+	Description          *string           `json:"description,omitempty" url:"description,omitempty"`
+	Format               *string           `json:"format,omitempty" url:"format,omitempty"`
+	Default              *string           `json:"default,omitempty" url:"default,omitempty"`
+	Example              interface{}       `json:"example,omitempty" url:"example,omitempty"`
+	Enum                 []interface{}     `json:"enum,omitempty" url:"enum,omitempty"`
+	MultipleOf           *float64          `json:"multipleOf,omitempty" url:"multipleOf,omitempty"`
+	Maximum              *float64          `json:"maximum,omitempty" url:"maximum,omitempty"`
+	ExclusiveMaximum     *bool             `json:"exclusiveMaximum,omitempty" url:"exclusiveMaximum,omitempty"`
+	Minimum              *float64          `json:"minimum,omitempty" url:"minimum,omitempty"`
+	ExclusiveMinimum     *bool             `json:"exclusiveMinimum,omitempty" url:"exclusiveMinimum,omitempty"`
+	MaxLength            *int              `json:"maxLength,omitempty" url:"maxLength,omitempty"`
+	MinLength            *int              `json:"minLength,omitempty" url:"minLength,omitempty"`
+	Pattern              *string           `json:"pattern,omitempty" url:"pattern,omitempty"`
+	MaxItems             *int              `json:"maxItems,omitempty" url:"maxItems,omitempty"`
+	MinItems             *int              `json:"minItems,omitempty" url:"minItems,omitempty"`
+	UniqueItems          *bool             `json:"uniqueItems,omitempty" url:"uniqueItems,omitempty"`
+	MaxProperties        *int              `json:"maxProperties,omitempty" url:"maxProperties,omitempty"`
+	MinProperties        *int              `json:"minProperties,omitempty" url:"minProperties,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RequestSchema) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RequestSchema) UnmarshalJSON(data []byte) error {
+	type unmarshaler RequestSchema
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RequestSchema(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RequestSchema) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
 type Route struct {
 	Path               string               `json:"path" url:"path"`
 	QueryParams        []string             `json:"queryParams,omitempty" url:"queryParams,omitempty"`
@@ -816,6 +1100,7 @@ type Route struct {
 	Type               ApiType              `json:"type" url:"type"`
 	Description        string               `json:"description" url:"description"`
 	ResponseProperties map[string][]string  `json:"responseProperties,omitempty" url:"responseProperties,omitempty"`
+	RequestSchema      *RequestSchema       `json:"requestSchema,omitempty" url:"requestSchema,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -904,6 +1189,56 @@ func (r *RoutesReport) String() string {
 		return value
 	}
 	return fmt.Sprintf("%#v", r)
+}
+
+type SchemaProperty struct {
+	Name                 string            `json:"name" url:"name"`
+	Type                 []string          `json:"type,omitempty" url:"type,omitempty"`
+	Format               *string           `json:"format,omitempty" url:"format,omitempty"`
+	Description          *string           `json:"description,omitempty" url:"description,omitempty"`
+	Required             *bool             `json:"required,omitempty" url:"required,omitempty"`
+	Items                *RequestSchema    `json:"items,omitempty" url:"items,omitempty"`
+	Properties           []*SchemaProperty `json:"properties,omitempty" url:"properties,omitempty"`
+	AdditionalProperties *RequestSchema    `json:"additionalProperties,omitempty" url:"additionalProperties,omitempty"`
+	Enum                 []string          `json:"enum,omitempty" url:"enum,omitempty"`
+	Example              *string           `json:"example,omitempty" url:"example,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SchemaProperty) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SchemaProperty) UnmarshalJSON(data []byte) error {
+	type unmarshaler SchemaProperty
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SchemaProperty(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SchemaProperty) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 type SecurityRequirement struct {
