@@ -29,11 +29,11 @@ types:
 
   VulnType:
     enum:
-      - Command
+      - COMMAND
       - SQL
       - XSS
-      - Auth
-      - SensitiveError
+      - AUTH
+      - SENSITIVEERROR
       - SQLINJECTION
       - TEMPLATE
       - NOSQL
