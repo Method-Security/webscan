@@ -22,13 +22,26 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 				return
 			}
 
-			report := webpagecapture.PerformWebpageCapture(cmd.Context(), target)
+			noSandbox, err := cmd.Flags().GetBool("no-sandbox")
+			if err != nil {
+				errorMessage := err.Error()
+				a.OutputSignal.ErrorMessage = &errorMessage
+				a.OutputSignal.Status = 1
+				return
+			}
 
+			report, err := webpagecapture.PerformWebpageCapture(cmd.Context(), noSandbox, target)
+			if err != nil {
+				errorMessage := err.Error()
+				a.OutputSignal.ErrorMessage = &errorMessage
+				a.OutputSignal.Status = 1
+			}
 			a.OutputSignal.Content = report
 		},
 	}
 
 	webpagecaptureCmd.Flags().String("target", "", "Url target to perform webpage HTML capture")
+	webpagecaptureCmd.Flags().Bool("no-sandbox", false, "Disable sandbox mode for scan")
 
 	var chromiumPath string
 	webpageScreenshotCmd := &cobra.Command{

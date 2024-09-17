@@ -2,57 +2,52 @@ package webpagecapture
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/base64"
-	"io"
-	"net/http"
+	"fmt"
+	"time"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
+	"github.com/chromedp/chromedp"
 )
 
 // PerformWebpageCapture performs a webpage capture against a target URL
-func PerformWebpageCapture(ctx context.Context, target string) *webscan.WebpageCaptureReport {
+func PerformWebpageCapture(ctx context.Context, noSandbox bool, target string) (*webscan.WebpageCaptureReport, error) {
 	report := &webscan.WebpageCaptureReport{
 		Target: target,
-		Errors: []string{},
 	}
 
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		},
+	opts := chromedp.DefaultExecAllocatorOptions[:]
+	if noSandbox {
+		opts = append(opts, chromedp.Flag("no-sandbox", true))
 	}
 
-	resp, err := client.Get(target)
+	ctx, cancel := chromedp.NewExecAllocator(ctx, opts...)
+	defer cancel()
+
+	ctx, cancel = chromedp.NewContext(ctx, chromedp.WithLogf(func(string, ...interface{}) {}))
+	defer cancel()
+
+	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
+	// Fetch the fully rendered HTML content
+	body, err := fetchHTMLContent(ctx, target)
 	if err != nil {
-		report.Errors = append(report.Errors, err.Error())
-		return report
+		return report, err
 	}
-	defer func() {
-		if cerr := resp.Body.Close(); cerr != nil {
-			err = cerr
-		}
-	}()
+	encodedBodyString := base64.StdEncoding.EncodeToString([]byte(body))
+	report.HtmlEncoded = &encodedBodyString
+	return report, nil
+}
+
+func fetchHTMLContent(ctx context.Context, target string) (string, error) {
+	var body string
+	err := chromedp.Run(ctx,
+		chromedp.Navigate(target),
+		chromedp.OuterHTML("html", &body),
+	)
 	if err != nil {
-		report.Errors = append(report.Errors, err.Error())
-		return report
+		return "", fmt.Errorf("failed to fetch HTML: %v", err)
 	}
-
-	if resp.StatusCode != http.StatusOK {
-		report.Errors = append(report.Errors, "Failed to get the webpage. Status code: "+string(rune(resp.StatusCode)))
-		return report
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		report.Errors = append(report.Errors, err.Error())
-	} else {
-		bodyString := string(body)
-		encodedBodyString := base64.StdEncoding.EncodeToString([]byte(bodyString))
-		report.HtmlEncoded = &encodedBodyString
-	}
-
-	return report
+	return body, nil
 }
