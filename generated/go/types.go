@@ -872,11 +872,11 @@ func (r *RequestReport) String() string {
 type VulnType string
 
 const (
-	VulnTypeCommand        VulnType = "Command"
+	VulnTypeCommand        VulnType = "COMMAND"
 	VulnTypeSql            VulnType = "SQL"
 	VulnTypeXss            VulnType = "XSS"
-	VulnTypeAuth           VulnType = "Auth"
-	VulnTypeSensitiveError VulnType = "SensitiveError"
+	VulnTypeAuth           VulnType = "AUTH"
+	VulnTypeSensitiveerror VulnType = "SENSITIVEERROR"
 	VulnTypeSqlinjection   VulnType = "SQLINJECTION"
 	VulnTypeTemplate       VulnType = "TEMPLATE"
 	VulnTypeNosql          VulnType = "NOSQL"
@@ -884,16 +884,16 @@ const (
 
 func NewVulnTypeFromString(s string) (VulnType, error) {
 	switch s {
-	case "Command":
+	case "COMMAND":
 		return VulnTypeCommand, nil
 	case "SQL":
 		return VulnTypeSql, nil
 	case "XSS":
 		return VulnTypeXss, nil
-	case "Auth":
+	case "AUTH":
 		return VulnTypeAuth, nil
-	case "SensitiveError":
-		return VulnTypeSensitiveError, nil
+	case "SENSITIVEERROR":
+		return VulnTypeSensitiveerror, nil
 	case "SQLINJECTION":
 		return VulnTypeSqlinjection, nil
 	case "TEMPLATE":
