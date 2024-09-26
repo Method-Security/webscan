@@ -18,7 +18,7 @@ func NewBrowserbaseWebpageCapturer(ctx context.Context, sessionURL string, timeo
 	}
 }
 
-func (b *BrowserbaseWebpageCapturer) Capture(ctx context.Context, url string, options *CaptureOptions) (*CaptureResult, error) {
+func (b *BrowserbaseWebpageCapturer) Capture(ctx context.Context, url string, options *Options) (*Result, error) {
 	return b.Capturer.Capture(ctx, url, options)
 }
 

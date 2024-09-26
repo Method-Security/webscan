@@ -4,8 +4,8 @@ import (
 	"context"
 )
 
-type CaptureOptions struct{}
-type CaptureResult struct {
+type Options struct{}
+type Result struct {
 	Content    []byte   `json:"content,omitempty" yaml:"content,omitempty"`
 	StatusCode *int     `json:"statusCode,omitempty" yaml:"statusCode,omitempty"`
 	URL        string   `json:"url,omitempty" yaml:"url,omitempty"`
@@ -13,12 +13,12 @@ type CaptureResult struct {
 }
 
 type WebPageCapturer interface {
-	Capture(ctx context.Context, url string, options *CaptureOptions) (*CaptureResult, error)
+	Capture(ctx context.Context, url string, options *Options) (*Result, error)
 	Close() error
 }
 
-func NewCaptureResult(URL string) *CaptureResult {
-	return &CaptureResult{
+func NewCaptureResult(URL string) *Result {
+	return &Result{
 		StatusCode: nil,
 		URL:        URL,
 		Errors:     []string{},

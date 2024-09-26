@@ -31,7 +31,7 @@ func NewBrowserWebpageCapturerWithClient(client *cdp.Client, timeout int) *Brows
 	}
 }
 
-func (b *BrowserWebpageCapturer) Capture(ctx context.Context, url string, options *CaptureOptions) (*CaptureResult, error) {
+func (b *BrowserWebpageCapturer) Capture(ctx context.Context, url string, options *Options) (*Result, error) {
 	result := NewCaptureResult(url)
 
 	if b.Browser == nil {

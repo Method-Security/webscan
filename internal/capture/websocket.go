@@ -2,9 +2,8 @@ package capture
 
 import (
 	"context"
-	"net"
-
 	"log"
+	"net"
 
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"

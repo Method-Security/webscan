@@ -23,7 +23,7 @@ func NewRequestWebpageCapturer() *RequestWebpageCapturer {
 	}
 }
 
-func (r *RequestWebpageCapturer) Capture(ctx context.Context, url string, options *CaptureOptions) (*CaptureResult, error) {
+func (r *RequestWebpageCapturer) Capture(ctx context.Context, url string, options *Options) (*Result, error) {
 	result := NewCaptureResult(url)
 	resp, err := r.Client.Get(url)
 
