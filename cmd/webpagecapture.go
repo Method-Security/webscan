@@ -87,6 +87,15 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 				return
 			}
 
+			var token string
+			if style == "browserbase" {
+				token, err = cmd.Flags().GetString("token")
+				if err != nil {
+					a.OutputSignal.AddError(err)
+					return
+				}
+			}
+
 			var capturer capture.WebPageCapturer
 			switch style {
 			case "request":
@@ -94,7 +103,6 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 			case "browser":
 				capturer = capture.NewBrowserWebpageCapturer(nil, 30)
 			case "browserbase":
-				token := ""
 				baseURL := "wss://connect.browserbase.com?apiKey=%s"
 				capturer = capture.NewBrowserbaseWebpageCapturer(cmd.Context(), fmt.Sprintf(baseURL, token), 30)
 			default:
@@ -115,6 +123,7 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 	}
 	seanCaptureCmd.Flags().String("target", "", "URL target to perform webpage capture")
 	seanCaptureCmd.Flags().String("style", "", "How to capture the webpage. Valid values are: 'request'")
+	seanCaptureCmd.Flags().String("token", "", "Browserbase API token")
 
 	webpagecaptureCmd.AddCommand(seanCaptureCmd)
 	webpagecaptureCmd.AddCommand(webpageScreenshotCmd)

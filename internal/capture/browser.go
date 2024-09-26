@@ -26,7 +26,7 @@ func NewBrowserWebpageCapturer(pathToBrowser *string, timeout int) *BrowserWebpa
 func NewBrowserWebpageCapturerWithClient(client *cdp.Client, timeout int) *BrowserWebpageCapturer {
 	return &BrowserWebpageCapturer{
 		PathToBrowser:  nil,
-		Browser:        rod.New().Client(client),
+		Browser:        rod.New().Client(client).MustConnect(),
 		TimeoutSeconds: timeout,
 	}
 }
