@@ -53,6 +53,6 @@ func (r *RequestWebpageCapturer) Capture(ctx context.Context, url string, option
 	return result, nil
 }
 
-func (r *RequestWebpageCapturer) Close() error {
+func (r *RequestWebpageCapturer) Close(ctx context.Context) error {
 	return nil
 }

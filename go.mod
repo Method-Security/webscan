@@ -12,6 +12,7 @@ require (
 	github.com/gobwas/ws v1.4.0
 	github.com/google/uuid v1.6.0
 	github.com/palantir/pkg/datetime v1.1.0
+	github.com/palantir/pkg/safejson v1.1.0
 	github.com/palantir/witchcraft-go-logging v1.57.0
 	github.com/pb33f/libopenapi v0.16.11
 	github.com/projectdiscovery/httpx v1.6.6
@@ -222,7 +223,6 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/palantir/pkg v1.1.0 // indirect
 	github.com/palantir/pkg/bytesbuffers v1.2.0 // indirect
-	github.com/palantir/pkg/safejson v1.1.0 // indirect
 	github.com/palantir/pkg/safelong v1.1.0 // indirect
 	github.com/palantir/pkg/safeyaml v1.1.0 // indirect
 	github.com/palantir/pkg/transform v1.1.0 // indirect

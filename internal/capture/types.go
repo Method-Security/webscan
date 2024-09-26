@@ -14,7 +14,7 @@ type Result struct {
 
 type WebPageCapturer interface {
 	Capture(ctx context.Context, url string, options *Options) (*Result, error)
-	Close() error
+	Close(ctx context.Context) error
 }
 
 func NewCaptureResult(URL string) *Result {

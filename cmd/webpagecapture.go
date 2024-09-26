@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/Method-Security/webscan/internal/browserbase"
 	capture "github.com/Method-Security/webscan/internal/capture"
 	"github.com/Method-Security/webscan/internal/webpagecapture"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
@@ -72,8 +74,8 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 	htmlCaptureCmd := &cobra.Command{
 		Use: "html",
 	}
-	htmlCaptureCmd.Flags().String("target", "", "URL target to perform webpage capture")
-	htmlCaptureCmd.Flags().Int("timeout", 30, "Timeout in seconds for the capture")
+	htmlCaptureCmd.PersistentFlags().String("target", "", "URL target to perform webpage capture")
+	htmlCaptureCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
 
 	requestCaptureCmd := &cobra.Command{
 		Use: "request",
@@ -91,7 +93,7 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 				a.OutputSignal.AddError(err)
 				return
 			}
-			_ = capturer.Close()
+			_ = capturer.Close(cmd.Context())
 			log.Info("Webpage capture successful", svc1log.SafeParam("target", target))
 			a.OutputSignal.Content = report
 		},
@@ -117,7 +119,7 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 				a.OutputSignal.AddError(err)
 				return
 			}
-			_ = capturer.Close()
+			_ = capturer.Close(cmd.Context())
 			log.Info("Webpage capture successful", svc1log.SafeParam("target", target))
 			a.OutputSignal.Content = report
 		},
@@ -126,6 +128,13 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 
 	browserbaseCaptureCmd := &cobra.Command{
 		Use: "browserbase",
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			countries, _ := cmd.Flags().GetStringArray("country")
+			if len(countries) > 0 {
+				cmd.MarkFlagRequired("proxy")
+			}
+			return nil
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			log := svc1log.FromContext(cmd.Context())
 			target, err := cmd.Flags().GetString("target")
@@ -134,31 +143,67 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 				return
 			}
 
-			token, err := cmd.Flags().GetString("token")
+			token, err := getFlagOrEnvironmentVariable(cmd, "token", "BROWSERBASE_TOKEN")
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
 			}
-
+			project, err := getFlagOrEnvironmentVariable(cmd, "project", "BROWSERBASE_PROJECT")
+			if err != nil {
+				a.OutputSignal.AddError(err)
+				return
+			}
 			timeout, _ := cmd.Flags().GetInt("timeout")
+			proxy, _ := cmd.Flags().GetBool("proxy")
+			countries, _ := cmd.Flags().GetStringArray("country")
 
-			baseURL := "wss://connect.browserbase.com?apiKey=%s"
-			capturer := capture.NewBrowserbaseWebpageCapturer(cmd.Context(), fmt.Sprintf(baseURL, token), timeout)
+			var options []browserbase.Option
+			if proxy && len(countries) > 0 {
+				options = append(options, browserbase.WithProxyCountries(countries))
+			} else if proxy {
+				options = append(options, browserbase.WithProxy())
+			}
+
+			client := browserbase.NewBrowserbaseClient(token, project, browserbase.NewBrowserbaseOptions(cmd.Context(), options...))
+			capturer := capture.NewBrowserbaseWebpageCapturer(cmd.Context(), timeout, client)
+
+			if capturer == nil {
+				a.OutputSignal.AddError(fmt.Errorf("failed to create browserbase capturer"))
+				return
+			}
 
 			report, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
 			}
-			_ = capturer.Close()
+			_ = capturer.Close(cmd.Context())
 			log.Info("Webpage capture successful", svc1log.SafeParam("target", target))
 			a.OutputSignal.Content = report
 		},
 	}
 	browserbaseCaptureCmd.Flags().String("token", "", "Browserbase API token")
+	browserbaseCaptureCmd.Flags().String("project", "", "Browserbase project ID")
+	browserbaseCaptureCmd.Flags().Bool("proxy", false, "Instruct Browserbase to use a proxy")
+	browserbaseCaptureCmd.Flags().StringArray("country", []string{}, "List of countries to use for the proxy")
+
 	htmlCaptureCmd.AddCommand(browserbaseCaptureCmd)
 
 	webpagecaptureCmd.AddCommand(htmlCaptureCmd)
 	webpagecaptureCmd.AddCommand(webpageScreenshotCmd)
 	a.RootCmd.AddCommand(webpagecaptureCmd)
+}
+
+// TODO: We could likely move this to viper to streamline
+func getFlagOrEnvironmentVariable(cmd *cobra.Command, flagName string, environmentVariableName string) (string, error) {
+	var value string
+	if envVar, exists := os.LookupEnv(environmentVariableName); exists && envVar != "" {
+		value = envVar
+	} else if flagValue, err := cmd.Flags().GetString(flagName); err == nil && flagValue != "" {
+		value = flagValue
+	} else {
+		return "", fmt.Errorf("no value provided for %s", flagName)
+	}
+
+	return value, nil
 }

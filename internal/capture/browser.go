@@ -7,6 +7,7 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/cdp"
 	"github.com/go-rod/rod/lib/launcher"
+	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
 type BrowserWebpageCapturer struct {
@@ -33,8 +34,10 @@ func NewBrowserWebpageCapturerWithClient(client *cdp.Client, timeout int) *Brows
 
 func (b *BrowserWebpageCapturer) Capture(ctx context.Context, url string, options *Options) (*Result, error) {
 	result := NewCaptureResult(url)
+	log := svc1log.FromContext(ctx)
 
 	if b.Browser == nil {
+		log.Debug("Initializing browser")
 		b.InitializeBrowser()
 	}
 
@@ -46,13 +49,16 @@ func (b *BrowserWebpageCapturer) Capture(ctx context.Context, url string, option
 		page = b.Browser.MustPage(url).Context(pageCtx)
 	})
 	if err != nil {
+		log.Error("Failed to create page", svc1log.SafeParam("url", url), svc1log.SafeParam("error", err))
 		result.Errors = append(result.Errors, err.Error())
 		return result, err
 	}
+	log.Debug("Successfully connected to page")
 
 	page = page.MustWaitStable()
 	evalResult, err := page.Eval(`() => document.documentElement.outerHTML`)
 	if err != nil {
+		log.Error("Failed to evaluate page content", svc1log.SafeParam("url", url), svc1log.SafeParam("error", err))
 		result.Errors = append(result.Errors, err.Error())
 		return result, err
 	}
@@ -72,9 +78,14 @@ func (b *BrowserWebpageCapturer) InitializeBrowser() {
 	b.Browser = rod.New().ControlURL(browserURL).MustConnect()
 }
 
-func (b *BrowserWebpageCapturer) Close() error {
+func (b *BrowserWebpageCapturer) Close(ctx context.Context) error {
+	svc1log.FromContext(ctx).Debug("Closing browser")
 	if b.Browser != nil {
-		return b.Browser.Close()
+		err := b.Browser.Close()
+		if err != nil {
+			svc1log.FromContext(ctx).Error("Failed to close browser", svc1log.SafeParam("error", err))
+			return err
+		}
 	}
 	return nil
 }
