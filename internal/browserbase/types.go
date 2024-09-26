@@ -18,16 +18,16 @@ type Proxy struct {
 }
 
 type BrowserSettings struct {
-	BlockAds      bool    `json:"blockAds,omitempty"`
-	SolveCaptchas bool    `json:"solveCaptchas,omitempty"`
-	RecordSession bool    `json:"recordSession,omitempty"`
-	LogSession    bool    `json:"logSession,omitempty"`
-	Proxies       []Proxy `json:"proxies,omitempty"`
+	BlockAds      bool `json:"blockAds,omitempty"`
+	SolveCaptchas bool `json:"solveCaptchas,omitempty"`
+	RecordSession bool `json:"recordSession,omitempty"`
+	LogSession    bool `json:"logSession,omitempty"`
 }
 
 type CreateSessionRequest struct {
 	ProjectID       string          `json:"projectId,omitempty"`
 	BrowserSettings BrowserSettings `json:"browserSettings,omitempty"`
+	Proxies         []Proxy         `json:"proxies,omitempty"`
 }
 
 type CloseSessionRequest struct {

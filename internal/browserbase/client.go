@@ -50,15 +50,15 @@ func (b *BrowserbaseClient) createBasicSession(ctx context.Context) (*Session, e
 
 func (b *BrowserbaseClient) createProxySession(ctx context.Context) (*Session, error) {
 	request := b.createSessionRequest()
-	request.BrowserSettings.Proxies = []Proxy{{Type: "browserbase"}}
+	request.Proxies = []Proxy{{Type: "browserbase"}}
 	return b.createSession(ctx, &request)
 }
 
 func (b *BrowserbaseClient) createGeoProxySession(ctx context.Context, countryCodes []string) (*Session, error) {
 	request := b.createSessionRequest()
-	request.BrowserSettings.Proxies = []Proxy{}
+	request.Proxies = []Proxy{}
 	for _, countryCode := range countryCodes {
-		request.BrowserSettings.Proxies = append(request.BrowserSettings.Proxies, Proxy{
+		request.Proxies = append(request.Proxies, Proxy{
 			Type: "browserbase",
 			Geolocation: &Geolocation{
 				Country: countryCode,
@@ -171,6 +171,8 @@ func (b *BrowserbaseClient) createSession(ctx context.Context, createSessionRequ
 		log.Error(fmt.Sprintf("Failed to read response body: %s", err.Error()))
 		return nil, err
 	}
+
+	log.Debug(fmt.Sprintf("Response body: %s", string(body)))
 
 	session := Session{}
 	err = safejson.Unmarshal(body, &session)

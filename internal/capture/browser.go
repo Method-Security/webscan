@@ -55,7 +55,7 @@ func (b *BrowserWebpageCapturer) Capture(ctx context.Context, url string, option
 	}
 	log.Debug("Successfully connected to page")
 
-	page = page.MustWaitStable()
+	page = page.MustWaitDOMStable()
 	evalResult, err := page.Eval(`() => document.documentElement.outerHTML`)
 	if err != nil {
 		log.Error("Failed to evaluate page content", svc1log.SafeParam("url", url), svc1log.SafeParam("error", err))
