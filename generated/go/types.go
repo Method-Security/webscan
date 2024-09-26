@@ -5,8 +5,9 @@ package webscan
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/Method-Security/webscan/generated/go/core"
 	time "time"
+
+	core "github.com/Method-Security/webscan/generated/go/core"
 )
 
 type TlsVersion string
@@ -1368,6 +1369,91 @@ func NewSecuritySchemeTypeFromString(s string) (SecuritySchemeType, error) {
 
 func (s SecuritySchemeType) Ptr() *SecuritySchemeType {
 	return &s
+}
+
+type SubdomainTakeover struct {
+	Target     string  `json:"target" url:"target"`
+	Vulnerable bool    `json:"vulnerable" url:"vulnerable"`
+	Service    *string `json:"service,omitempty" url:"service,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SubdomainTakeover) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SubdomainTakeover) UnmarshalJSON(data []byte) error {
+	type unmarshaler SubdomainTakeover
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SubdomainTakeover(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SubdomainTakeover) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
+}
+
+type SubdomainTakeoverReport struct {
+	SubdomainTakeovers []*SubdomainTakeover `json:"subdomainTakeovers,omitempty" url:"subdomainTakeovers,omitempty"`
+	Errors             []string             `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (s *SubdomainTakeoverReport) GetExtraProperties() map[string]interface{} {
+	return s.extraProperties
+}
+
+func (s *SubdomainTakeoverReport) UnmarshalJSON(data []byte) error {
+	type unmarshaler SubdomainTakeoverReport
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*s = SubdomainTakeoverReport(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *s)
+	if err != nil {
+		return err
+	}
+	s.extraProperties = extraProperties
+
+	s._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (s *SubdomainTakeoverReport) String() string {
+	if len(s._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(s._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(s); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", s)
 }
 
 type WebpageCaptureReport struct {

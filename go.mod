@@ -10,6 +10,7 @@ require (
 	github.com/ffuf/ffuf/v2 v2.1.0
 	github.com/go-rod/rod v0.116.2
 	github.com/google/uuid v1.6.0
+	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/palantir/pkg/datetime v1.1.0
 	github.com/palantir/witchcraft-go-logging v1.51.0
 	github.com/pb33f/libopenapi v0.16.11
@@ -193,7 +194,6 @@ require (
 	github.com/leslie-qiwa/flat v0.0.0-20230424180412-f9d1cf014baa // indirect
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/libdns/libdns v0.2.1 // indirect
-	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
 	github.com/lor00x/goldap v0.0.0-20180618054307-a546dffdd1a3 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect

@@ -18,6 +18,7 @@ nav:
         - Probe: docs/probe.md
         - Spider: docs/spider.md
         - Vulnerability Scan: docs/vuln.md
+        - Subdomain Takeover Scan: docs/sdt.md
   - Contributing:
       - How to contribute: community/community.md
       - Development:

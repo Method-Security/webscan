@@ -1,0 +1,10 @@
+types:
+  SubdomainTakeover:
+    properties:
+      target: string
+      vulnerable: boolean
+      service: optional<string>
+  SubdomainTakeoverReport:
+    properties:
+      subdomainTakeovers: optional<list<SubdomainTakeover>>
+      errors: optional<list<string>>
