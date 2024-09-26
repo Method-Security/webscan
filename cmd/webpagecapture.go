@@ -88,14 +88,14 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 			}
 
 			capturer := capture.NewRequestWebpageCapturer()
-			report, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
+			result, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
 			}
 			_ = capturer.Close(cmd.Context())
 			log.Info("Webpage capture successful", svc1log.SafeParam("target", target))
-			a.OutputSignal.Content = report
+			a.OutputSignal.Content = result.ToWebpageCaptureReport()
 		},
 	}
 	htmlCaptureCmd.AddCommand(requestCaptureCmd)
@@ -114,14 +114,15 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 			timeout, _ := cmd.Flags().GetInt("timeout")
 
 			capturer := capture.NewBrowserWebpageCapturer(nil, timeout)
-			report, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
+			result, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
 			}
 			_ = capturer.Close(cmd.Context())
 			log.Info("Webpage capture successful", svc1log.SafeParam("target", target))
-			a.OutputSignal.Content = report
+
+			a.OutputSignal.Content = result.ToWebpageCaptureReport()
 		},
 	}
 	htmlCaptureCmd.AddCommand(browserCaptureCmd)
@@ -172,14 +173,14 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 				return
 			}
 
-			report, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
+			result, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
 			}
 			_ = capturer.Close(cmd.Context())
 			log.Info("Webpage capture successful", svc1log.SafeParam("target", target))
-			a.OutputSignal.Content = report
+			a.OutputSignal.Content = result.ToWebpageCaptureReport()
 		},
 	}
 	browserbaseCaptureCmd.Flags().String("token", "", "Browserbase API token")

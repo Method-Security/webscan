@@ -2,6 +2,9 @@ package capture
 
 import (
 	"context"
+	"encoding/base64"
+
+	webscan "github.com/Method-Security/webscan/generated/go"
 )
 
 type Options struct{}
@@ -23,4 +26,19 @@ func NewCaptureResult(URL string) *Result {
 		URL:        URL,
 		Errors:     []string{},
 	}
+}
+
+func (r *Result) ToWebpageCaptureReport() webscan.WebpageCaptureReport {
+	report := webscan.WebpageCaptureReport{
+		Target:      r.URL,
+		Errors:      r.Errors,
+		HtmlEncoded: nil,
+	}
+
+	if r.Content != nil {
+		encodedBodyString := base64.StdEncoding.EncodeToString([]byte(r.Content))
+		report.HtmlEncoded = &encodedBodyString
+	}
+
+	return report
 }
