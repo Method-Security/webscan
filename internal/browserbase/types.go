@@ -35,8 +35,8 @@ type CloseSessionRequest struct {
 	Status    string `json:"status,omitempty"`
 }
 
-type BrowserbaseClient struct {
-	ApiKey        string
+type Client struct {
+	APIKey        string
 	URL           string
 	ConnectionURL string
 	ProjectID     string

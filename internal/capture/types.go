@@ -36,7 +36,7 @@ func (r *Result) ToWebpageCaptureReport() webscan.WebpageCaptureReport {
 	}
 
 	if r.Content != nil {
-		encodedBodyString := base64.StdEncoding.EncodeToString([]byte(r.Content))
+		encodedBodyString := base64.StdEncoding.EncodeToString(r.Content)
 		report.HtmlEncoded = &encodedBodyString
 	}
 

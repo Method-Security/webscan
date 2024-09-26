@@ -9,14 +9,14 @@ import (
 )
 
 type BrowserbaseWebpageCapturer struct {
-	Client   *browserbase.BrowserbaseClient
+	Client   *browserbase.Client
 	Capturer *BrowserWebpageCapturer
 }
 
 func NewBrowserbaseWebpageCapturer(
 	ctx context.Context,
 	timeout int,
-	browserbaseClient *browserbase.BrowserbaseClient,
+	browserbaseClient *browserbase.Client,
 ) *BrowserbaseWebpageCapturer {
 	session, err := browserbaseClient.CreateSession(ctx)
 	if err != nil {

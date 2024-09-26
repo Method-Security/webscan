@@ -132,7 +132,7 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			countries, _ := cmd.Flags().GetStringArray("country")
 			if len(countries) > 0 {
-				cmd.MarkFlagRequired("proxy")
+				_ = cmd.MarkFlagRequired("proxy")
 			}
 			return nil
 		},
