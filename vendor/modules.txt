@@ -95,7 +95,7 @@ github.com/Knetic/govaluate
 # github.com/Masterminds/semver/v3 v3.2.1
 ## explicit; go 1.18
 github.com/Masterminds/semver/v3
-# github.com/Method-Security/pkg v0.0.2
+# github.com/Method-Security/pkg v0.0.3
 ## explicit; go 1.22
 github.com/Method-Security/pkg/signal
 github.com/Method-Security/pkg/writer
@@ -780,8 +780,8 @@ github.com/gobwas/pool
 github.com/gobwas/pool/internal/pmath
 github.com/gobwas/pool/pbufio
 github.com/gobwas/pool/pbytes
-# github.com/gobwas/ws v1.2.1
-## explicit; go 1.15
+# github.com/gobwas/ws v1.4.0
+## explicit; go 1.16
 github.com/gobwas/ws
 github.com/gobwas/ws/wsutil
 # github.com/goccy/go-json v0.10.2
@@ -1129,11 +1129,11 @@ github.com/palantir/pkg/safeyaml
 # github.com/palantir/pkg/transform v1.1.0
 ## explicit; go 1.19
 github.com/palantir/pkg/transform
-# github.com/palantir/witchcraft-go-error v1.34.0
+# github.com/palantir/witchcraft-go-error v1.38.0
 ## explicit; go 1.21
 github.com/palantir/witchcraft-go-error
 github.com/palantir/witchcraft-go-error/internal/errors
-# github.com/palantir/witchcraft-go-logging v1.51.0
+# github.com/palantir/witchcraft-go-logging v1.57.0
 ## explicit; go 1.21
 github.com/palantir/witchcraft-go-logging/conjure/witchcraft/api/logging
 github.com/palantir/witchcraft-go-logging/internal/gopath
@@ -1143,10 +1143,10 @@ github.com/palantir/witchcraft-go-logging/wlog-tmpl/logentryformatter
 github.com/palantir/witchcraft-go-logging/wlog-tmpl/logs
 github.com/palantir/witchcraft-go-logging/wlog/internal
 github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log
-# github.com/palantir/witchcraft-go-params v1.31.0
+# github.com/palantir/witchcraft-go-params v1.35.0
 ## explicit; go 1.21
 github.com/palantir/witchcraft-go-params
-# github.com/palantir/witchcraft-go-tracing v1.33.0
+# github.com/palantir/witchcraft-go-tracing v1.37.0
 ## explicit; go 1.21
 github.com/palantir/witchcraft-go-tracing/wtracing
 # github.com/pb33f/libopenapi v0.16.11

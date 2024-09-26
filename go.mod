@@ -5,13 +5,14 @@ go 1.22
 toolchain go1.22.5
 
 require (
-	github.com/Method-Security/pkg v0.0.2
+	github.com/Method-Security/pkg v0.0.3
 	github.com/chromedp/chromedp v0.9.2
 	github.com/ffuf/ffuf/v2 v2.1.0
 	github.com/go-rod/rod v0.116.2
+	github.com/gobwas/ws v1.4.0
 	github.com/google/uuid v1.6.0
 	github.com/palantir/pkg/datetime v1.1.0
-	github.com/palantir/witchcraft-go-logging v1.51.0
+	github.com/palantir/witchcraft-go-logging v1.57.0
 	github.com/pb33f/libopenapi v0.16.11
 	github.com/projectdiscovery/httpx v1.6.6
 	github.com/projectdiscovery/katana v1.1.0
@@ -140,7 +141,6 @@ require (
 	github.com/goburrow/cache v0.1.4 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
-	github.com/gobwas/ws v1.2.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
@@ -226,9 +226,9 @@ require (
 	github.com/palantir/pkg/safelong v1.1.0 // indirect
 	github.com/palantir/pkg/safeyaml v1.1.0 // indirect
 	github.com/palantir/pkg/transform v1.1.0 // indirect
-	github.com/palantir/witchcraft-go-error v1.34.0 // indirect
-	github.com/palantir/witchcraft-go-params v1.31.0 // indirect
-	github.com/palantir/witchcraft-go-tracing v1.33.0 // indirect
+	github.com/palantir/witchcraft-go-error v1.38.0 // indirect
+	github.com/palantir/witchcraft-go-params v1.35.0 // indirect
+	github.com/palantir/witchcraft-go-tracing v1.37.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
