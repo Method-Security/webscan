@@ -81,13 +81,14 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 		Use: "request",
 		Run: func(cmd *cobra.Command, args []string) {
 			log := svc1log.FromContext(cmd.Context())
+			insecure, _ := cmd.Flags().GetBool("insecure")
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
 			}
 
-			capturer := capture.NewRequestWebpageCapturer()
+			capturer := capture.NewRequestWebpageCapturer(insecure)
 			result, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
 			if err != nil {
 				a.OutputSignal.AddError(err)
@@ -98,6 +99,7 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 			a.OutputSignal.Content = result.ToWebpageCaptureReport()
 		},
 	}
+	requestCaptureCmd.Flags().Bool("insecure", false, "Allow insecure connections")
 	htmlCaptureCmd.AddCommand(requestCaptureCmd)
 
 	browserCaptureCmd := &cobra.Command{

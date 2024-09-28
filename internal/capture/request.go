@@ -11,12 +11,12 @@ type RequestWebpageCapturer struct {
 	Client http.Client
 }
 
-func NewRequestWebpageCapturer() *RequestWebpageCapturer {
+func NewRequestWebpageCapturer(insecure bool) *RequestWebpageCapturer {
 	return &RequestWebpageCapturer{
 		Client: http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
-					InsecureSkipVerify: true,
+					InsecureSkipVerify: insecure,
 				},
 			},
 		},
