@@ -1,0 +1,10 @@
+types:
+  BodyGrab:
+    properties:
+      target: string
+      statusCode: integer
+      responseBody: string
+  BodyGrabReport:
+    properties:
+      bodyGrabs: optional<list<BodyGrab>>
+      errors: optional<list<string>>

@@ -9,6 +9,91 @@ import (
 	time "time"
 )
 
+type BodyGrab struct {
+	Target       string `json:"target" url:"target"`
+	StatusCode   int    `json:"statusCode" url:"statusCode"`
+	ResponseBody string `json:"responseBody" url:"responseBody"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BodyGrab) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *BodyGrab) UnmarshalJSON(data []byte) error {
+	type unmarshaler BodyGrab
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*b = BodyGrab(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BodyGrab) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+type BodyGrabReport struct {
+	BodyGrabs []*BodyGrab `json:"bodyGrabs,omitempty" url:"bodyGrabs,omitempty"`
+	Errors    []string    `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BodyGrabReport) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *BodyGrabReport) UnmarshalJSON(data []byte) error {
+	type unmarshaler BodyGrabReport
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*b = BodyGrabReport(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BodyGrabReport) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
 type TlsVersion string
 
 const (
