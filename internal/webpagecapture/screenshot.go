@@ -48,14 +48,15 @@ func PerformWebpageScreenshot(ctx context.Context, path string, target string) w
 	})
 	if err != nil {
 		return webscan.WebpageScreenshotReport{
-			Target: target,
-			Errors: []string{err.Error()},
+			Target:     target,
+			Screenshot: nil,
+			Errors:     []string{err.Error()},
 		}
 	}
 
 	return webscan.WebpageScreenshotReport{
 		Target:     target,
-		Screenshot: img,
+		Screenshot: &img,
 		Errors:     nil,
 	}
 }
