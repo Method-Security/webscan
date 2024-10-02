@@ -20,27 +20,33 @@ func (a *WebScan) InitPagecaptureCommand() {
 		Long:    `Perform a webpage capture against a URL target`,
 	}
 
-	var chromiumPath string
 	pageScreenshotCmd := &cobra.Command{
 		Use:   "screenshot",
 		Short: "Perform a fully rendered webpage screenshot capture using a headless browser",
 		Long:  `Perform a fully rendered webpage screenshot capture using a headless browser`,
 		Run: func(cmd *cobra.Command, args []string) {
+			log := svc1log.FromContext(cmd.Context())
+
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
+				a.OutputSignal.AddError(err)
 				return
 			}
 
-			report := capture.PerformPageScreenshot(cmd.Context(), chromiumPath, target)
+			timeout, _ := cmd.Flags().GetInt("timeout")
+
+			capturer := capture.NewBrowserPageCapturer(nil, timeout)
+			report := capturer.CaptureScreenshot(cmd.Context(), target, &capture.Options{})
+			
+			_ = capturer.Close(cmd.Context())
+			log.Info("Screenshot capture successful", svc1log.SafeParam("target", target))
+
 			a.OutputSignal.Content = report
 		},
 	}
 
-	pageScreenshotCmd.Flags().String("target", "", "Url target to perform webpage screenshot")
-	pageScreenshotCmd.Flags().StringVar(&chromiumPath, "chromium-path", "", "Path to an instance of Chromium to use for the screenshot")
+	pageScreenshotCmd.PersistentFlags().String("target", "", "URL target to perform webpage capture")
+	pageScreenshotCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
 
 	htmlCaptureCmd := &cobra.Command{
 		Use:   "html",
