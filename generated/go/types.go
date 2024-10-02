@@ -692,6 +692,92 @@ func (g *GraphQlType) String() string {
 	return fmt.Sprintf("%#v", g)
 }
 
+type PageCaptureReport struct {
+	Target      string   `json:"target" url:"target"`
+	HtmlEncoded *string  `json:"html_encoded,omitempty" url:"html_encoded,omitempty"`
+	Errors      []string `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PageCaptureReport) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PageCaptureReport) UnmarshalJSON(data []byte) error {
+	type unmarshaler PageCaptureReport
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PageCaptureReport(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PageCaptureReport) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type PageScreenshotReport struct {
+	Target     string   `json:"target" url:"target"`
+	Screenshot []byte   `json:"screenshot" url:"screenshot"`
+	Errors     []string `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PageScreenshotReport) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PageScreenshotReport) UnmarshalJSON(data []byte) error {
+	type unmarshaler PageScreenshotReport
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PageScreenshotReport(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PageScreenshotReport) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
 type HttpMethod string
 
 const (
@@ -1368,90 +1454,4 @@ func NewSecuritySchemeTypeFromString(s string) (SecuritySchemeType, error) {
 
 func (s SecuritySchemeType) Ptr() *SecuritySchemeType {
 	return &s
-}
-
-type WebpageCaptureReport struct {
-	Target      string   `json:"target" url:"target"`
-	HtmlEncoded *string  `json:"html_encoded,omitempty" url:"html_encoded,omitempty"`
-	Errors      []string `json:"errors,omitempty" url:"errors,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (w *WebpageCaptureReport) GetExtraProperties() map[string]interface{} {
-	return w.extraProperties
-}
-
-func (w *WebpageCaptureReport) UnmarshalJSON(data []byte) error {
-	type unmarshaler WebpageCaptureReport
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*w = WebpageCaptureReport(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *w)
-	if err != nil {
-		return err
-	}
-	w.extraProperties = extraProperties
-
-	w._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (w *WebpageCaptureReport) String() string {
-	if len(w._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(w._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(w); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", w)
-}
-
-type WebpageScreenshotReport struct {
-	Target     string   `json:"target" url:"target"`
-	Screenshot []byte   `json:"screenshot" url:"screenshot"`
-	Errors     []string `json:"errors,omitempty" url:"errors,omitempty"`
-
-	extraProperties map[string]interface{}
-	_rawJSON        json.RawMessage
-}
-
-func (w *WebpageScreenshotReport) GetExtraProperties() map[string]interface{} {
-	return w.extraProperties
-}
-
-func (w *WebpageScreenshotReport) UnmarshalJSON(data []byte) error {
-	type unmarshaler WebpageScreenshotReport
-	var value unmarshaler
-	if err := json.Unmarshal(data, &value); err != nil {
-		return err
-	}
-	*w = WebpageScreenshotReport(value)
-
-	extraProperties, err := core.ExtractExtraProperties(data, *w)
-	if err != nil {
-		return err
-	}
-	w.extraProperties = extraProperties
-
-	w._rawJSON = json.RawMessage(data)
-	return nil
-}
-
-func (w *WebpageScreenshotReport) String() string {
-	if len(w._rawJSON) > 0 {
-		if value, err := core.StringifyJSON(w._rawJSON); err == nil {
-			return value
-		}
-	}
-	if value, err := core.StringifyJSON(w); err == nil {
-		return value
-	}
-	return fmt.Sprintf("%#v", w)
 }

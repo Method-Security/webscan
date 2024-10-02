@@ -6,7 +6,6 @@ import (
 
 	"github.com/Method-Security/webscan/internal/browserbase"
 	capture "github.com/Method-Security/webscan/internal/capture"
-	"github.com/Method-Security/webscan/internal/webpagecapture"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/spf13/cobra"
 )
@@ -19,35 +18,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 		Aliases: []string{"capture"},
 		Short:   "Perform a webpage capture against a URL target",
 		Long:    `Perform a webpage capture against a URL target`,
-		Run: func(cmd *cobra.Command, args []string) {
-			target, err := cmd.Flags().GetString("target")
-			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
-				return
-			}
-
-			noSandbox, err := cmd.Flags().GetBool("no-sandbox")
-			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
-				return
-			}
-
-			report, err := webpagecapture.PerformWebpageCapture(cmd.Context(), noSandbox, target)
-			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
-			}
-			a.OutputSignal.Content = report
-		},
 	}
-
-	pagecaptureCmd.Flags().String("target", "", "Url target to perform webpage HTML capture")
-	pagecaptureCmd.Flags().Bool("no-sandbox", false, "Disable sandbox mode for scan")
 
 	var chromiumPath string
 	pageScreenshotCmd := &cobra.Command{
@@ -63,7 +34,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 				return
 			}
 
-			report := webpagecapture.PerformWebpageScreenshot(cmd.Context(), chromiumPath, target)
+			report := capture.PerformPageScreenshot(cmd.Context(), chromiumPath, target)
 			a.OutputSignal.Content = report
 		},
 	}
@@ -72,17 +43,17 @@ func (a *WebScan) InitPagecaptureCommand() {
 	pageScreenshotCmd.Flags().StringVar(&chromiumPath, "chromium-path", "", "Path to an instance of Chromium to use for the screenshot")
 
 	htmlCaptureCmd := &cobra.Command{
-		Use: "html",
+		Use:   "html",
 		Short: "Perform a webpage HTML capture against a URL target",
-		Long: `Perform a webpage HTML capture against a URL target`,
+		Long:  `Perform a webpage HTML capture against a URL target`,
 	}
 	htmlCaptureCmd.PersistentFlags().String("target", "", "URL target to perform webpage capture")
 	htmlCaptureCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
 
 	requestCaptureCmd := &cobra.Command{
-		Use: "request",
+		Use:   "request",
 		Short: "Perform a webpage HTML capture using a basic HTTP/HTTPS request",
-		Long: `Perform a webpage HTML capture using a basic HTTP/HTTPS request`,
+		Long:  `Perform a webpage HTML capture using a basic HTTP/HTTPS request`,
 		Run: func(cmd *cobra.Command, args []string) {
 			log := svc1log.FromContext(cmd.Context())
 			insecure, _ := cmd.Flags().GetBool("insecure")
@@ -92,24 +63,24 @@ func (a *WebScan) InitPagecaptureCommand() {
 				return
 			}
 
-			capturer := capture.NewRequestWebpageCapturer(insecure)
+			capturer := capture.NewRequestPageCapturer(insecure)
 			result, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
 			}
 			_ = capturer.Close(cmd.Context())
-			log.Info("Webpage capture successful", svc1log.SafeParam("target", target))
-			a.OutputSignal.Content = result.ToWebpageCaptureReport()
+			log.Info("Page capture successful", svc1log.SafeParam("target", target))
+			a.OutputSignal.Content = result.ToPageCaptureReport()
 		},
 	}
 	requestCaptureCmd.Flags().Bool("insecure", false, "Allow insecure connections")
 	htmlCaptureCmd.AddCommand(requestCaptureCmd)
 
 	browserCaptureCmd := &cobra.Command{
-		Use: "browser",
+		Use:   "browser",
 		Short: "Perform a fully rendered webpage HTML capture using a headless browser",
-		Long: `Perform a fully rendered webpage HTML capture using a headless browser`,
+		Long:  `Perform a fully rendered webpage HTML capture using a headless browser`,
 		Run: func(cmd *cobra.Command, args []string) {
 			log := svc1log.FromContext(cmd.Context())
 
@@ -121,24 +92,24 @@ func (a *WebScan) InitPagecaptureCommand() {
 
 			timeout, _ := cmd.Flags().GetInt("timeout")
 
-			capturer := capture.NewBrowserWebpageCapturer(nil, timeout)
+			capturer := capture.NewBrowserPageCapturer(nil, timeout)
 			result, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
 			}
 			_ = capturer.Close(cmd.Context())
-			log.Info("Webpage capture successful", svc1log.SafeParam("target", target))
+			log.Info("Page capture successful", svc1log.SafeParam("target", target))
 
-			a.OutputSignal.Content = result.ToWebpageCaptureReport()
+			a.OutputSignal.Content = result.ToPageCaptureReport()
 		},
 	}
 	htmlCaptureCmd.AddCommand(browserCaptureCmd)
 
 	browserbaseCaptureCmd := &cobra.Command{
-		Use: "browserbase",
+		Use:   "browserbase",
 		Short: "Perform a fully rendered webpage HTML capture using Browserbase",
-		Long: `Perform a fully rendered webpage HTML capture using Browserbase. Useful for avoiding bot detection or maintaining stealth`,
+		Long:  `Perform a fully rendered webpage HTML capture using Browserbase. Useful for avoiding bot detection or maintaining stealth`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			countries, _ := cmd.Flags().GetStringArray("country")
 			if len(countries) > 0 {
@@ -176,7 +147,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 			}
 
 			client := browserbase.NewBrowserbaseClient(token, project, browserbase.NewBrowserbaseOptions(cmd.Context(), options...))
-			capturer := capture.NewBrowserbaseWebpageCapturer(cmd.Context(), timeout, client)
+			capturer := capture.NewBrowserbasePageCapturer(cmd.Context(), timeout, client)
 
 			if capturer == nil {
 				a.OutputSignal.AddError(fmt.Errorf("failed to create browserbase capturer"))
@@ -189,8 +160,8 @@ func (a *WebScan) InitPagecaptureCommand() {
 				return
 			}
 			_ = capturer.Close(cmd.Context())
-			log.Info("Webpage capture successful", svc1log.SafeParam("target", target))
-			a.OutputSignal.Content = result.ToWebpageCaptureReport()
+			log.Info("Page capture successful", svc1log.SafeParam("target", target))
+			a.OutputSignal.Content = result.ToPageCaptureReport()
 		},
 	}
 	browserbaseCaptureCmd.Flags().String("token", "", "Browserbase API token")

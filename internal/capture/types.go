@@ -28,8 +28,8 @@ func NewCaptureResult(URL string) *Result {
 	}
 }
 
-func (r *Result) ToWebpageCaptureReport() webscan.WebpageCaptureReport {
-	report := webscan.WebpageCaptureReport{
+func (r *Result) ToPageCaptureReport() webscan.PageCaptureReport {
+	report := webscan.PageCaptureReport{
 		Target:      r.URL,
 		Errors:      r.Errors,
 		HtmlEncoded: nil,

@@ -10,29 +10,29 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
-type BrowserWebpageCapturer struct {
+type BrowserPageCapturer struct {
 	PathToBrowser  *string
 	Browser        *rod.Browser
 	TimeoutSeconds int
 }
 
-func NewBrowserWebpageCapturer(pathToBrowser *string, timeout int) *BrowserWebpageCapturer {
-	return &BrowserWebpageCapturer{
+func NewBrowserPageCapturer(pathToBrowser *string, timeout int) *BrowserPageCapturer {
+	return &BrowserPageCapturer{
 		PathToBrowser:  pathToBrowser,
 		Browser:        nil,
 		TimeoutSeconds: timeout,
 	}
 }
 
-func NewBrowserWebpageCapturerWithClient(client *cdp.Client, timeout int) *BrowserWebpageCapturer {
-	return &BrowserWebpageCapturer{
+func NewBrowserPageCapturerWithClient(client *cdp.Client, timeout int) *BrowserPageCapturer {
+	return &BrowserPageCapturer{
 		PathToBrowser:  nil,
 		Browser:        rod.New().Client(client).MustConnect(),
 		TimeoutSeconds: timeout,
 	}
 }
 
-func (b *BrowserWebpageCapturer) Capture(ctx context.Context, url string, options *Options) (*Result, error) {
+func (b *BrowserPageCapturer) Capture(ctx context.Context, url string, options *Options) (*Result, error) {
 	result := NewCaptureResult(url)
 	log := svc1log.FromContext(ctx)
 
@@ -67,7 +67,7 @@ func (b *BrowserWebpageCapturer) Capture(ctx context.Context, url string, option
 	return result, nil
 }
 
-func (b *BrowserWebpageCapturer) InitializeBrowser() {
+func (b *BrowserPageCapturer) InitializeBrowser() {
 	var browserURL string
 	if b.PathToBrowser != nil && *b.PathToBrowser != "" {
 		browserURL = launcher.New().Headless(true).Bin(*b.PathToBrowser).MustLaunch()
@@ -78,7 +78,7 @@ func (b *BrowserWebpageCapturer) InitializeBrowser() {
 	b.Browser = rod.New().ControlURL(browserURL).MustConnect()
 }
 
-func (b *BrowserWebpageCapturer) Close(ctx context.Context) error {
+func (b *BrowserPageCapturer) Close(ctx context.Context) error {
 	svc1log.FromContext(ctx).Debug("Closing browser")
 	if b.Browser != nil {
 		err := b.Browser.Close()

@@ -8,16 +8,16 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
-type BrowserbaseWebpageCapturer struct {
+type BrowserbasePageCapturer struct {
 	Client   *browserbase.Client
-	Capturer *BrowserWebpageCapturer
+	Capturer *BrowserPageCapturer
 }
 
-func NewBrowserbaseWebpageCapturer(
+func NewBrowserbasePageCapturer(
 	ctx context.Context,
 	timeout int,
 	browserbaseClient *browserbase.Client,
-) *BrowserbaseWebpageCapturer {
+) *BrowserbasePageCapturer {
 	session, err := browserbaseClient.CreateSession(ctx)
 	if err != nil {
 		svc1log.FromContext(ctx).Error("Failed to create session. Aborting.")
@@ -26,17 +26,17 @@ func NewBrowserbaseWebpageCapturer(
 
 	websocket := NewWebSocket(ctx, browserbaseClient.ConnectionString(*session))
 	client := cdp.New().Start(websocket)
-	return &BrowserbaseWebpageCapturer{
-		Capturer: NewBrowserWebpageCapturerWithClient(client, timeout),
+	return &BrowserbasePageCapturer{
+		Capturer: NewBrowserPageCapturerWithClient(client, timeout),
 		Client:   browserbaseClient,
 	}
 }
 
-func (b *BrowserbaseWebpageCapturer) Capture(ctx context.Context, url string, options *Options) (*Result, error) {
+func (b *BrowserbasePageCapturer) Capture(ctx context.Context, url string, options *Options) (*Result, error) {
 	return b.Capturer.Capture(ctx, url, options)
 }
 
-func (b *BrowserbaseWebpageCapturer) Close(ctx context.Context) error {
+func (b *BrowserbasePageCapturer) Close(ctx context.Context) error {
 	var err error = nil
 	sessionErr := b.Client.CloseAllSessions(ctx)
 	if sessionErr != nil {
