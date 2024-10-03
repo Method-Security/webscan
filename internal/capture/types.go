@@ -15,7 +15,7 @@ type Result struct {
 	Errors     []string `json:"errors,omitempty" yaml:"errors,omitempty"`
 }
 
-type WebPageCapturer interface {
+type PageCapturer interface {
 	Capture(ctx context.Context, url string, options *Options) (*Result, error)
 	Close(ctx context.Context) error
 }
