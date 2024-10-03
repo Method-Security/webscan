@@ -5,9 +5,53 @@ package webscan
 import (
 	json "encoding/json"
 	fmt "fmt"
-	core "github.com/Method-Security/webscan/generated/go/core"
 	time "time"
+
+	core "github.com/Method-Security/webscan/generated/go/core"
 )
+
+type HttpMethod string
+
+const (
+	HttpMethodGet     HttpMethod = "GET"
+	HttpMethodPost    HttpMethod = "POST"
+	HttpMethodPut     HttpMethod = "PUT"
+	HttpMethodDelete  HttpMethod = "DELETE"
+	HttpMethodPatch   HttpMethod = "PATCH"
+	HttpMethodOptions HttpMethod = "OPTIONS"
+	HttpMethodHead    HttpMethod = "HEAD"
+	HttpMethodConnect HttpMethod = "CONNECT"
+	HttpMethodTrace   HttpMethod = "TRACE"
+)
+
+func NewHttpMethodFromString(s string) (HttpMethod, error) {
+	switch s {
+	case "GET":
+		return HttpMethodGet, nil
+	case "POST":
+		return HttpMethodPost, nil
+	case "PUT":
+		return HttpMethodPut, nil
+	case "DELETE":
+		return HttpMethodDelete, nil
+	case "PATCH":
+		return HttpMethodPatch, nil
+	case "OPTIONS":
+		return HttpMethodOptions, nil
+	case "HEAD":
+		return HttpMethodHead, nil
+	case "CONNECT":
+		return HttpMethodConnect, nil
+	case "TRACE":
+		return HttpMethodTrace, nil
+	}
+	var t HttpMethod
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (h HttpMethod) Ptr() *HttpMethod {
+	return &h
+}
 
 type TlsVersion string
 
@@ -778,37 +822,6 @@ func (p *PageScreenshotReport) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
-type HttpMethod string
-
-const (
-	HttpMethodGet    HttpMethod = "GET"
-	HttpMethodPost   HttpMethod = "POST"
-	HttpMethodPut    HttpMethod = "PUT"
-	HttpMethodDelete HttpMethod = "DELETE"
-	HttpMethodPatch  HttpMethod = "PATCH"
-)
-
-func NewHttpMethodFromString(s string) (HttpMethod, error) {
-	switch s {
-	case "GET":
-		return HttpMethodGet, nil
-	case "POST":
-		return HttpMethodPost, nil
-	case "PUT":
-		return HttpMethodPut, nil
-	case "DELETE":
-		return HttpMethodDelete, nil
-	case "PATCH":
-		return HttpMethodPatch, nil
-	}
-	var t HttpMethod
-	return "", fmt.Errorf("%s is not a valid %T", s, t)
-}
-
-func (h HttpMethod) Ptr() *HttpMethod {
-	return &h
-}
-
 type ParsedParams struct {
 	PathParams      map[string]string `json:"pathParams,omitempty" url:"pathParams,omitempty"`
 	QueryParams     map[string]string `json:"queryParams,omitempty" url:"queryParams,omitempty"`
@@ -993,6 +1006,204 @@ func NewVulnTypeFromString(s string) (VulnType, error) {
 
 func (v VulnType) Ptr() *VulnType {
 	return &v
+}
+
+type BodyParams struct {
+	Name          string   `json:"name" url:"name"`
+	ExampleValues []string `json:"exampleValues,omitempty" url:"exampleValues,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (b *BodyParams) GetExtraProperties() map[string]interface{} {
+	return b.extraProperties
+}
+
+func (b *BodyParams) UnmarshalJSON(data []byte) error {
+	type unmarshaler BodyParams
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*b = BodyParams(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *b)
+	if err != nil {
+		return err
+	}
+	b.extraProperties = extraProperties
+
+	b._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (b *BodyParams) String() string {
+	if len(b._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(b._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(b); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", b)
+}
+
+type PageCaptureMethod string
+
+const (
+	PageCaptureMethodRequest     PageCaptureMethod = "REQUEST"
+	PageCaptureMethodBrowser     PageCaptureMethod = "BROWSER"
+	PageCaptureMethodBrowserbase PageCaptureMethod = "BROWSERBASE"
+)
+
+func NewPageCaptureMethodFromString(s string) (PageCaptureMethod, error) {
+	switch s {
+	case "REQUEST":
+		return PageCaptureMethodRequest, nil
+	case "BROWSER":
+		return PageCaptureMethodBrowser, nil
+	case "BROWSERBASE":
+		return PageCaptureMethodBrowserbase, nil
+	}
+	var t PageCaptureMethod
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p PageCaptureMethod) Ptr() *PageCaptureMethod {
+	return &p
+}
+
+type QueryParams struct {
+	Name          string   `json:"name" url:"name"`
+	ExampleValues []string `json:"exampleValues,omitempty" url:"exampleValues,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (q *QueryParams) GetExtraProperties() map[string]interface{} {
+	return q.extraProperties
+}
+
+func (q *QueryParams) UnmarshalJSON(data []byte) error {
+	type unmarshaler QueryParams
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*q = QueryParams(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *q)
+	if err != nil {
+		return err
+	}
+	q.extraProperties = extraProperties
+
+	q._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (q *QueryParams) String() string {
+	if len(q._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(q._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(q); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", q)
+}
+
+type RouteCaptureReport struct {
+	Target string      `json:"target" url:"target"`
+	Routes []*WebRoute `json:"routes,omitempty" url:"routes,omitempty"`
+	Urls   []string    `json:"urls,omitempty" url:"urls,omitempty"`
+	Errors []string    `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (r *RouteCaptureReport) GetExtraProperties() map[string]interface{} {
+	return r.extraProperties
+}
+
+func (r *RouteCaptureReport) UnmarshalJSON(data []byte) error {
+	type unmarshaler RouteCaptureReport
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*r = RouteCaptureReport(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *r)
+	if err != nil {
+		return err
+	}
+	r.extraProperties = extraProperties
+
+	r._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (r *RouteCaptureReport) String() string {
+	if len(r._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(r._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(r); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", r)
+}
+
+type WebRoute struct {
+	Url         string         `json:"url" url:"url"`
+	Path        *string        `json:"path,omitempty" url:"path,omitempty"`
+	Method      *HttpMethod    `json:"method,omitempty" url:"method,omitempty"`
+	QueryParams []*QueryParams `json:"queryParams,omitempty" url:"queryParams,omitempty"`
+	BodyParams  []*BodyParams  `json:"bodyParams,omitempty" url:"bodyParams,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (w *WebRoute) GetExtraProperties() map[string]interface{} {
+	return w.extraProperties
+}
+
+func (w *WebRoute) UnmarshalJSON(data []byte) error {
+	type unmarshaler WebRoute
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*w = WebRoute(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+
+	w._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (w *WebRoute) String() string {
+	if len(w._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(w._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(w); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", w)
 }
 
 type ApiType string

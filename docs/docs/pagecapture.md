@@ -104,7 +104,7 @@ Global Flags:
 #### Usage
 
 ```bash
-webscan pagecapture screenshot --target https://example.com --chromium-path /path/to/chromium
+webscan pagecapture screenshot --target https://example.com
 ```
 
 #### Help Text
@@ -116,9 +116,9 @@ Usage:
   webscan pagecapture screenshot [flags]
 
 Flags:
-      --chromium-path string   Path to an instance of Chromium to use for the screenshot
-  -h, --help                   help for screenshot
-      --target string          Url target to perform webpage screenshot
+  -h, --help            help for screenshot
+      --target string   URL target to perform webpage capture
+      --timeout int     Timeout in seconds for the capture (default 30)
 
 Global Flags:
   -o, --output string        Output format (signal, json, yaml). Default value is signal (default "signal")

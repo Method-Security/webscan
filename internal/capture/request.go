@@ -5,13 +5,14 @@ import (
 	"crypto/tls"
 	"io"
 	"net/http"
+	"time"
 )
 
 type RequestPageCapturer struct {
 	Client http.Client
 }
 
-func NewRequestPageCapturer(insecure bool) *RequestPageCapturer {
+func NewRequestPageCapturer(insecure bool, timeout int) *RequestPageCapturer {
 	return &RequestPageCapturer{
 		Client: http.Client{
 			Transport: &http.Transport{
@@ -19,6 +20,7 @@ func NewRequestPageCapturer(insecure bool) *RequestPageCapturer {
 					InsecureSkipVerify: insecure,
 				},
 			},
+			Timeout: time.Duration(timeout) * time.Second,
 		},
 	}
 }

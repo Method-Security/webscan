@@ -2,45 +2,40 @@ package capture
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
 	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/proto"
+	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/ysmood/gson"
 )
 
-func PerformPageScreenshot(ctx context.Context, path string, target string) webscan.PageScreenshotReport {
-	var browserURL string
-	if path != "" {
-		browserURL = launcher.New().Headless(true).Bin(path).MustLaunch()
-	} else {
-		browserURL = launcher.New().Headless(true).MustLaunch()
-	}
-	browser := rod.New().ControlURL(browserURL).MustConnect()
-	defer browser.MustClose()
+func (b *BrowserPageCapturer) CaptureScreenshot(ctx context.Context, url string, options *Options) webscan.PageScreenshotReport {
+	log := svc1log.FromContext(ctx)
 
-	pageCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	if b.Browser == nil {
+		log.Debug("Initializing browser")
+		b.InitializeBrowser()
+	}
+
+	pageCtx, cancel := context.WithTimeout(ctx, time.Duration(b.TimeoutSeconds)*time.Second)
 	defer cancel()
 
 	var page *rod.Page
 	err := rod.Try(func() {
-		page = browser.MustPage(target).Context(pageCtx)
+		page = b.Browser.MustPage(url).Context(pageCtx)
 	})
 	if err != nil {
-		errorMsg := err.Error()
-		if strings.Contains(errorMsg, "net::ERR_NAME_NOT_RESOLVED") {
-			errorMsg = "Unable to resolve the domain name. Please check if the URL is correct and the domain exists."
-		} else {
-			errorMsg = "Failed to load the page: " + errorMsg
-		}
+		log.Error("Failed to create page", svc1log.SafeParam("url", url), svc1log.SafeParam("error", err))
 		return webscan.PageScreenshotReport{
-			Target: target,
-			Errors: []string{errorMsg},
+			Target: url,
+			Errors: []string{err.Error()},
 		}
 	}
+	log.Debug("Successfully connected to page")
+
+	page = page.MustWaitDOMStable()
 
 	img, err := page.MustWaitStable().ScrollScreenshot(&rod.ScrollScreenshotOptions{
 		Format:  proto.PageCaptureScreenshotFormatPng,
@@ -48,13 +43,13 @@ func PerformPageScreenshot(ctx context.Context, path string, target string) webs
 	})
 	if err != nil {
 		return webscan.PageScreenshotReport{
-			Target: target,
+			Target: url,
 			Errors: []string{err.Error()},
 		}
 	}
 
 	return webscan.PageScreenshotReport{
-		Target:     target,
+		Target:     url,
 		Screenshot: img,
 		Errors:     nil,
 	}

@@ -37,7 +37,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 
 			capturer := capture.NewBrowserPageCapturer(nil, timeout)
 			report := capturer.CaptureScreenshot(cmd.Context(), target, &capture.Options{})
-			
+
 			_ = capturer.Close(cmd.Context())
 			log.Info("Screenshot capture successful", svc1log.SafeParam("target", target))
 
@@ -69,7 +69,9 @@ func (a *WebScan) InitPagecaptureCommand() {
 				return
 			}
 
-			capturer := capture.NewRequestPageCapturer(insecure)
+			timeout, _ := cmd.Flags().GetInt("timeout")
+
+			capturer := capture.NewRequestPageCapturer(insecure, timeout)
 			result, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
 			if err != nil {
 				a.OutputSignal.AddError(err)

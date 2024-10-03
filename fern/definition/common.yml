@@ -11,3 +11,14 @@ types:
       - "TLS12"
       - "TLS13"
       - "UNKNOWN"
+  HttpMethod:
+    enum:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - PATCH
+      - OPTIONS
+      - HEAD
+      - CONNECT
+      - TRACE
