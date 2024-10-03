@@ -21,6 +21,7 @@ func main() {
 	webscan.InitAppCommand()
 	webscan.InitFingerprintCommand()
 	webscan.InitPagecaptureCommand()
+	webscan.InitRoutecaptureCommand()
 
 	if err := webscan.RootCmd.Execute(); err != nil {
 		os.Exit(1)
