@@ -7,7 +7,8 @@ webscan offers a variety of scanning techniques to security teams working to gai
 - [Spider](./spider.md)
 - [Vuln](./vuln.md)
 - [Fingerprint](./fingerprint.md)
-- [Webpagecapture](./webpagecapture.md)
+- [Pagecapture](./pagecapture.md)
+- [Routecapture](./routecapture.md)
 
 ## Top Level Flags
 

@@ -1,20 +1,14 @@
 imports:
   routes: ./routes.yml
+  common: ./common.yml
 
 types:
-  HttpMethod:
-    enum:
-      - GET
-      - POST
-      - PUT
-      - DELETE
-      - PATCH
 
   RequestReport:
     properties:
       baseUrl: string
       path: string
-      method: HttpMethod
+      method: common.HttpMethod
       pathParams: optional<map<string, string>>
       queryParams: optional<map<string, string>>
       headerParams: optional<map<string, string>>

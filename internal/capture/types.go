@@ -15,7 +15,7 @@ type Result struct {
 	Errors     []string `json:"errors,omitempty" yaml:"errors,omitempty"`
 }
 
-type WebPageCapturer interface {
+type PageCapturer interface {
 	Capture(ctx context.Context, url string, options *Options) (*Result, error)
 	Close(ctx context.Context) error
 }
@@ -28,8 +28,8 @@ func NewCaptureResult(URL string) *Result {
 	}
 }
 
-func (r *Result) ToWebpageCaptureReport() webscan.WebpageCaptureReport {
-	report := webscan.WebpageCaptureReport{
+func (r *Result) ToPageCaptureReport() webscan.PageCaptureReport {
+	report := webscan.PageCaptureReport{
 		Target:      r.URL,
 		Errors:      r.Errors,
 		HtmlEncoded: nil,

@@ -6,104 +6,24 @@ import (
 
 	"github.com/Method-Security/webscan/internal/browserbase"
 	capture "github.com/Method-Security/webscan/internal/capture"
-	"github.com/Method-Security/webscan/internal/webpagecapture"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 	"github.com/spf13/cobra"
 )
 
-// InitWebpagecaptureCommand initializes the webpagecapture command for the webscan CLI. This command is used to collect
+// InitPagecaptureCommand initializes the pagecapture command for the webscan CLI. This command is used to collect
 // the HTML of a webpage from a URL target.
-func (a *WebScan) InitWebpagecaptureCommand() {
-	webpagecaptureCmd := &cobra.Command{
-		Use:     "webpagecapture",
+func (a *WebScan) InitPagecaptureCommand() {
+	pagecaptureCmd := &cobra.Command{
+		Use:     "pagecapture",
 		Aliases: []string{"capture"},
-		Short:   "Perform a webpage HTML capture against a URL target",
-		Long:    `Perform a webpage HTML capture against a URL target`,
-		Run: func(cmd *cobra.Command, args []string) {
-			target, err := cmd.Flags().GetString("target")
-			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
-				return
-			}
-
-			noSandbox, err := cmd.Flags().GetBool("no-sandbox")
-			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
-				return
-			}
-
-			report, err := webpagecapture.PerformWebpageCapture(cmd.Context(), noSandbox, target)
-			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
-			}
-			a.OutputSignal.Content = report
-		},
+		Short:   "Perform a webpage capture against a URL target",
+		Long:    `Perform a webpage capture against a URL target`,
 	}
 
-	webpagecaptureCmd.Flags().String("target", "", "Url target to perform webpage HTML capture")
-	webpagecaptureCmd.Flags().Bool("no-sandbox", false, "Disable sandbox mode for scan")
-
-	var chromiumPath string
-	webpageScreenshotCmd := &cobra.Command{
+	pageScreenshotCmd := &cobra.Command{
 		Use:   "screenshot",
-		Short: "Perform a webpage screenshot against a URL target",
-		Long:  `Perform a webpage screenshot against a URL target`,
-		Run: func(cmd *cobra.Command, args []string) {
-			target, err := cmd.Flags().GetString("target")
-			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
-				return
-			}
-
-			report := webpagecapture.PerformWebpageScreenshot(cmd.Context(), chromiumPath, target)
-			a.OutputSignal.Content = report
-		},
-	}
-
-	webpageScreenshotCmd.Flags().String("target", "", "Url target to perform webpage screenshot")
-	webpageScreenshotCmd.Flags().StringVar(&chromiumPath, "chromium-path", "", "Path to an instance of Chromium to use for the screenshot")
-
-	htmlCaptureCmd := &cobra.Command{
-		Use: "html",
-	}
-	htmlCaptureCmd.PersistentFlags().String("target", "", "URL target to perform webpage capture")
-	htmlCaptureCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
-
-	requestCaptureCmd := &cobra.Command{
-		Use: "request",
-		Run: func(cmd *cobra.Command, args []string) {
-			log := svc1log.FromContext(cmd.Context())
-			insecure, _ := cmd.Flags().GetBool("insecure")
-			target, err := cmd.Flags().GetString("target")
-			if err != nil {
-				a.OutputSignal.AddError(err)
-				return
-			}
-
-			capturer := capture.NewRequestWebpageCapturer(insecure)
-			result, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
-			if err != nil {
-				a.OutputSignal.AddError(err)
-				return
-			}
-			_ = capturer.Close(cmd.Context())
-			log.Info("Webpage capture successful", svc1log.SafeParam("target", target))
-			a.OutputSignal.Content = result.ToWebpageCaptureReport()
-		},
-	}
-	requestCaptureCmd.Flags().Bool("insecure", false, "Allow insecure connections")
-	htmlCaptureCmd.AddCommand(requestCaptureCmd)
-
-	browserCaptureCmd := &cobra.Command{
-		Use: "browser",
+		Short: "Perform a fully rendered webpage screenshot capture using a headless browser",
+		Long:  `Perform a fully rendered webpage screenshot capture using a headless browser`,
 		Run: func(cmd *cobra.Command, args []string) {
 			log := svc1log.FromContext(cmd.Context())
 
@@ -115,22 +35,89 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 
 			timeout, _ := cmd.Flags().GetInt("timeout")
 
-			capturer := capture.NewBrowserWebpageCapturer(nil, timeout)
+			capturer := capture.NewBrowserPageCapturer(nil, timeout)
+			report := capturer.CaptureScreenshot(cmd.Context(), target, &capture.Options{})
+
+			_ = capturer.Close(cmd.Context())
+			log.Info("Screenshot capture successful", svc1log.SafeParam("target", target))
+
+			a.OutputSignal.Content = report
+		},
+	}
+
+	pageScreenshotCmd.PersistentFlags().String("target", "", "URL target to perform webpage capture")
+	pageScreenshotCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
+
+	htmlCaptureCmd := &cobra.Command{
+		Use:   "html",
+		Short: "Perform a webpage HTML capture against a URL target",
+		Long:  `Perform a webpage HTML capture against a URL target`,
+	}
+	htmlCaptureCmd.PersistentFlags().String("target", "", "URL target to perform webpage capture")
+	htmlCaptureCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
+
+	requestCaptureCmd := &cobra.Command{
+		Use:   "request",
+		Short: "Perform a webpage HTML capture using a basic HTTP/HTTPS request",
+		Long:  `Perform a webpage HTML capture using a basic HTTP/HTTPS request`,
+		Run: func(cmd *cobra.Command, args []string) {
+			log := svc1log.FromContext(cmd.Context())
+			insecure, _ := cmd.Flags().GetBool("insecure")
+			target, err := cmd.Flags().GetString("target")
+			if err != nil {
+				a.OutputSignal.AddError(err)
+				return
+			}
+
+			timeout, _ := cmd.Flags().GetInt("timeout")
+
+			capturer := capture.NewRequestPageCapturer(insecure, timeout)
 			result, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
 			}
 			_ = capturer.Close(cmd.Context())
-			log.Info("Webpage capture successful", svc1log.SafeParam("target", target))
+			log.Info("Page capture successful", svc1log.SafeParam("target", target))
+			a.OutputSignal.Content = result.ToPageCaptureReport()
+		},
+	}
+	requestCaptureCmd.Flags().Bool("insecure", false, "Allow insecure connections")
+	htmlCaptureCmd.AddCommand(requestCaptureCmd)
 
-			a.OutputSignal.Content = result.ToWebpageCaptureReport()
+	browserCaptureCmd := &cobra.Command{
+		Use:   "browser",
+		Short: "Perform a fully rendered webpage HTML capture using a headless browser",
+		Long:  `Perform a fully rendered webpage HTML capture using a headless browser`,
+		Run: func(cmd *cobra.Command, args []string) {
+			log := svc1log.FromContext(cmd.Context())
+
+			target, err := cmd.Flags().GetString("target")
+			if err != nil {
+				a.OutputSignal.AddError(err)
+				return
+			}
+
+			timeout, _ := cmd.Flags().GetInt("timeout")
+
+			capturer := capture.NewBrowserPageCapturer(nil, timeout)
+			result, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
+			if err != nil {
+				a.OutputSignal.AddError(err)
+				return
+			}
+			_ = capturer.Close(cmd.Context())
+			log.Info("Page capture successful", svc1log.SafeParam("target", target))
+
+			a.OutputSignal.Content = result.ToPageCaptureReport()
 		},
 	}
 	htmlCaptureCmd.AddCommand(browserCaptureCmd)
 
 	browserbaseCaptureCmd := &cobra.Command{
-		Use: "browserbase",
+		Use:   "browserbase",
+		Short: "Perform a fully rendered webpage HTML capture using Browserbase",
+		Long:  `Perform a fully rendered webpage HTML capture using Browserbase. Useful for avoiding bot detection or maintaining stealth`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			countries, _ := cmd.Flags().GetStringArray("country")
 			if len(countries) > 0 {
@@ -168,7 +155,7 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 			}
 
 			client := browserbase.NewBrowserbaseClient(token, project, browserbase.NewBrowserbaseOptions(cmd.Context(), options...))
-			capturer := capture.NewBrowserbaseWebpageCapturer(cmd.Context(), timeout, client)
+			capturer := capture.NewBrowserbasePageCapturer(cmd.Context(), timeout, client)
 
 			if capturer == nil {
 				a.OutputSignal.AddError(fmt.Errorf("failed to create browserbase capturer"))
@@ -181,8 +168,8 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 				return
 			}
 			_ = capturer.Close(cmd.Context())
-			log.Info("Webpage capture successful", svc1log.SafeParam("target", target))
-			a.OutputSignal.Content = result.ToWebpageCaptureReport()
+			log.Info("Page capture successful", svc1log.SafeParam("target", target))
+			a.OutputSignal.Content = result.ToPageCaptureReport()
 		},
 	}
 	browserbaseCaptureCmd.Flags().String("token", "", "Browserbase API token")
@@ -192,9 +179,9 @@ func (a *WebScan) InitWebpagecaptureCommand() {
 
 	htmlCaptureCmd.AddCommand(browserbaseCaptureCmd)
 
-	webpagecaptureCmd.AddCommand(htmlCaptureCmd)
-	webpagecaptureCmd.AddCommand(webpageScreenshotCmd)
-	a.RootCmd.AddCommand(webpagecaptureCmd)
+	pagecaptureCmd.AddCommand(htmlCaptureCmd)
+	pagecaptureCmd.AddCommand(pageScreenshotCmd)
+	a.RootCmd.AddCommand(pagecaptureCmd)
 }
 
 // TODO: We could likely move this to viper to streamline

@@ -5,25 +5,27 @@ import (
 	"crypto/tls"
 	"io"
 	"net/http"
+	"time"
 )
 
-type RequestWebpageCapturer struct {
+type RequestPageCapturer struct {
 	Client http.Client
 }
 
-func NewRequestWebpageCapturer(insecure bool) *RequestWebpageCapturer {
-	return &RequestWebpageCapturer{
+func NewRequestPageCapturer(insecure bool, timeout int) *RequestPageCapturer {
+	return &RequestPageCapturer{
 		Client: http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
 					InsecureSkipVerify: insecure,
 				},
 			},
+			Timeout: time.Duration(timeout) * time.Second,
 		},
 	}
 }
 
-func (r *RequestWebpageCapturer) Capture(ctx context.Context, url string, options *Options) (*Result, error) {
+func (r *RequestPageCapturer) Capture(ctx context.Context, url string, options *Options) (*Result, error) {
 	result := NewCaptureResult(url)
 	resp, err := r.Client.Get(url)
 
@@ -53,6 +55,6 @@ func (r *RequestWebpageCapturer) Capture(ctx context.Context, url string, option
 	return result, nil
 }
 
-func (r *RequestWebpageCapturer) Close(ctx context.Context) error {
+func (r *RequestPageCapturer) Close(ctx context.Context) error {
 	return nil
 }
