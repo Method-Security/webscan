@@ -2,6 +2,8 @@
 
 The `webscan routecapture` command all web routes and URLs from a specified target. It uses the same underlying techniques that `pagecapture` uses to render HTML.
 
+Routes are extracted from the rendered HTML, inline scripts, linked scripts, and inspecting network requests made (when using Browser mode).
+
 ## Usage
 
 ```bash

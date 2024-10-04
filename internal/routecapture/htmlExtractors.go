@@ -12,9 +12,10 @@ import (
 // extractFormRoutes extracts WebRoutes from form elements in the HTML document
 // It returns a slice of WebRoutes, a slice of URLs and a slice of errors
 // WebRoutes are merged to only return unique routes
-func extractFormRoutes(doc *goquery.Document, baseURL string, baseUrlsOnly bool) ([]*webscan.WebRoute, []string, []string) {
+func extractFormRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool) ([]*webscan.WebRoute, []string, []string) {
 	routes := []*webscan.WebRoute{}
 	urls := make(map[string]struct{})
+	errors := []string{}
 
 	doc.Find("form").Each(func(i int, s *goquery.Selection) {
 		fmt.Println("Form found")
@@ -30,12 +31,18 @@ func extractFormRoutes(doc *goquery.Document, baseURL string, baseUrlsOnly bool)
 		fullURL := resolveURL(baseURL, action)
 
 		// Check if the URL is allowed
-		if !isURLAllowed(baseURL, fullURL, baseUrlsOnly) {
+		if !isURLAllowed(baseURL, fullURL, baseURLsOnly) {
 			return
 		}
 
-		route.Url = fullURL
-		urls[fullURL] = struct{}{}
+		// The route URL should not have query params, those are stored in QueryParams
+		urlNoQuery, err := urlRemoveQueryParams(fullURL)
+		if err != nil {
+			errors = append(errors, err.Error())
+			return
+		}
+		route.Url = urlNoQuery
+		urls[urlNoQuery] = struct{}{}
 
 		// Extract method attribute
 		method, exists := s.Attr("method")
@@ -83,7 +90,7 @@ func extractFormRoutes(doc *goquery.Document, baseURL string, baseUrlsOnly bool)
 	return mergeWebRoutes(routes), setToListString(urls), []string{}
 }
 
-func extractAnchorRoutes(doc *goquery.Document, baseURL string, baseUrlsOnly bool) ([]*webscan.WebRoute, []string, []string) {
+func extractAnchorRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool) ([]*webscan.WebRoute, []string, []string) {
 	routes := []*webscan.WebRoute{}
 	urls := make(map[string]struct{})
 	errors := []string{}
@@ -93,21 +100,28 @@ func extractAnchorRoutes(doc *goquery.Document, baseURL string, baseUrlsOnly boo
 		if exists && href != "" {
 			fullURL := resolveURL(baseURL, href)
 
-			// Check if the URL is allowed
-			if !isURLAllowed(baseURL, fullURL, baseUrlsOnly) {
+			// The route URL should not have query params, those are stored in QueryParams
+			urlNoQuery, err := urlRemoveQueryParams(fullURL)
+			if err != nil {
+				errors = append(errors, err.Error())
 				return
 			}
-			urls[fullURL] = struct{}{}
+
+			// Check if the URL is allowed
+			if !isURLAllowed(baseURL, fullURL, baseURLsOnly) {
+				return
+			}
+			urls[urlNoQuery] = struct{}{}
 
 			// Get the path from the full URL
-			parsedURL, err := url.Parse(fullURL)
+			parsedURL, err := url.Parse(urlNoQuery)
 			if err != nil {
 				errors = append(errors, err.Error())
 				return
 			}
 
 			route := &webscan.WebRoute{
-				Url:    fullURL,
+				Url:    urlNoQuery,
 				Path:   &parsedURL.Path,
 				Method: webscan.HttpMethodGet.Ptr(), // Anchor links are accessed via GET
 			}
@@ -119,7 +133,7 @@ func extractAnchorRoutes(doc *goquery.Document, baseURL string, baseUrlsOnly boo
 	return mergeWebRoutes(routes), setToListString(urls), errors
 }
 
-func extractLinkRoutes(doc *goquery.Document, baseURL string, baseUrlsOnly bool) ([]*webscan.WebRoute, []string, []string) {
+func extractLinkRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool) ([]*webscan.WebRoute, []string, []string) {
 	routes := []*webscan.WebRoute{}
 	urls := make(map[string]struct{})
 	errors := []string{}
@@ -129,22 +143,29 @@ func extractLinkRoutes(doc *goquery.Document, baseURL string, baseUrlsOnly bool)
 		if exists && href != "" {
 			fullURL := resolveURL(baseURL, href)
 
-			// Check if the URL is allowed
-			if !isURLAllowed(baseURL, fullURL, baseUrlsOnly) {
+			// The route URL should not have query params, those are stored in QueryParams
+			urlNoQuery, err := urlRemoveQueryParams(fullURL)
+			if err != nil {
+				errors = append(errors, err.Error())
 				return
 			}
 
-			urls[fullURL] = struct{}{}
+			// Check if the URL is allowed
+			if !isURLAllowed(baseURL, fullURL, baseURLsOnly) {
+				return
+			}
+
+			urls[urlNoQuery] = struct{}{}
 
 			// Get the path from the full URL
-			parsedURL, err := url.Parse(fullURL)
+			parsedURL, err := url.Parse(urlNoQuery)
 			if err != nil {
 				errors = append(errors, err.Error())
 				return
 			}
 
 			route := &webscan.WebRoute{
-				Url:    fullURL,
+				Url:    urlNoQuery,
 				Path:   &parsedURL.Path,
 				Method: webscan.HttpMethodGet.Ptr(), // Link elements are accessed via GET
 			}

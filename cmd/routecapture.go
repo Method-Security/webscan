@@ -31,12 +31,12 @@ func (a *WebScan) InitRoutecaptureCommand() {
 				return
 			}
 
-			baseUrlsOnly, _ := cmd.Flags().GetBool("base-urls-only")
+			baseURLsOnly, _ := cmd.Flags().GetBool("base-urls-only")
 
 			timeout, _ := cmd.Flags().GetInt("timeout")
 
 			// Extract the routes and links
-			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodRequest, baseUrlsOnly, timeout, insecure)
+			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodRequest, baseURLsOnly, timeout, insecure)
 			a.OutputSignal.Content = report
 		},
 	}
@@ -54,12 +54,12 @@ func (a *WebScan) InitRoutecaptureCommand() {
 				return
 			}
 
-			baseUrlsOnly, _ := cmd.Flags().GetBool("base-urls-only")
+			baseURLsOnly, _ := cmd.Flags().GetBool("base-urls-only")
 
 			timeout, _ := cmd.Flags().GetInt("timeout")
 
 			// Extract the routes and links
-			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodBrowser, baseUrlsOnly, timeout, false)
+			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodBrowser, baseURLsOnly, timeout, false)
 			a.OutputSignal.Content = report
 		},
 	}
