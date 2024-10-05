@@ -41,9 +41,6 @@ func extractNetworkRoutes(ctx context.Context, b *capture.BrowserPageCapturer, t
 	}
 	log.Debug("Successfully connected to page for network capture")
 
-	// Stabalize DOM
-	page = page.MustWaitDOMStable()
-
 	// Enable network event tracking
 	networkEventErr := proto.NetworkEnable{}.Call(page)
 	if networkEventErr != nil {
@@ -64,6 +61,9 @@ func extractNetworkRoutes(ctx context.Context, b *capture.BrowserPageCapturer, t
 
 	// Navigate to the page and wait for the page to load
 	page.MustNavigate(target).MustWaitLoad()
+	// Stabalize DOM
+	page = page.MustWaitDOMStable()
+	// Wait for network events to be captured
 	waitForNetworkEvents()
 
 	// Process network events and populate the WebRoute structure
@@ -109,7 +109,10 @@ func extractNetworkRoutes(ctx context.Context, b *capture.BrowserPageCapturer, t
 
 		// Capture body parameters (if any)
 		if request.HasPostData {
-			webRoute.BodyParams = parseBodyParams(request.PostData)
+			webRoute.BodyParams, err = parseBodyParams(request.PostData)
+		}
+		if err != nil {
+			errors = append(errors, err.Error())
 		}
 
 		// Add the WebRoute to the list

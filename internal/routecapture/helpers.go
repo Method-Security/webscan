@@ -63,7 +63,17 @@ func mergeWebRoutes(routes []*webscan.WebRoute) []*webscan.WebRoute {
 
 // Helper function to merge QueryParams only retaining those that are unique
 // When the same param name is encountered, the example values are merged
-func mergeQueryParams(params1, params2 []*webscan.QueryParams) []*webscan.QueryParams {
+func mergeQueryParams(params1 []*webscan.QueryParams, params2 []*webscan.QueryParams) []*webscan.QueryParams {
+	// If either is nil return the other
+	if params1 == nil && params2 == nil {
+		return nil
+	} else if params1 == nil {
+		return params2
+	} else if params2 == nil {
+		return params1
+	}
+
+	// Merge
 	paramMap := make(map[string]*webscan.QueryParams)
 	for _, param := range params1 {
 		paramMap[param.Name] = param
@@ -71,10 +81,15 @@ func mergeQueryParams(params1, params2 []*webscan.QueryParams) []*webscan.QueryP
 	for _, param := range params2 {
 		if _, exists := paramMap[param.Name]; !exists {
 			existingParam := paramMap[param.Name]
-			existingParam.ExampleValues = append(existingParam.ExampleValues, param.ExampleValues...)
+			if existingParam.ExampleValues != nil && param.ExampleValues != nil {
+				existingParam.ExampleValues = append(existingParam.ExampleValues, param.ExampleValues...)
+			} else if param.ExampleValues != nil {
+				existingParam.ExampleValues = param.ExampleValues
+			} // else existingParam.ExampleValues is already set
 			paramMap[param.Name] = existingParam
 		}
 	}
+
 	// Convert map back to slice
 	var mergedParams []*webscan.QueryParams
 	for _, param := range paramMap {
@@ -85,7 +100,17 @@ func mergeQueryParams(params1, params2 []*webscan.QueryParams) []*webscan.QueryP
 
 // Helper function to merge BodyParams only retaining those that are unique
 // When the same param name is encountered, the example values are merged
-func mergeBodyParams(params1, params2 []*webscan.BodyParams) []*webscan.BodyParams {
+func mergeBodyParams(params1 []*webscan.BodyParams, params2 []*webscan.BodyParams) []*webscan.BodyParams {
+	// If either is nil return the other
+	if params1 == nil && params2 == nil {
+		return nil
+	} else if params1 == nil {
+		return params2
+	} else if params2 == nil {
+		return params1
+	}
+
+	// Merge
 	paramMap := make(map[string]*webscan.BodyParams)
 	for _, param := range params1 {
 		paramMap[param.Name] = param
@@ -93,10 +118,15 @@ func mergeBodyParams(params1, params2 []*webscan.BodyParams) []*webscan.BodyPara
 	for _, param := range params2 {
 		if _, exists := paramMap[param.Name]; !exists {
 			existingParam := paramMap[param.Name]
-			existingParam.ExampleValues = append(existingParam.ExampleValues, param.ExampleValues...)
+			if existingParam.ExampleValues != nil && param.ExampleValues != nil {
+				existingParam.ExampleValues = append(existingParam.ExampleValues, param.ExampleValues...)
+			} else if param.ExampleValues != nil {
+				existingParam.ExampleValues = param.ExampleValues
+			} // else existingParam.ExampleValues is already set
 			paramMap[param.Name] = existingParam
 		}
 	}
+
 	// Convert map back to slice
 	var mergedParams []*webscan.BodyParams
 	for _, param := range paramMap {
@@ -118,9 +148,8 @@ func parseQueryParams(reqURL *url.URL) []*webscan.QueryParams {
 }
 
 // Helper to parse body parameters
-func parseBodyParams(postData string) []*webscan.BodyParams {
+func parseBodyParams(postData string) ([]*webscan.BodyParams, error) {
 	var bodyParams []*webscan.BodyParams
-	fmt.Println("postData:", postData)
 
 	// For simplicity, assume the body is JSON or form-urlencoded
 	if strings.HasPrefix(postData, "{") {
@@ -136,11 +165,11 @@ func parseBodyParams(postData string) []*webscan.BodyParams {
 						ExampleValues: []string{string(valueStr)}, // Store as a string
 					})
 				} else {
-					fmt.Printf("Failed to stringify JSON value: %v\n", err)
+					return bodyParams, fmt.Errorf("failed to stringify json value: %v", err)
 				}
 			}
 		} else {
-			fmt.Printf("Failed to parse JSON: %v\n", err)
+			return bodyParams, fmt.Errorf("failed to parse json: %v", err)
 		}
 	} else {
 		// Parse form-urlencoded data
@@ -153,11 +182,11 @@ func parseBodyParams(postData string) []*webscan.BodyParams {
 				})
 			}
 		} else {
-			fmt.Printf("Failed to parse form-urlencoded data: %v\n", err)
+			return bodyParams, fmt.Errorf("failed to parse form-urlencoded data: %v", err)
 		}
 	}
 
-	return bodyParams
+	return bodyParams, nil
 }
 
 // Helper function to resolve relative URLs

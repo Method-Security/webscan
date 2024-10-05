@@ -1,7 +1,6 @@
 package routecapture
 
 import (
-	"fmt"
 	"net/url"
 	"strings"
 
@@ -18,7 +17,7 @@ func extractFormRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool)
 	errors := []string{}
 
 	doc.Find("form").Each(func(i int, s *goquery.Selection) {
-		fmt.Println("Form found")
+
 		route := webscan.WebRoute{}
 
 		// Extract action attribute
