@@ -61,8 +61,6 @@ func extractNetworkRoutes(ctx context.Context, b *capture.BrowserPageCapturer, t
 
 	// Navigate to the page and wait for the page to load
 	page.MustNavigate(target).MustWaitLoad()
-	// Stabalize DOM
-	page = page.MustWaitDOMStable()
 	// Wait for network events to be captured
 	waitForNetworkEvents()
 
