@@ -2,82 +2,82 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://method-security.github.io/webscan/index.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/community/community.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/development/adding.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/development/principles.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/development/setup.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/docs/index.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/docs/app.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/docs/fingerprint.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/docs/fuzz.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/docs/pagecapture.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/docs/probe.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/docs/routecapture.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/docs/spider.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/docs/vuln.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/getting-started/basic-usage.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://method-security.github.io/webscan/getting-started/installation.html</loc>
-         <lastmod>2024-10-04</lastmod>
+         <lastmod>2024-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
