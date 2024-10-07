@@ -33,15 +33,19 @@ func (a *WebScan) InitPagecaptureCommand() {
 				return
 			}
 
-			browserPath, err := cmd.Flags().GetString("browserPath")
-			if err != nil {
+			var browserPath *string
+			if path, err := cmd.Flags().GetString("browserPath"); err == nil {
+				if path != "" {
+					browserPath = &path
+				}
+			} else {
 				a.OutputSignal.AddError(err)
 				return
 			}
 
 			timeout, _ := cmd.Flags().GetInt("timeout")
 
-			capturer := capture.NewBrowserPageCapturer(&browserPath, timeout)
+			capturer := capture.NewBrowserPageCapturer(browserPath, timeout)
 			report := capturer.CaptureScreenshot(cmd.Context(), target, &capture.Options{})
 
 			_ = capturer.Close(cmd.Context())
@@ -52,6 +56,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 	}
 
 	pageScreenshotCmd.PersistentFlags().String("target", "", "URL target to perform webpage capture")
+	pageScreenshotCmd.PersistentFlags().String("browserPath", "", "Path to a browser executable")
 	pageScreenshotCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
 
 	htmlCaptureCmd := &cobra.Command{
@@ -104,15 +109,19 @@ func (a *WebScan) InitPagecaptureCommand() {
 				return
 			}
 
-			browserPath, err := cmd.Flags().GetString("browserPath")
-			if err != nil {
+			var browserPath *string
+			if path, err := cmd.Flags().GetString("browserPath"); err == nil {
+				if path != "" {
+					browserPath = &path
+				}
+			} else {
 				a.OutputSignal.AddError(err)
 				return
 			}
 
 			timeout, _ := cmd.Flags().GetInt("timeout")
 
-			capturer := capture.NewBrowserPageCapturer(&browserPath, timeout)
+			capturer := capture.NewBrowserPageCapturer(browserPath, timeout)
 			result, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
 			if err != nil {
 				a.OutputSignal.AddError(err)
@@ -124,6 +133,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 			a.OutputSignal.Content = result.ToPageCaptureReport()
 		},
 	}
+	browserCaptureCmd.PersistentFlags().String("browserPath", "", "Path to a browser executable")
 	htmlCaptureCmd.AddCommand(browserCaptureCmd)
 
 	browserbaseCaptureCmd := &cobra.Command{
