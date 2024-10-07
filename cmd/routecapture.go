@@ -15,6 +15,7 @@ func (a *WebScan) InitRoutecaptureCommand() {
 		Long:  `Perform a webpage routes and URL links capture against a URL target`,
 	}
 	routeCaptureCmd.PersistentFlags().String("target", "", "URL target to perform webpage capture")
+	routeCaptureCmd.PersistentFlags().String("browserPath", "", "Path to a browser executable")
 	routeCaptureCmd.PersistentFlags().Bool("base-urls-only", true, "Only match routes and urls that share the base URLs domain")
 	routeCaptureCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
 
@@ -31,12 +32,22 @@ func (a *WebScan) InitRoutecaptureCommand() {
 				return
 			}
 
+			var browserPath *string
+			if path, err := cmd.Flags().GetString("browserPath"); err == nil {
+				if path != "" {
+					browserPath = &path
+				}
+			} else {
+				a.OutputSignal.AddError(err)
+				return
+			}
+
 			baseURLsOnly, _ := cmd.Flags().GetBool("base-urls-only")
 
 			timeout, _ := cmd.Flags().GetInt("timeout")
 
 			// Extract the routes and links
-			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodRequest, baseURLsOnly, timeout, insecure)
+			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodRequest, baseURLsOnly, timeout, insecure, browserPath)
 			a.OutputSignal.Content = report
 		},
 	}
@@ -56,10 +67,20 @@ func (a *WebScan) InitRoutecaptureCommand() {
 
 			baseURLsOnly, _ := cmd.Flags().GetBool("base-urls-only")
 
+			var browserPath *string
+			if path, err := cmd.Flags().GetString("browserPath"); err == nil {
+				if path != "" {
+					browserPath = &path
+				}
+			} else {
+				a.OutputSignal.AddError(err)
+				return
+			}
+
 			timeout, _ := cmd.Flags().GetInt("timeout")
 
 			// Extract the routes and links
-			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodBrowser, baseURLsOnly, timeout, false)
+			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodBrowser, baseURLsOnly, timeout, false, browserPath)
 			a.OutputSignal.Content = report
 		},
 	}
