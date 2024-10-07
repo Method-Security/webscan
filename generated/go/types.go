@@ -779,9 +779,10 @@ func (p *PageCaptureReport) String() string {
 }
 
 type PageScreenshotReport struct {
-	Target     string   `json:"target" url:"target"`
-	Screenshot []byte   `json:"screenshot" url:"screenshot"`
-	Errors     []string `json:"errors,omitempty" url:"errors,omitempty"`
+	Target      string   `json:"target" url:"target"`
+	HtmlEncoded *string  `json:"html_encoded,omitempty" url:"html_encoded,omitempty"`
+	Screenshot  []byte   `json:"screenshot" url:"screenshot"`
+	Errors      []string `json:"errors,omitempty" url:"errors,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
