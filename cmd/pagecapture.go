@@ -33,9 +33,15 @@ func (a *WebScan) InitPagecaptureCommand() {
 				return
 			}
 
+			browserPath, err := cmd.Flags().GetString("browserPath")
+			if err != nil {
+				a.OutputSignal.AddError(err)
+				return
+			}
+
 			timeout, _ := cmd.Flags().GetInt("timeout")
 
-			capturer := capture.NewBrowserPageCapturer(nil, timeout)
+			capturer := capture.NewBrowserPageCapturer(&browserPath, timeout)
 			report := capturer.CaptureScreenshot(cmd.Context(), target, &capture.Options{})
 
 			_ = capturer.Close(cmd.Context())
@@ -98,9 +104,15 @@ func (a *WebScan) InitPagecaptureCommand() {
 				return
 			}
 
+			browserPath, err := cmd.Flags().GetString("browserPath")
+			if err != nil {
+				a.OutputSignal.AddError(err)
+				return
+			}
+
 			timeout, _ := cmd.Flags().GetInt("timeout")
 
-			capturer := capture.NewBrowserPageCapturer(nil, timeout)
+			capturer := capture.NewBrowserPageCapturer(&browserPath, timeout)
 			result, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
 			if err != nil {
 				a.OutputSignal.AddError(err)

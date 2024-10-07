@@ -74,7 +74,7 @@ func extractRoutes(ctx context.Context, target string, htmlContent string, baseU
 	return mergedRoutes, setToListString(urls), errors
 }
 
-func PerformRouteCapture(ctx context.Context, target string, captureMethod webscan.PageCaptureMethod, baseURLsOnly bool, timeout int, insecure bool) webscan.RouteCaptureReport {
+func PerformRouteCapture(ctx context.Context, target string, captureMethod webscan.PageCaptureMethod, baseURLsOnly bool, timeout int, insecure bool, browserPath *string) webscan.RouteCaptureReport {
 	log := svc1log.FromContext(ctx)
 
 	report := webscan.RouteCaptureReport{
@@ -106,7 +106,7 @@ func PerformRouteCapture(ctx context.Context, target string, captureMethod websc
 
 	case webscan.PageCaptureMethodBrowser:
 		log.Info("Initiating page capture with browser method", svc1log.SafeParam("target", target))
-		capturer := capture.NewBrowserPageCapturer(nil, timeout)
+		capturer := capture.NewBrowserPageCapturer(browserPath, timeout)
 		result, err := capturer.Capture(ctx, target, &capture.Options{})
 		if err != nil {
 			report.Errors = append(report.Errors, err.Error())
