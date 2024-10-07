@@ -9,5 +9,6 @@ types:
   PageScreenshotReport:
     properties:
       target: string
+      html_encoded: optional<string>
       screenshot: base64
       errors: optional<list<string>>
