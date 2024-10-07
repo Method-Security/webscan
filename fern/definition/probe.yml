@@ -1,0 +1,87 @@
+imports:
+  common: ./common.yml
+# Enums
+types:
+  ModuleName:
+    enum:
+      - BUFFER_OVERFLOW_CONTENT_HEADER
+      - PATH_TRAVERSAL
+      - RCE_MOD_FILE
+      - REVERSE_PROXY_MISCONFIGURATION
+      - X_POWERED_BY_HEADER_GRAB
+  ProbeType:
+    enum:
+      - ENUMERATION
+      - VALIDATION
+  ServerType:
+    enum:
+      - APACHE
+      - NGINX
+# Config Struct
+  probeTypeConfig:
+    properties:
+      targets: list<string>
+      server: ServerType
+      probe: ProbeType
+      timeout: integer
+      successfulOnly: boolean
+# Request/Response Structs
+  ResponseUnion: 
+    union:
+      GeneralResponse: GeneralResponseInfo
+      VersionEnumerateResponse: VersionEnumerateResponseInfo
+  VersionEnumerateResponseInfo:
+    properties:
+      statusCode: integer
+      header: optional<string>
+      versionType: optional<string>
+      versionNumber: optional<string>
+  GeneralResponseInfo:
+    properties:
+      statusCode: integer
+      body: optional<string>
+  GeneralRequestInfo:
+    properties:
+      method: common.HttpMethod
+      url: string
+      headers: optional<map<string,string>>
+# Attempt Structs
+  PathInfo:
+    properties:
+      path: string
+      request: GeneralRequestInfo
+      response: optional<GeneralResponseInfo>
+      finding: optional<boolean>
+  MultiplePathsAttemptInfo:
+    properties:
+      paths: optional<list<PathInfo>>
+  VersionEnumerateAttemptInfo:
+    properties:
+      request: GeneralRequestInfo
+      response: optional<VersionEnumerateResponseInfo>
+  GeneralAttemptInfo:
+    properties:
+      request: GeneralRequestInfo
+      response: optional<GeneralResponseInfo>
+# Webserver Report Struct
+  AttemptInfoUnion: 
+    union:
+      MultiplePathsAttempt: MultiplePathsAttemptInfo
+      GeneralAttempt: GeneralAttemptInfo
+      VersionAttempt: VersionEnumerateAttemptInfo
+  Attempt:
+    properties:
+      name: ModuleName
+      timestamp: datetime
+      AttemptInfo: optional<AttemptInfoUnion>
+      finding : boolean
+  WebserverProbe:
+    properties:
+      target: string
+      attempts: list<Attempt>
+  WebserverProbeReport:
+    properties:
+      server: ServerType
+      probe: ProbeType
+      webserverProbes: optional<list<WebserverProbe>>
+      errors: optional<list<string>>

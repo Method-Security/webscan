@@ -2,9 +2,8 @@ package capture
 
 import (
 	"context"
-	"time"
-
 	"encoding/base64"
+	"time"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
 	"github.com/go-rod/rod"

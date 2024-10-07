@@ -822,6 +822,726 @@ func (p *PageScreenshotReport) String() string {
 	return fmt.Sprintf("%#v", p)
 }
 
+type Attempt struct {
+	Name        ModuleName        `json:"name" url:"name"`
+	Timestamp   time.Time         `json:"timestamp" url:"timestamp"`
+	AttemptInfo *AttemptInfoUnion `json:"AttemptInfo,omitempty" url:"AttemptInfo,omitempty"`
+	Finding     bool              `json:"finding" url:"finding"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (a *Attempt) GetExtraProperties() map[string]interface{} {
+	return a.extraProperties
+}
+
+func (a *Attempt) UnmarshalJSON(data []byte) error {
+	type embed Attempt
+	var unmarshaler = struct {
+		embed
+		Timestamp *core.DateTime `json:"timestamp"`
+	}{
+		embed: embed(*a),
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	*a = Attempt(unmarshaler.embed)
+	a.Timestamp = unmarshaler.Timestamp.Time()
+
+	extraProperties, err := core.ExtractExtraProperties(data, *a)
+	if err != nil {
+		return err
+	}
+	a.extraProperties = extraProperties
+
+	a._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (a *Attempt) MarshalJSON() ([]byte, error) {
+	type embed Attempt
+	var marshaler = struct {
+		embed
+		Timestamp *core.DateTime `json:"timestamp"`
+	}{
+		embed:     embed(*a),
+		Timestamp: core.NewDateTime(a.Timestamp),
+	}
+	return json.Marshal(marshaler)
+}
+
+func (a *Attempt) String() string {
+	if len(a._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(a._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(a); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", a)
+}
+
+type AttemptInfoUnion struct {
+	Type                 string
+	MultiplePathsAttempt *MultiplePathsAttemptInfo
+	GeneralAttempt       *GeneralAttemptInfo
+	VersionAttempt       *VersionEnumerateAttemptInfo
+}
+
+func NewAttemptInfoUnionFromMultiplePathsAttempt(value *MultiplePathsAttemptInfo) *AttemptInfoUnion {
+	return &AttemptInfoUnion{Type: "MultiplePathsAttempt", MultiplePathsAttempt: value}
+}
+
+func NewAttemptInfoUnionFromGeneralAttempt(value *GeneralAttemptInfo) *AttemptInfoUnion {
+	return &AttemptInfoUnion{Type: "GeneralAttempt", GeneralAttempt: value}
+}
+
+func NewAttemptInfoUnionFromVersionAttempt(value *VersionEnumerateAttemptInfo) *AttemptInfoUnion {
+	return &AttemptInfoUnion{Type: "VersionAttempt", VersionAttempt: value}
+}
+
+func (a *AttemptInfoUnion) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	a.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", a)
+	}
+	switch unmarshaler.Type {
+	case "MultiplePathsAttempt":
+		value := new(MultiplePathsAttemptInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.MultiplePathsAttempt = value
+	case "GeneralAttempt":
+		value := new(GeneralAttemptInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.GeneralAttempt = value
+	case "VersionAttempt":
+		value := new(VersionEnumerateAttemptInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		a.VersionAttempt = value
+	}
+	return nil
+}
+
+func (a AttemptInfoUnion) MarshalJSON() ([]byte, error) {
+	switch a.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", a.Type, a)
+	case "MultiplePathsAttempt":
+		return core.MarshalJSONWithExtraProperty(a.MultiplePathsAttempt, "type", "MultiplePathsAttempt")
+	case "GeneralAttempt":
+		return core.MarshalJSONWithExtraProperty(a.GeneralAttempt, "type", "GeneralAttempt")
+	case "VersionAttempt":
+		return core.MarshalJSONWithExtraProperty(a.VersionAttempt, "type", "VersionAttempt")
+	}
+}
+
+type AttemptInfoUnionVisitor interface {
+	VisitMultiplePathsAttempt(*MultiplePathsAttemptInfo) error
+	VisitGeneralAttempt(*GeneralAttemptInfo) error
+	VisitVersionAttempt(*VersionEnumerateAttemptInfo) error
+}
+
+func (a *AttemptInfoUnion) Accept(visitor AttemptInfoUnionVisitor) error {
+	switch a.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", a.Type, a)
+	case "MultiplePathsAttempt":
+		return visitor.VisitMultiplePathsAttempt(a.MultiplePathsAttempt)
+	case "GeneralAttempt":
+		return visitor.VisitGeneralAttempt(a.GeneralAttempt)
+	case "VersionAttempt":
+		return visitor.VisitVersionAttempt(a.VersionAttempt)
+	}
+}
+
+type GeneralAttemptInfo struct {
+	Request  *GeneralRequestInfo  `json:"request,omitempty" url:"request,omitempty"`
+	Response *GeneralResponseInfo `json:"response,omitempty" url:"response,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GeneralAttemptInfo) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GeneralAttemptInfo) UnmarshalJSON(data []byte) error {
+	type unmarshaler GeneralAttemptInfo
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GeneralAttemptInfo(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GeneralAttemptInfo) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GeneralRequestInfo struct {
+	Method  HttpMethod        `json:"method" url:"method"`
+	Url     string            `json:"url" url:"url"`
+	Headers map[string]string `json:"headers,omitempty" url:"headers,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GeneralRequestInfo) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GeneralRequestInfo) UnmarshalJSON(data []byte) error {
+	type unmarshaler GeneralRequestInfo
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GeneralRequestInfo(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GeneralRequestInfo) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type GeneralResponseInfo struct {
+	StatusCode int     `json:"statusCode" url:"statusCode"`
+	Body       *string `json:"body,omitempty" url:"body,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (g *GeneralResponseInfo) GetExtraProperties() map[string]interface{} {
+	return g.extraProperties
+}
+
+func (g *GeneralResponseInfo) UnmarshalJSON(data []byte) error {
+	type unmarshaler GeneralResponseInfo
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*g = GeneralResponseInfo(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *g)
+	if err != nil {
+		return err
+	}
+	g.extraProperties = extraProperties
+
+	g._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (g *GeneralResponseInfo) String() string {
+	if len(g._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(g._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(g); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", g)
+}
+
+type ModuleName string
+
+const (
+	ModuleNameBufferOverflowContentHeader  ModuleName = "BUFFER_OVERFLOW_CONTENT_HEADER"
+	ModuleNamePathTraversal                ModuleName = "PATH_TRAVERSAL"
+	ModuleNameRceModFile                   ModuleName = "RCE_MOD_FILE"
+	ModuleNameReverseProxyMisconfiguration ModuleName = "REVERSE_PROXY_MISCONFIGURATION"
+	ModuleNameXPoweredByHeaderGrab         ModuleName = "X_POWERED_BY_HEADER_GRAB"
+)
+
+func NewModuleNameFromString(s string) (ModuleName, error) {
+	switch s {
+	case "BUFFER_OVERFLOW_CONTENT_HEADER":
+		return ModuleNameBufferOverflowContentHeader, nil
+	case "PATH_TRAVERSAL":
+		return ModuleNamePathTraversal, nil
+	case "RCE_MOD_FILE":
+		return ModuleNameRceModFile, nil
+	case "REVERSE_PROXY_MISCONFIGURATION":
+		return ModuleNameReverseProxyMisconfiguration, nil
+	case "X_POWERED_BY_HEADER_GRAB":
+		return ModuleNameXPoweredByHeaderGrab, nil
+	}
+	var t ModuleName
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (m ModuleName) Ptr() *ModuleName {
+	return &m
+}
+
+type MultiplePathsAttemptInfo struct {
+	Paths []*PathInfo `json:"paths,omitempty" url:"paths,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (m *MultiplePathsAttemptInfo) GetExtraProperties() map[string]interface{} {
+	return m.extraProperties
+}
+
+func (m *MultiplePathsAttemptInfo) UnmarshalJSON(data []byte) error {
+	type unmarshaler MultiplePathsAttemptInfo
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*m = MultiplePathsAttemptInfo(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *m)
+	if err != nil {
+		return err
+	}
+	m.extraProperties = extraProperties
+
+	m._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (m *MultiplePathsAttemptInfo) String() string {
+	if len(m._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(m._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(m); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", m)
+}
+
+type PathInfo struct {
+	Path     string               `json:"path" url:"path"`
+	Request  *GeneralRequestInfo  `json:"request,omitempty" url:"request,omitempty"`
+	Response *GeneralResponseInfo `json:"response,omitempty" url:"response,omitempty"`
+	Finding  *bool                `json:"finding,omitempty" url:"finding,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *PathInfo) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *PathInfo) UnmarshalJSON(data []byte) error {
+	type unmarshaler PathInfo
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = PathInfo(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *PathInfo) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
+type ProbeType string
+
+const (
+	ProbeTypeEnumeration ProbeType = "ENUMERATION"
+	ProbeTypeValidation  ProbeType = "VALIDATION"
+)
+
+func NewProbeTypeFromString(s string) (ProbeType, error) {
+	switch s {
+	case "ENUMERATION":
+		return ProbeTypeEnumeration, nil
+	case "VALIDATION":
+		return ProbeTypeValidation, nil
+	}
+	var t ProbeType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (p ProbeType) Ptr() *ProbeType {
+	return &p
+}
+
+type ResponseUnion struct {
+	Type                     string
+	GeneralResponse          *GeneralResponseInfo
+	VersionEnumerateResponse *VersionEnumerateResponseInfo
+}
+
+func NewResponseUnionFromGeneralResponse(value *GeneralResponseInfo) *ResponseUnion {
+	return &ResponseUnion{Type: "GeneralResponse", GeneralResponse: value}
+}
+
+func NewResponseUnionFromVersionEnumerateResponse(value *VersionEnumerateResponseInfo) *ResponseUnion {
+	return &ResponseUnion{Type: "VersionEnumerateResponse", VersionEnumerateResponse: value}
+}
+
+func (r *ResponseUnion) UnmarshalJSON(data []byte) error {
+	var unmarshaler struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &unmarshaler); err != nil {
+		return err
+	}
+	r.Type = unmarshaler.Type
+	if unmarshaler.Type == "" {
+		return fmt.Errorf("%T did not include discriminant type", r)
+	}
+	switch unmarshaler.Type {
+	case "GeneralResponse":
+		value := new(GeneralResponseInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.GeneralResponse = value
+	case "VersionEnumerateResponse":
+		value := new(VersionEnumerateResponseInfo)
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+		r.VersionEnumerateResponse = value
+	}
+	return nil
+}
+
+func (r ResponseUnion) MarshalJSON() ([]byte, error) {
+	switch r.Type {
+	default:
+		return nil, fmt.Errorf("invalid type %s in %T", r.Type, r)
+	case "GeneralResponse":
+		return core.MarshalJSONWithExtraProperty(r.GeneralResponse, "type", "GeneralResponse")
+	case "VersionEnumerateResponse":
+		return core.MarshalJSONWithExtraProperty(r.VersionEnumerateResponse, "type", "VersionEnumerateResponse")
+	}
+}
+
+type ResponseUnionVisitor interface {
+	VisitGeneralResponse(*GeneralResponseInfo) error
+	VisitVersionEnumerateResponse(*VersionEnumerateResponseInfo) error
+}
+
+func (r *ResponseUnion) Accept(visitor ResponseUnionVisitor) error {
+	switch r.Type {
+	default:
+		return fmt.Errorf("invalid type %s in %T", r.Type, r)
+	case "GeneralResponse":
+		return visitor.VisitGeneralResponse(r.GeneralResponse)
+	case "VersionEnumerateResponse":
+		return visitor.VisitVersionEnumerateResponse(r.VersionEnumerateResponse)
+	}
+}
+
+type ServerType string
+
+const (
+	ServerTypeApache ServerType = "APACHE"
+	ServerTypeNginx  ServerType = "NGINX"
+)
+
+func NewServerTypeFromString(s string) (ServerType, error) {
+	switch s {
+	case "APACHE":
+		return ServerTypeApache, nil
+	case "NGINX":
+		return ServerTypeNginx, nil
+	}
+	var t ServerType
+	return "", fmt.Errorf("%s is not a valid %T", s, t)
+}
+
+func (s ServerType) Ptr() *ServerType {
+	return &s
+}
+
+type VersionEnumerateAttemptInfo struct {
+	Request  *GeneralRequestInfo           `json:"request,omitempty" url:"request,omitempty"`
+	Response *VersionEnumerateResponseInfo `json:"response,omitempty" url:"response,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VersionEnumerateAttemptInfo) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VersionEnumerateAttemptInfo) UnmarshalJSON(data []byte) error {
+	type unmarshaler VersionEnumerateAttemptInfo
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VersionEnumerateAttemptInfo(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (v *VersionEnumerateAttemptInfo) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+type VersionEnumerateResponseInfo struct {
+	StatusCode    int     `json:"statusCode" url:"statusCode"`
+	Header        *string `json:"header,omitempty" url:"header,omitempty"`
+	VersionType   *string `json:"versionType,omitempty" url:"versionType,omitempty"`
+	VersionNumber *string `json:"versionNumber,omitempty" url:"versionNumber,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (v *VersionEnumerateResponseInfo) GetExtraProperties() map[string]interface{} {
+	return v.extraProperties
+}
+
+func (v *VersionEnumerateResponseInfo) UnmarshalJSON(data []byte) error {
+	type unmarshaler VersionEnumerateResponseInfo
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*v = VersionEnumerateResponseInfo(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *v)
+	if err != nil {
+		return err
+	}
+	v.extraProperties = extraProperties
+
+	v._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (v *VersionEnumerateResponseInfo) String() string {
+	if len(v._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(v._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(v); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", v)
+}
+
+type WebserverProbe struct {
+	Target   string     `json:"target" url:"target"`
+	Attempts []*Attempt `json:"attempts,omitempty" url:"attempts,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (w *WebserverProbe) GetExtraProperties() map[string]interface{} {
+	return w.extraProperties
+}
+
+func (w *WebserverProbe) UnmarshalJSON(data []byte) error {
+	type unmarshaler WebserverProbe
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*w = WebserverProbe(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+
+	w._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (w *WebserverProbe) String() string {
+	if len(w._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(w._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(w); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", w)
+}
+
+type WebserverProbeReport struct {
+	Server          ServerType        `json:"server" url:"server"`
+	Probe           ProbeType         `json:"probe" url:"probe"`
+	WebserverProbes []*WebserverProbe `json:"webserverProbes,omitempty" url:"webserverProbes,omitempty"`
+	Errors          []string          `json:"errors,omitempty" url:"errors,omitempty"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (w *WebserverProbeReport) GetExtraProperties() map[string]interface{} {
+	return w.extraProperties
+}
+
+func (w *WebserverProbeReport) UnmarshalJSON(data []byte) error {
+	type unmarshaler WebserverProbeReport
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*w = WebserverProbeReport(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *w)
+	if err != nil {
+		return err
+	}
+	w.extraProperties = extraProperties
+
+	w._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (w *WebserverProbeReport) String() string {
+	if len(w._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(w._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(w); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", w)
+}
+
+type ProbeTypeConfig struct {
+	Targets        []string   `json:"targets,omitempty" url:"targets,omitempty"`
+	Server         ServerType `json:"server" url:"server"`
+	Probe          ProbeType  `json:"probe" url:"probe"`
+	Timeout        int        `json:"timeout" url:"timeout"`
+	SuccessfulOnly bool       `json:"successfulOnly" url:"successfulOnly"`
+
+	extraProperties map[string]interface{}
+	_rawJSON        json.RawMessage
+}
+
+func (p *ProbeTypeConfig) GetExtraProperties() map[string]interface{} {
+	return p.extraProperties
+}
+
+func (p *ProbeTypeConfig) UnmarshalJSON(data []byte) error {
+	type unmarshaler ProbeTypeConfig
+	var value unmarshaler
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
+	}
+	*p = ProbeTypeConfig(value)
+
+	extraProperties, err := core.ExtractExtraProperties(data, *p)
+	if err != nil {
+		return err
+	}
+	p.extraProperties = extraProperties
+
+	p._rawJSON = json.RawMessage(data)
+	return nil
+}
+
+func (p *ProbeTypeConfig) String() string {
+	if len(p._rawJSON) > 0 {
+		if value, err := core.StringifyJSON(p._rawJSON); err == nil {
+			return value
+		}
+	}
+	if value, err := core.StringifyJSON(p); err == nil {
+		return value
+	}
+	return fmt.Sprintf("%#v", p)
+}
+
 type ParsedParams struct {
 	PathParams      map[string]string `json:"pathParams,omitempty" url:"pathParams,omitempty"`
 	QueryParams     map[string]string `json:"queryParams,omitempty" url:"queryParams,omitempty"`
