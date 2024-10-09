@@ -15,7 +15,7 @@ func main() {
 	webscan := cmd.NewWebScan(version)
 	webscan.InitRootCommand()
 	webscan.InitFuzzCommand()
-	webscan.InitProbeCommand()
+	webscan.InitWebServerCommand()
 	webscan.InitSpiderCommand()
 	webscan.InitVulnCommand()
 	webscan.InitAppCommand()
