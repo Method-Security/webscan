@@ -1,4 +1,4 @@
-package probe
+package webserver
 
 import (
 	"crypto/tls"
@@ -11,7 +11,7 @@ import (
 
 type XPoweredByHeaderGrabLibrary struct{}
 
-func (XPoweredByHeaderGrabLib *XPoweredByHeaderGrabLibrary) ModuleRun(target string, config *webscan.ProbeTypeConfig) (*webscan.Attempt, []string) {
+func (XPoweredByHeaderGrabLib *XPoweredByHeaderGrabLibrary) ModuleRun(target string, config *webscan.WebServerTypeConfig) (*webscan.Attempt, []string) {
 	//Initialize structs
 	attempt := webscan.Attempt{Name: webscan.ModuleNameXPoweredByHeaderGrab, Timestamp: time.Now()}
 	errors := []string{}

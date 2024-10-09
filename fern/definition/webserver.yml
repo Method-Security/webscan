@@ -5,6 +5,7 @@ types:
   ModuleName:
     enum:
       - BUFFER_OVERFLOW_CONTENT_HEADER
+      - CRLF_INJECTION
       - PATH_TRAVERSAL
       - RCE_MOD_FILE
       - REVERSE_PROXY_MISCONFIGURATION
@@ -18,7 +19,7 @@ types:
       - APACHE
       - NGINX
 # Config Struct
-  probeTypeConfig:
+  WebServerTypeConfig:
     properties:
       targets: list<string>
       server: ServerType
@@ -40,6 +41,7 @@ types:
     properties:
       statusCode: integer
       body: optional<string>
+      headers: optional<map<string,string>>
   GeneralRequestInfo:
     properties:
       method: common.HttpMethod
@@ -63,7 +65,7 @@ types:
     properties:
       request: GeneralRequestInfo
       response: optional<GeneralResponseInfo>
-# Webserver Report Struct
+# WebServer Report Struct
   AttemptInfoUnion: 
     union:
       MultiplePathsAttempt: MultiplePathsAttemptInfo
@@ -75,13 +77,13 @@ types:
       timestamp: datetime
       AttemptInfo: optional<AttemptInfoUnion>
       finding : boolean
-  WebserverProbe:
+  WebServer:
     properties:
       target: string
       attempts: list<Attempt>
-  WebserverProbeReport:
+  WebServerReport:
     properties:
       server: ServerType
       probe: ProbeType
-      webserverProbes: optional<list<WebserverProbe>>
+      webServers: optional<list<WebServer>>
       errors: optional<list<string>>

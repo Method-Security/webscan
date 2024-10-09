@@ -1,18 +1,18 @@
-package probe
+package webserver
 
 import (
 	"context"
 	"fmt"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
-	apacheEnumerationModules "github.com/Method-Security/webscan/internal/probe/type/apache/enumeration"
-	apacheValidationModules "github.com/Method-Security/webscan/internal/probe/type/apache/validation"
-	nginxEnumerationModules "github.com/Method-Security/webscan/internal/probe/type/nginx/enumeration"
-	nginxValidationModules "github.com/Method-Security/webscan/internal/probe/type/nginx/validation"
+	apacheEnumerationModules "github.com/Method-Security/webscan/internal/webserver/type/apache/enumeration"
+	apacheValidationModules "github.com/Method-Security/webscan/internal/webserver/type/apache/validation"
+	nginxEnumerationModules "github.com/Method-Security/webscan/internal/webserver/type/nginx/enumeration"
+	nginxValidationModules "github.com/Method-Security/webscan/internal/webserver/type/nginx/validation"
 )
 
 type ModuleLibrary interface {
-	ModuleRun(target string, config *webscan.ProbeTypeConfig) (*webscan.Attempt, []string)
+	ModuleRun(target string, config *webscan.WebServerTypeConfig) (*webscan.Attempt, []string)
 	AnalyzeResponse(response *webscan.ResponseUnion) bool
 }
 
@@ -20,16 +20,16 @@ type TypeEngine struct {
 	Library ModuleLibrary
 }
 
-func (be *TypeEngine) Run(ctx context.Context, target string, config *webscan.ProbeTypeConfig) (*webscan.Attempt, []string) {
+func (be *TypeEngine) Run(ctx context.Context, target string, config *webscan.WebServerTypeConfig) (*webscan.Attempt, []string) {
 	attempt, errs := be.Library.ModuleRun(target, config)
 	return attempt, errs
 }
 
-func TypeLaunch(ctx context.Context, config *webscan.ProbeTypeConfig) (*webscan.WebserverProbeReport, error) {
-	resources := webscan.WebserverProbeReport{Server: config.Server, Probe: config.Probe}
+func TypeLaunch(ctx context.Context, config *webscan.WebServerTypeConfig) (*webscan.WebServerReport, error) {
+	resources := webscan.WebServerReport{Server: config.Server, Probe: config.Probe}
 	errors := []string{}
 
-	var WebserverProbes []*webscan.WebserverProbe
+	var WebServers []*webscan.WebServer
 	for _, target := range config.Targets {
 		var attempts []*webscan.Attempt
 		moduleLibs, err := returnModuleLibaries(config)
@@ -57,17 +57,17 @@ func TypeLaunch(ctx context.Context, config *webscan.ProbeTypeConfig) (*webscan.
 			attempts = successfulAttempts
 		}
 
-		WebserverProbe := webscan.WebserverProbe{Target: target, Attempts: attempts}
-		WebserverProbes = append(WebserverProbes, &WebserverProbe)
+		WebServer := webscan.WebServer{Target: target, Attempts: attempts}
+		WebServers = append(WebServers, &WebServer)
 	}
 
 	// Marshal Report
-	resources.WebserverProbes = WebserverProbes
+	resources.WebServers = WebServers
 	resources.Errors = errors
 	return &resources, nil
 }
 
-func returnModuleLibaries(config *webscan.ProbeTypeConfig) (map[webscan.ModuleName]ModuleLibrary, error) {
+func returnModuleLibaries(config *webscan.WebServerTypeConfig) (map[webscan.ModuleName]ModuleLibrary, error) {
 	apacheModules := map[webscan.ProbeType]map[webscan.ModuleName]ModuleLibrary{
 		webscan.ProbeTypeEnumeration: {
 			webscan.ModuleNamePathTraversal:        &apacheEnumerationModules.PathTraversalLibrary{},
@@ -84,6 +84,7 @@ func returnModuleLibaries(config *webscan.ProbeTypeConfig) (map[webscan.ModuleNa
 		},
 		webscan.ProbeTypeValidation: {
 			webscan.ModuleNameBufferOverflowContentHeader: &nginxValidationModules.BufferOverflowContentHeaderLibrary{},
+			webscan.ModuleNameCrlfInjection:               &nginxValidationModules.CRLFInjectionLibrary{},
 		},
 	}
 

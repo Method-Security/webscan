@@ -1,30 +1,29 @@
-package probe
+package webserver
 
 import (
 	"crypto/tls"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
 )
 
-type ReverseProxyCheckLibrary struct{}
+type CRLFInjectionLibrary struct{}
 
-func (ReverseProxyCheckLib *ReverseProxyCheckLibrary) ModuleRun(target string, config *webscan.ProbeTypeConfig) (*webscan.Attempt, []string) {
-	//Initialize structs
-	attempt := webscan.Attempt{Name: webscan.ModuleNameReverseProxyMisconfiguration, Timestamp: time.Now()}
+func (CRLFInjectionLib *CRLFInjectionLibrary) ModuleRun(target string, config *webscan.WebServerTypeConfig) (*webscan.Attempt, []string) {
+	// Initialize structs
+	attempt := webscan.Attempt{Name: webscan.ModuleNameCrlfInjection, Timestamp: time.Now()}
 	errors := []string{}
 
 	// Enumerate target
-	attackURL := target + "/?url=" + url.QueryEscape("http://127.0.0.1:80")
+	crlfPayload := "/%0d%0aSet-Cookie:%20crlfInjected=1"
+	attackURL := target + crlfPayload
 	request := webscan.GeneralRequestInfo{
 		Method: webscan.HttpMethodGet,
 		Url:    attackURL,
 	}
-
 	client := &http.Client{
 		Timeout: time.Duration(config.Timeout) * time.Millisecond,
 		Transport: &http.Transport{
@@ -45,10 +44,18 @@ func (ReverseProxyCheckLib *ReverseProxyCheckLibrary) ModuleRun(target string, c
 		return &attempt, errors
 	}
 	bodyStr := string(body)
+	headerMap := make(map[string]string)
+	for key, values := range resp.Header {
+		headerMap[key] = strings.Join(values, ", ")
+	}
+
 	response := webscan.GeneralResponseInfo{
 		StatusCode: resp.StatusCode,
 		Body:       &bodyStr,
+		Headers:    headerMap,
 	}
+
+	// Close the response body
 	err = resp.Body.Close()
 	if err != nil {
 		GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &request}
@@ -59,24 +66,17 @@ func (ReverseProxyCheckLib *ReverseProxyCheckLibrary) ModuleRun(target string, c
 	// Marshal structs
 	GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &request, Response: &response}
 	attempt.AttemptInfo = webscan.NewAttemptInfoUnionFromGeneralAttempt(&GeneralAttemptInfo)
-	finding := ReverseProxyCheckLib.AnalyzeResponse(webscan.NewResponseUnionFromGeneralResponse(&response))
+	finding := CRLFInjectionLib.AnalyzeResponse(webscan.NewResponseUnionFromGeneralResponse(&response))
 	attempt.Finding = finding
 	return &attempt, errors
 }
 
-func (ReverseProxyCheckLib *ReverseProxyCheckLibrary) AnalyzeResponse(response *webscan.ResponseUnion) bool {
-	if response.GeneralResponse.StatusCode != http.StatusOK {
-		return false
-	}
-	internalIndicators := []string{
-		"Welcome",
-		"Nginx",
-		"localhost",
-	}
-	for _, indicator := range internalIndicators {
-		if response.GeneralResponse.Body != nil && strings.Contains(*response.GeneralResponse.Body, indicator) {
-			finding := true
-			return finding
+func (CRLFInjectionLib *CRLFInjectionLibrary) AnalyzeResponse(response *webscan.ResponseUnion) bool {
+	if response.GeneralResponse.StatusCode == http.StatusOK {
+		if setCookieHeader, ok := response.GeneralResponse.Headers["Set-Cookie"]; ok {
+			if strings.Contains(setCookieHeader, "crlfInjected=1") {
+				return true
+			}
 		}
 	}
 	return false

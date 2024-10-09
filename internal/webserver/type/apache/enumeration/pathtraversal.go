@@ -1,34 +1,39 @@
-package probe
+package webserver
 
 import (
 	"net/http"
 	"time"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
-	helpers "github.com/Method-Security/webscan/internal/probe/type/general/enumeration"
+	helpers "github.com/Method-Security/webscan/internal/webserver/type/general/enumeration"
 )
 
 type PathTraversalLibrary struct{}
 
 var commonExposedPaths = []string{
+	"/.cgi",
 	"/.env",
 	"/.git",
-	"/admin",
-	"/backup",
-	"/config",
-	"/etc/nginx/nginx.conf",
+	"/.htaccess",
+	"/cgi-bin/",
+	"/cgi-bin/admin.cgi",
+	"/cgi-bin/test.cgi",
+	"/cgi-bin/.%2e/.%2e/.%2e/.%2e/etc/passwd", //CVE-2021-41773
+	"/etc/apache2/apache2.conf",
+	"/etc/apache2/sites-available/apache2.conf",
+	"/etc/httpd/conf/httpd.conf",
+	"/etc/httpd/httpd.conf",
+	"/logs/access.log",
+	"/logs/error.log",
+	"/perl/admin.cgi",
+	"/perl/test.cgi",
+	"/scripts/admin.cgi",
+	"/scripts/test.cgi",
 	"/server-status",
-	"/usr/local/nginx/conf/nginx.conf",
-	"/var/log/nginx/access.log",
-	"/var/log/nginx/error.log",
-	"/usr/share/nginx/html",
-	"/path/to/app/current/public",
-	"var/wwww/html",
-	"/",
-	"/api../",
+	"/test.cgi",
 }
 
-func (PathTraversalLib *PathTraversalLibrary) ModuleRun(target string, config *webscan.ProbeTypeConfig) (*webscan.Attempt, []string) {
+func (PathTraversalLib *PathTraversalLibrary) ModuleRun(target string, config *webscan.WebServerTypeConfig) (*webscan.Attempt, []string) {
 	//Initialize structs
 	attempt := webscan.Attempt{Name: webscan.ModuleNamePathTraversal, Timestamp: time.Now()}
 	findingGlobal := false

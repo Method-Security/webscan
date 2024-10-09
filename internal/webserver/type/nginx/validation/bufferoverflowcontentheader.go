@@ -1,4 +1,4 @@
-package probe
+package webserver
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 
 type BufferOverflowContentHeaderLibrary struct{}
 
-func (BufferOverflowContentHeaderLib *BufferOverflowContentHeaderLibrary) ModuleRun(target string, config *webscan.ProbeTypeConfig) (*webscan.Attempt, []string) {
+func (BufferOverflowContentHeaderLib *BufferOverflowContentHeaderLibrary) ModuleRun(target string, config *webscan.WebServerTypeConfig) (*webscan.Attempt, []string) {
 	// Initialize structs
 	attempt := webscan.Attempt{Name: webscan.ModuleNameBufferOverflowContentHeader, Timestamp: time.Now()}
 	errors := []string{}
