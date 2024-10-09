@@ -92,12 +92,12 @@ func (a *WebScan) InitWebServerCommand() {
 				return
 			}
 
-			report, err := webservertype.TypeLaunch(cmd.Context(), config)
+			engine := webservertype.NewEngine(config)
+			report, err := engine.Launch(cmd.Context())
 			if err != nil {
 				a.OutputSignal.AddError(err)
 			}
 			a.OutputSignal.Content = report
-
 		},
 	}
 
@@ -154,12 +154,12 @@ func (a *WebScan) InitWebServerCommand() {
 				return
 			}
 
-			report, err := webservertype.TypeLaunch(cmd.Context(), config)
+			engine := webservertype.NewEngine(config)
+			report, err := engine.Launch(cmd.Context())
 			if err != nil {
 				a.OutputSignal.AddError(err)
 			}
 			a.OutputSignal.Content = report
-
 		},
 	}
 
