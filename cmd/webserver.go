@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -28,25 +27,19 @@ func (a *WebScan) InitWebServerCommand() {
 		Run: func(cmd *cobra.Command, args []string) {
 			targets, err := cmd.Flags().GetString("targets")
 			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
+				a.OutputSignal.AddError(err)
 				return
 			}
 
 			timeout, err := cmd.Flags().GetInt("timeout")
 			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
+				a.OutputSignal.AddError(err)
 				return
 			}
 
 			report, err := webserver.PerformWebServerProbe(cmd.Context(), targets, time.Duration(timeout)*time.Second)
 			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
+				a.OutputSignal.AddError(err)
 			}
 			a.OutputSignal.Content = report
 
@@ -93,7 +86,7 @@ func (a *WebScan) InitWebServerCommand() {
 				a.OutputSignal.AddError(err)
 				return
 			}
-			config, err := LoadWebserverTypeConfig(targets, serverEnum, webscan.ProbeTypeEnumeration, timeout, successfulOnly)
+			config, err := NewLoadWebserverTypeConfig(targets, serverEnum, webscan.ProbeTypeEnumeration, timeout, successfulOnly)
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
@@ -101,9 +94,7 @@ func (a *WebScan) InitWebServerCommand() {
 
 			report, err := webservertype.TypeLaunch(cmd.Context(), config)
 			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
+				a.OutputSignal.AddError(err)
 			}
 			a.OutputSignal.Content = report
 
@@ -157,7 +148,7 @@ func (a *WebScan) InitWebServerCommand() {
 				a.OutputSignal.AddError(err)
 				return
 			}
-			config, err := LoadWebserverTypeConfig(targets, serverEnum, webscan.ProbeTypeValidation, timeout, successfulOnly)
+			config, err := NewLoadWebserverTypeConfig(targets, serverEnum, webscan.ProbeTypeValidation, timeout, successfulOnly)
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
@@ -165,9 +156,7 @@ func (a *WebScan) InitWebServerCommand() {
 
 			report, err := webservertype.TypeLaunch(cmd.Context(), config)
 			if err != nil {
-				errorMessage := err.Error()
-				a.OutputSignal.ErrorMessage = &errorMessage
-				a.OutputSignal.Status = 1
+				a.OutputSignal.AddError(err)
 			}
 			a.OutputSignal.Content = report
 
@@ -187,7 +176,7 @@ func (a *WebScan) InitWebServerCommand() {
 	a.RootCmd.AddCommand(webServerCmd)
 }
 
-func LoadWebserverTypeConfig(targets []string, serverEnum webscan.ServerType, probeEnum webscan.ProbeType, timeout int, successfulOnly bool) (*webscan.WebServerTypeConfig, error) {
+func NewLoadWebserverTypeConfig(targets []string, serverEnum webscan.ServerType, probeEnum webscan.ProbeType, timeout int, successfulOnly bool) (*webscan.WebServerTypeConfig, error) {
 	config := &webscan.WebServerTypeConfig{
 		Targets:        targets,
 		Probe:          probeEnum,
@@ -196,7 +185,7 @@ func LoadWebserverTypeConfig(targets []string, serverEnum webscan.ServerType, pr
 		SuccessfulOnly: successfulOnly,
 	}
 	if config.Timeout < 1 {
-		return nil, errors.New("timeout must be greater than 0")
+		config.Timeout = 0
 	}
 	return config, nil
 }

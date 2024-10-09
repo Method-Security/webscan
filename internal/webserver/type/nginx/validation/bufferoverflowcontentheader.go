@@ -3,7 +3,6 @@ package webserver
 import (
 	"bytes"
 	"crypto/tls"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -25,13 +24,17 @@ func (BufferOverflowContentHeaderLib *BufferOverflowContentHeaderLibrary) Module
 		"Content-Length": "4294967295",
 		"Connection":     "close",
 	}
-	payloadRequest := fmt.Sprintf("POST / HTTP/1.1\r\nHost: %s\r\n", headers["Host"])
-	payloadRequest += fmt.Sprintf("Content-Length: %s\r\n", headers["Content-Length"])
-	payloadRequest += fmt.Sprintf("Connection: %s\r\n\r\n", headers["Connection"])
-	request := webscan.GeneralRequestInfo{
-		Method:  webscan.HttpMethodPost,
-		Url:     target,
-		Headers: headers,
+
+	req, err := http.NewRequest("POST", target, bytes.NewBuffer(payload))
+	if err != nil {
+		errors = append(errors, err.Error())
+		GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &webscan.GeneralRequestInfo{Method: webscan.HttpMethodPost, Url: target, Headers: headers}}
+		attempt.AttemptInfo = webscan.NewAttemptInfoUnionFromGeneralAttempt(&GeneralAttemptInfo)
+		return &attempt, errors
+	}
+
+	for k, v := range headers {
+		req.Header.Set(k, v)
 	}
 
 	client := &http.Client{
@@ -40,10 +43,10 @@ func (BufferOverflowContentHeaderLib *BufferOverflowContentHeaderLibrary) Module
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 	}
-	resp, err := client.Post(target, "application/x-www-form-urlencoded", bytes.NewBuffer([]byte(payloadRequest+string(payload))))
+	resp, err := client.Do(req)
 	if err != nil {
 		errors = append(errors, err.Error())
-		GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &request}
+		GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &webscan.GeneralRequestInfo{Method: webscan.HttpMethodPost, Url: target, Headers: headers}}
 		attempt.AttemptInfo = webscan.NewAttemptInfoUnionFromGeneralAttempt(&GeneralAttemptInfo)
 		return &attempt, errors
 	}
@@ -56,7 +59,7 @@ func (BufferOverflowContentHeaderLib *BufferOverflowContentHeaderLibrary) Module
 	}
 
 	// Marshal structs
-	GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &request, Response: &response}
+	GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &webscan.GeneralRequestInfo{Method: webscan.HttpMethodPost, Url: target, Headers: headers}, Response: &response}
 	attempt.AttemptInfo = webscan.NewAttemptInfoUnionFromGeneralAttempt(&GeneralAttemptInfo)
 	finding = BufferOverflowContentHeaderLib.AnalyzeResponse(webscan.NewResponseUnionFromGeneralResponse(&response))
 	attempt.Finding = finding
