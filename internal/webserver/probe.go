@@ -1,5 +1,5 @@
-// Package probe contains the logic and data structures necessary for the `webcan probe` command
-package probe
+// Package webserver contains the logic and data structures necessary for the `webcan probe` command
+package webserver
 
 import (
 	"context"
@@ -16,8 +16,8 @@ type URLDetails struct {
 	Title  string `json:"title" yaml:"title"`
 }
 
-// A WebServerReport represents a holistic report of all the URLs that were probed during a web server probe operation,
-type WebServerReport struct {
+// A ProbeReport represents a holistic report of all the URLs that were probed during a web server probe operation,
+type ProbeReport struct {
 	Targets []string     `json:"targets" yaml:"targets"`
 	URLs    []URLDetails `json:"urls" yaml:"urls"`
 	Errors  []string     `json:"errors" yaml:"errors"`
@@ -76,9 +76,9 @@ func performWebServerProbe(ctx context.Context, targets []string, timeout time.D
 	}
 }
 
-// PerformWebServerProbe performs a web server probe against the provided targets, returning a WebServerReport with the
+// PerformWebServerProbe performs a web server probe against the provided targets, returning a ProbeReport with the
 // results of the probe.
-func PerformWebServerProbe(ctx context.Context, targets string, timeout time.Duration) (WebServerReport, error) {
+func PerformWebServerProbe(ctx context.Context, targets string, timeout time.Duration) (ProbeReport, error) {
 	// 1. Parse target list
 	targetList := strings.Split(targets, ",")
 
@@ -89,7 +89,7 @@ func PerformWebServerProbe(ctx context.Context, targets string, timeout time.Dur
 	}
 
 	// 3. Create report
-	report := WebServerReport{
+	report := ProbeReport{
 		Targets: targetList,
 		URLs:    urls,
 		Errors:  errors,
