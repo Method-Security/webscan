@@ -84,6 +84,7 @@ func (a *WebScan) InitRoutecaptureCommand() {
 			a.OutputSignal.Content = report
 		},
 	}
+	browserCaptureCmd.PersistentFlags().String("browserPath", "", "Path to a browser executable")
 	routeCaptureCmd.AddCommand(browserCaptureCmd)
 
 	a.RootCmd.AddCommand(routeCaptureCmd)
