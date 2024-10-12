@@ -1,5 +1,5 @@
 # Dockerfile used as distribution for the webscan CLI in Tool container format
-FROM chromedp/headless-shell:129.0.6643.2 
+FROM chromedp/headless-shell:129.0.6643.2
 
 ARG CLI_NAME="webscan"
 ARG TARGETARCH
@@ -19,15 +19,16 @@ RUN \
   mkdir -p /opt/method/${CLI_NAME}/service/bin && \
   mkdir -p /mnt/output
 
+RUN adduser --disabled-password --gecos '' method
+
 COPY configs/configs/*                  /opt/method/${CLI_NAME}/var/conf/
 COPY configs/configs/templates/default  /opt/method/${CLI_NAME}/var/conf/templates/default
 COPY configs/configs/templates/custom  /opt/method/${CLI_NAME}/var/conf/templates/custom
-COPY configs/nuclei-ignore-file.txt /root/.config/nuclei/.nuclei-ignore
-
+COPY configs/nuclei-ignore-file.txt /home/method/.config/nuclei/.nuclei-ignore
 COPY ${CLI_NAME} /opt/method/${CLI_NAME}/service/bin/${CLI_NAME}
 
 RUN \
-  adduser --disabled-password --gecos '' method && \
+  chown -R method:method /home/method && \
   chown -R method:method /opt/method/${CLI_NAME}/ && \
   chown -R method:method /mnt/output
 
