@@ -12,6 +12,10 @@ import (
 	"github.com/ysmood/gson"
 )
 
+func (b *BrowserbasePageCapturer) CaptureScreenshot(ctx context.Context, url string, options *Options) webscan.PageScreenshotReport {
+	return b.Capturer.CaptureScreenshot(ctx, url, options)
+}
+
 func (b *BrowserPageCapturer) CaptureScreenshot(ctx context.Context, url string, options *Options) webscan.PageScreenshotReport {
 	log := svc1log.FromContext(ctx)
 

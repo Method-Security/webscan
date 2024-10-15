@@ -99,30 +99,63 @@ Global Flags:
   -v, --verbose              Verbose output
 ```
 
-### Screenshot
+### Screenshot Browser
 
 #### Usage
 
 ```bash
-webscan pagecapture screenshot --target https://example.com
+webscan pagecapture screenshot browser --target https://example.com
 ```
 
 #### Help Text
 
 ```bash
-Perform a fully rendered webpage screenshot capture using a headless browser
+Perform a fully rendered webpage screenshot and HTML capture using a headless browser
 
 Usage:
-  webscan pagecapture screenshot [flags]
+  webscan pagecapture screenshot browser [flags]
 
 Flags:
-  -h, --help            help for screenshot
-      --target string   URL target to perform webpage capture
-      --timeout int     Timeout in seconds for the capture (default 30)
+      --browserPath string   Path to a browser executable
+  -h, --help                 help for browser
 
 Global Flags:
   -o, --output string        Output format (signal, json, yaml). Default value is signal (default "signal")
   -f, --output-file string   Path to output file. If blank, will output to STDOUT
   -q, --quiet                Suppress output
+      --target string        URL target to perform webpage capture
+      --timeout int          Timeout in seconds for the capture (default 30)
+  -v, --verbose              Verbose output
+```
+
+### Screenshot Browserbase
+
+#### Usage
+
+```bash
+webscan pagecapture screenshot browser --target https://example.com
+```
+
+#### Help Text
+
+```bash
+Perform a fully rendered webpage screenshot and HTML capture using Browserbase. Useful for avoiding bot detection or maintaining stealth
+
+Usage:
+  webscan pagecapture screenshot browserbase [flags]
+
+Flags:
+      --country stringArray   List of countries to use for the proxy
+  -h, --help                  help for browserbase
+      --project string        Browserbase project ID
+      --proxy                 Instruct Browserbase to use a proxy
+      --token string          Browserbase API token
+
+Global Flags:
+  -o, --output string        Output format (signal, json, yaml). Default value is signal (default "signal")
+  -f, --output-file string   Path to output file. If blank, will output to STDOUT
+  -q, --quiet                Suppress output
+      --target string        URL target to perform webpage capture
+      --timeout int          Timeout in seconds for the capture (default 30)
   -v, --verbose              Verbose output
 ```
