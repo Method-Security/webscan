@@ -189,7 +189,12 @@ func (a *WebScan) InitPagecaptureCommand() {
 				a.OutputSignal.AddError(err)
 				return
 			}
-			_ = capturer.Close(cmd.Context())
+			err = capturer.Close(cmd.Context())
+			if err != nil {
+				log.Debug("Failed to close browserbase capturer", svc1log.SafeParam("error", err.Error()))
+				a.OutputSignal.AddError(err)
+				return
+			}
 			log.Info("Page capture successful", svc1log.SafeParam("target", target))
 			a.OutputSignal.Content = result.ToPageCaptureReport()
 		},

@@ -79,12 +79,26 @@ func (b *BrowserPageCapturer) InitializeBrowser() {
 }
 
 func (b *BrowserPageCapturer) Close(ctx context.Context) error {
-	svc1log.FromContext(ctx).Debug("Closing browser")
+	svc1log.FromContext(ctx).Debug("Closing browser with allowed timeout of 5 seconds")
 	if b.Browser != nil {
-		err := b.Browser.Close()
-		if err != nil {
-			svc1log.FromContext(ctx).Error("Failed to close browser", svc1log.SafeParam("error", err))
-			return err
+		svc1log.FromContext(ctx).Debug("Attempting to close browser")
+		closeCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		closeChan := make(chan error)
+		go func() {
+			closeChan <- b.Browser.Close()
+		}()
+
+		select {
+		case err := <-closeChan:
+			if err != nil {
+				svc1log.FromContext(ctx).Error("Failed to close browser", svc1log.SafeParam("error", err))
+				return err
+			}
+			svc1log.FromContext(ctx).Debug("Successfully closed browser")
+		case <-closeCtx.Done():
+			svc1log.FromContext(ctx).Warn("Timeout while closing browser, skipping close operation")
 		}
 	}
 	return nil

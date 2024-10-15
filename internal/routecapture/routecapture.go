@@ -137,6 +137,8 @@ func PerformRouteCapture(ctx context.Context, target string, captureMethod websc
 		// Extract the routes and urls
 		routes, urls, errors = extractRoutes(ctx, target, htmlContent, baseURLsOnly, timeout, webscan.PageCaptureMethodRequest, nil)
 
+		_ = capturer.Close(ctx)
+
 	default:
 		report.Errors = append(report.Errors, "Unsupported capture method")
 		return report
