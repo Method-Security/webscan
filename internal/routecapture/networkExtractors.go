@@ -59,8 +59,26 @@ func extractNetworkRoutes(ctx context.Context, b *capture.BrowserPageCapturer, t
 		}
 	})
 
-	// Navigate to the page and wait for the page to load
-	page.MustNavigate(target).MustWaitLoad()
+	// Navigate to the page
+	err := page.Navigate(target)
+	if err != nil {
+		log.Error("Failed to navigate to page", svc1log.SafeParam("url", target), svc1log.SafeParam("error", err))
+		errors = append(errors, err.Error())
+		return routes, setToListString(urls), errors
+	}
+	// Wait for the page to load
+	err = page.WaitLoad()
+	if err != nil {
+		log.Debug("Failed to wait for page load", svc1log.SafeParam("url", target), svc1log.SafeParam("error", err))
+		errors = append(errors, err.Error())
+		// Reload the page if it can't load, possible redirect
+		reloadErr := page.Reload()
+		if reloadErr != nil {
+			log.Error("Failed to reload page", svc1log.SafeParam("url", target), svc1log.SafeParam("error", reloadErr))
+			errors = append(errors, reloadErr.Error())
+			return routes, setToListString(urls), errors
+		}
+	}
 	// Wait for network events to be captured
 	waitForNetworkEvents()
 

@@ -22,8 +22,16 @@ func (a *WebScan) InitPagecaptureCommand() {
 
 	pageScreenshotCmd := &cobra.Command{
 		Use:   "screenshot",
-		Short: "Perform a fully rendered webpage screenshot capture using a headless browser",
-		Long:  `Perform a fully rendered webpage screenshot capture using a headless browser`,
+		Short: "Perform a webpage screenshot and HTML capture against a URL target",
+		Long:  `Perform a webpage screenshot and HTML capture against a URL target`,
+	}
+	pageScreenshotCmd.PersistentFlags().String("target", "", "URL target to perform webpage capture")
+	pageScreenshotCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
+
+	browserScreenshotCmd := &cobra.Command{
+		Use:   "browser",
+		Short: "Perform a fully rendered webpage screenshot and HTML capture capture using a headless browser",
+		Long:  `Perform a fully rendered webpage screenshot and HTML capture capture using a headless browser`,
 		Run: func(cmd *cobra.Command, args []string) {
 			log := svc1log.FromContext(cmd.Context())
 
@@ -54,10 +62,76 @@ func (a *WebScan) InitPagecaptureCommand() {
 			a.OutputSignal.Content = report
 		},
 	}
+	browserScreenshotCmd.PersistentFlags().String("browserPath", "", "Path to a browser executable")
 
-	pageScreenshotCmd.PersistentFlags().String("target", "", "URL target to perform webpage capture")
-	pageScreenshotCmd.PersistentFlags().String("browserPath", "", "Path to a browser executable")
-	pageScreenshotCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
+	pageScreenshotCmd.AddCommand(browserScreenshotCmd)
+
+	browserbaseScreenshotCmd := &cobra.Command{
+		Use:   "browserbase",
+		Short: "Perform a fully rendered webpage screenshot and HTML capture using Browserbase",
+		Long:  `Perform a fully rendered webpage screenshot and HTML capture using Browserbase. Useful for avoiding bot detection or maintaining stealth`,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			countries, _ := cmd.Flags().GetStringArray("country")
+			if len(countries) > 0 {
+				_ = cmd.MarkFlagRequired("proxy")
+			}
+			return nil
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			log := svc1log.FromContext(cmd.Context())
+			target, err := cmd.Flags().GetString("target")
+			if err != nil {
+				a.OutputSignal.AddError(err)
+				return
+			}
+
+			token, err := getFlagOrEnvironmentVariable(cmd, "token", "BROWSERBASE_TOKEN")
+			if err != nil {
+				a.OutputSignal.AddError(err)
+				return
+			}
+			project, err := getFlagOrEnvironmentVariable(cmd, "project", "BROWSERBASE_PROJECT")
+			if err != nil {
+				a.OutputSignal.AddError(err)
+				return
+			}
+			timeout, _ := cmd.Flags().GetInt("timeout")
+			proxy, _ := cmd.Flags().GetBool("proxy")
+			countries, _ := cmd.Flags().GetStringArray("country")
+
+			var options []browserbase.Option
+			if proxy && len(countries) > 0 {
+				options = append(options, browserbase.WithProxyCountries(countries))
+			} else if proxy {
+				options = append(options, browserbase.WithProxy())
+			}
+
+			client := browserbase.NewBrowserbaseClient(token, project, browserbase.NewBrowserbaseOptions(cmd.Context(), options...))
+			capturer := capture.NewBrowserbasePageCapturer(cmd.Context(), timeout, client)
+
+			if capturer == nil {
+				a.OutputSignal.AddError(fmt.Errorf("failed to create browserbase capturer"))
+				return
+			}
+
+			report := capturer.CaptureScreenshot(cmd.Context(), target, &capture.Options{})
+
+			err = capturer.Close(cmd.Context())
+			if err != nil {
+				log.Debug("Failed to close browserbase capturer", svc1log.SafeParam("error", err.Error()))
+				a.OutputSignal.AddError(err)
+				return
+			}
+			log.Info("Screenshot capture successful", svc1log.SafeParam("target", target))
+			a.OutputSignal.Content = report
+		},
+	}
+	browserbaseScreenshotCmd.Flags().String("token", "", "Browserbase API token")
+	browserbaseScreenshotCmd.Flags().String("project", "", "Browserbase project ID")
+	browserbaseScreenshotCmd.Flags().Bool("proxy", false, "Instruct Browserbase to use a proxy")
+	browserbaseScreenshotCmd.Flags().StringArray("country", []string{}, "List of countries to use for the proxy")
+
+	pageScreenshotCmd.AddCommand(browserbaseScreenshotCmd)
 
 	htmlCaptureCmd := &cobra.Command{
 		Use:   "html",
@@ -189,7 +263,12 @@ func (a *WebScan) InitPagecaptureCommand() {
 				a.OutputSignal.AddError(err)
 				return
 			}
-			_ = capturer.Close(cmd.Context())
+			err = capturer.Close(cmd.Context())
+			if err != nil {
+				log.Debug("Failed to close browserbase capturer", svc1log.SafeParam("error", err.Error()))
+				a.OutputSignal.AddError(err)
+				return
+			}
 			log.Info("Page capture successful", svc1log.SafeParam("target", target))
 			a.OutputSignal.Content = result.ToPageCaptureReport()
 		},
