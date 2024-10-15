@@ -7,6 +7,7 @@ import (
 	"time"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
+	"github.com/Method-Security/webscan/internal/browserbase"
 	capture "github.com/Method-Security/webscan/internal/capture"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
@@ -74,7 +75,7 @@ func extractRoutes(ctx context.Context, target string, htmlContent string, baseU
 	return mergedRoutes, setToListString(urls), errors
 }
 
-func PerformRouteCapture(ctx context.Context, target string, captureMethod webscan.PageCaptureMethod, baseURLsOnly bool, timeout int, insecure bool, browserPath *string) webscan.RouteCaptureReport {
+func PerformRouteCapture(ctx context.Context, target string, captureMethod webscan.PageCaptureMethod, baseURLsOnly bool, timeout int, insecure bool, browserPath *string, browserBaseToken *string, browserBaseProject *string, browserBaseOptions *[]browserbase.Option) webscan.RouteCaptureReport {
 	log := svc1log.FromContext(ctx)
 
 	report := webscan.RouteCaptureReport{
@@ -120,6 +121,21 @@ func PerformRouteCapture(ctx context.Context, target string, captureMethod websc
 		routes, urls, errors = extractRoutes(ctx, target, htmlContent, baseURLsOnly, timeout, webscan.PageCaptureMethodBrowser, capturer)
 
 		_ = capturer.Close(ctx)
+
+	case webscan.PageCaptureMethodBrowserbase:
+		log.Info("Initiating page capture with browserbase method", svc1log.SafeParam("target", target))
+		client := browserbase.NewBrowserbaseClient(*browserBaseToken, *browserBaseProject, browserbase.NewBrowserbaseOptions(ctx, *browserBaseOptions...))
+		capturer := capture.NewBrowserbasePageCapturer(ctx, timeout, client)
+		result, err := capturer.Capture(ctx, target, &capture.Options{})
+		if err != nil {
+			report.Errors = append(report.Errors, err.Error())
+			return report
+		}
+		log.Info("Page capture successful")
+		htmlContent = string(result.Content)
+
+		// Extract the routes and urls
+		routes, urls, errors = extractRoutes(ctx, target, htmlContent, baseURLsOnly, timeout, webscan.PageCaptureMethodRequest, nil)
 
 	default:
 		report.Errors = append(report.Errors, "Unsupported capture method")
