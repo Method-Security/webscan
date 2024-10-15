@@ -828,13 +828,13 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#screenshot" class="md-nav__link">
+  <a href="#screenshot-browser" class="md-nav__link">
     <span class="md-ellipsis">
-      Screenshot
+      Screenshot Browser
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Screenshot">
+    <nav class="md-nav" aria-label="Screenshot Browser">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -848,6 +848,39 @@
         
           <li class="md-nav__item">
   <a href="#help-text_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Help Text
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#screenshot-browserbase" class="md-nav__link">
+    <span class="md-ellipsis">
+      Screenshot Browserbase
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Screenshot Browserbase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#help-text_4" class="md-nav__link">
     <span class="md-ellipsis">
       Help Text
     </span>
@@ -1234,13 +1267,13 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#screenshot" class="md-nav__link">
+  <a href="#screenshot-browser" class="md-nav__link">
     <span class="md-ellipsis">
-      Screenshot
+      Screenshot Browser
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Screenshot">
+    <nav class="md-nav" aria-label="Screenshot Browser">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1254,6 +1287,39 @@
         
           <li class="md-nav__item">
   <a href="#help-text_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Help Text
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#screenshot-browserbase" class="md-nav__link">
+    <span class="md-ellipsis">
+      Screenshot Browserbase
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Screenshot Browserbase">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#usage_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#help-text_4" class="md-nav__link">
     <span class="md-ellipsis">
       Help Text
     </span>
@@ -1368,25 +1434,51 @@ Global<span class="w"> </span>Flags:
 <span class="w">      </span>--timeout<span class="w"> </span>int<span class="w">          </span>Timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>capture<span class="w"> </span><span class="o">(</span>default<span class="w"> </span><span class="m">30</span><span class="o">)</span>
 <span class="w">  </span>-v,<span class="w"> </span>--verbose<span class="w">              </span>Verbose<span class="w"> </span>output
 </code></pre></div>
-<h3 id="screenshot">Screenshot<a class="headerlink" href="#screenshot" title="Permanent link">#</a></h3>
+<h3 id="screenshot-browser">Screenshot Browser<a class="headerlink" href="#screenshot-browser" title="Permanent link">#</a></h3>
 <h4 id="usage_4">Usage<a class="headerlink" href="#usage_4" title="Permanent link">#</a></h4>
-<div class="highlight"><pre><span></span><code>webscan<span class="w"> </span>pagecapture<span class="w"> </span>screenshot<span class="w"> </span>--target<span class="w"> </span>https://example.com
+<div class="highlight"><pre><span></span><code>webscan<span class="w"> </span>pagecapture<span class="w"> </span>screenshot<span class="w"> </span>browser<span class="w"> </span>--target<span class="w"> </span>https://example.com
 </code></pre></div>
 <h4 id="help-text_3">Help Text<a class="headerlink" href="#help-text_3" title="Permanent link">#</a></h4>
-<div class="highlight"><pre><span></span><code>Perform<span class="w"> </span>a<span class="w"> </span>fully<span class="w"> </span>rendered<span class="w"> </span>webpage<span class="w"> </span>screenshot<span class="w"> </span>capture<span class="w"> </span>using<span class="w"> </span>a<span class="w"> </span>headless<span class="w"> </span>browser
+<div class="highlight"><pre><span></span><code>Perform<span class="w"> </span>a<span class="w"> </span>fully<span class="w"> </span>rendered<span class="w"> </span>webpage<span class="w"> </span>screenshot<span class="w"> </span>and<span class="w"> </span>HTML<span class="w"> </span>capture<span class="w"> </span>using<span class="w"> </span>a<span class="w"> </span>headless<span class="w"> </span>browser
 
 Usage:
-<span class="w">  </span>webscan<span class="w"> </span>pagecapture<span class="w"> </span>screenshot<span class="w"> </span><span class="o">[</span>flags<span class="o">]</span>
+<span class="w">  </span>webscan<span class="w"> </span>pagecapture<span class="w"> </span>screenshot<span class="w"> </span>browser<span class="w"> </span><span class="o">[</span>flags<span class="o">]</span>
 
 Flags:
-<span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">            </span><span class="nb">help</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>screenshot
-<span class="w">      </span>--target<span class="w"> </span>string<span class="w">   </span>URL<span class="w"> </span>target<span class="w"> </span>to<span class="w"> </span>perform<span class="w"> </span>webpage<span class="w"> </span>capture
-<span class="w">      </span>--timeout<span class="w"> </span>int<span class="w">     </span>Timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>capture<span class="w"> </span><span class="o">(</span>default<span class="w"> </span><span class="m">30</span><span class="o">)</span>
+<span class="w">      </span>--browserPath<span class="w"> </span>string<span class="w">   </span>Path<span class="w"> </span>to<span class="w"> </span>a<span class="w"> </span>browser<span class="w"> </span>executable
+<span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">                 </span><span class="nb">help</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>browser
 
 Global<span class="w"> </span>Flags:
 <span class="w">  </span>-o,<span class="w"> </span>--output<span class="w"> </span>string<span class="w">        </span>Output<span class="w"> </span>format<span class="w"> </span><span class="o">(</span>signal,<span class="w"> </span>json,<span class="w"> </span>yaml<span class="o">)</span>.<span class="w"> </span>Default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span>signal<span class="w"> </span><span class="o">(</span>default<span class="w"> </span><span class="s2">&quot;signal&quot;</span><span class="o">)</span>
 <span class="w">  </span>-f,<span class="w"> </span>--output-file<span class="w"> </span>string<span class="w">   </span>Path<span class="w"> </span>to<span class="w"> </span>output<span class="w"> </span>file.<span class="w"> </span>If<span class="w"> </span>blank,<span class="w"> </span>will<span class="w"> </span>output<span class="w"> </span>to<span class="w"> </span>STDOUT
 <span class="w">  </span>-q,<span class="w"> </span>--quiet<span class="w">                </span>Suppress<span class="w"> </span>output
+<span class="w">      </span>--target<span class="w"> </span>string<span class="w">        </span>URL<span class="w"> </span>target<span class="w"> </span>to<span class="w"> </span>perform<span class="w"> </span>webpage<span class="w"> </span>capture
+<span class="w">      </span>--timeout<span class="w"> </span>int<span class="w">          </span>Timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>capture<span class="w"> </span><span class="o">(</span>default<span class="w"> </span><span class="m">30</span><span class="o">)</span>
+<span class="w">  </span>-v,<span class="w"> </span>--verbose<span class="w">              </span>Verbose<span class="w"> </span>output
+</code></pre></div>
+<h3 id="screenshot-browserbase">Screenshot Browserbase<a class="headerlink" href="#screenshot-browserbase" title="Permanent link">#</a></h3>
+<h4 id="usage_5">Usage<a class="headerlink" href="#usage_5" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>webscan<span class="w"> </span>pagecapture<span class="w"> </span>screenshot<span class="w"> </span>browser<span class="w"> </span>--target<span class="w"> </span>https://example.com
+</code></pre></div>
+<h4 id="help-text_4">Help Text<a class="headerlink" href="#help-text_4" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>Perform<span class="w"> </span>a<span class="w"> </span>fully<span class="w"> </span>rendered<span class="w"> </span>webpage<span class="w"> </span>screenshot<span class="w"> </span>and<span class="w"> </span>HTML<span class="w"> </span>capture<span class="w"> </span>using<span class="w"> </span>Browserbase.<span class="w"> </span>Useful<span class="w"> </span><span class="k">for</span><span class="w"> </span>avoiding<span class="w"> </span>bot<span class="w"> </span>detection<span class="w"> </span>or<span class="w"> </span>maintaining<span class="w"> </span>stealth
+
+Usage:
+<span class="w">  </span>webscan<span class="w"> </span>pagecapture<span class="w"> </span>screenshot<span class="w"> </span>browserbase<span class="w"> </span><span class="o">[</span>flags<span class="o">]</span>
+
+Flags:
+<span class="w">      </span>--country<span class="w"> </span>stringArray<span class="w">   </span>List<span class="w"> </span>of<span class="w"> </span>countries<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>proxy
+<span class="w">  </span>-h,<span class="w"> </span>--help<span class="w">                  </span><span class="nb">help</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>browserbase
+<span class="w">      </span>--project<span class="w"> </span>string<span class="w">        </span>Browserbase<span class="w"> </span>project<span class="w"> </span>ID
+<span class="w">      </span>--proxy<span class="w">                 </span>Instruct<span class="w"> </span>Browserbase<span class="w"> </span>to<span class="w"> </span>use<span class="w"> </span>a<span class="w"> </span>proxy
+<span class="w">      </span>--token<span class="w"> </span>string<span class="w">          </span>Browserbase<span class="w"> </span>API<span class="w"> </span>token
+
+Global<span class="w"> </span>Flags:
+<span class="w">  </span>-o,<span class="w"> </span>--output<span class="w"> </span>string<span class="w">        </span>Output<span class="w"> </span>format<span class="w"> </span><span class="o">(</span>signal,<span class="w"> </span>json,<span class="w"> </span>yaml<span class="o">)</span>.<span class="w"> </span>Default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span>signal<span class="w"> </span><span class="o">(</span>default<span class="w"> </span><span class="s2">&quot;signal&quot;</span><span class="o">)</span>
+<span class="w">  </span>-f,<span class="w"> </span>--output-file<span class="w"> </span>string<span class="w">   </span>Path<span class="w"> </span>to<span class="w"> </span>output<span class="w"> </span>file.<span class="w"> </span>If<span class="w"> </span>blank,<span class="w"> </span>will<span class="w"> </span>output<span class="w"> </span>to<span class="w"> </span>STDOUT
+<span class="w">  </span>-q,<span class="w"> </span>--quiet<span class="w">                </span>Suppress<span class="w"> </span>output
+<span class="w">      </span>--target<span class="w"> </span>string<span class="w">        </span>URL<span class="w"> </span>target<span class="w"> </span>to<span class="w"> </span>perform<span class="w"> </span>webpage<span class="w"> </span>capture
+<span class="w">      </span>--timeout<span class="w"> </span>int<span class="w">          </span>Timeout<span class="w"> </span><span class="k">in</span><span class="w"> </span>seconds<span class="w"> </span><span class="k">for</span><span class="w"> </span>the<span class="w"> </span>capture<span class="w"> </span><span class="o">(</span>default<span class="w"> </span><span class="m">30</span><span class="o">)</span>
 <span class="w">  </span>-v,<span class="w"> </span>--verbose<span class="w">              </span>Verbose<span class="w"> </span>output
 </code></pre></div>
 
