@@ -62,8 +62,8 @@ func extractRoutes(ctx context.Context, target string, htmlContent string, baseU
 	errors = append(errors, inlineScriptErrors...)
 
 	// Extract routes from inspecting network calls
-	// Only to be performed if captureMethod is of type Browser
-	if captureMethod == webscan.PageCaptureMethodBrowser {
+	// Only to be performed if captureMethod is of type Browser or Browserbase
+	if captureMethod == webscan.PageCaptureMethodBrowser  || captureMethod == webscan.PageCaptureMethodBrowserbase {
 		networkRoutes, networkUrls, networkErrors := extractNetworkRoutes(ctx, browserCapturer, target, baseURLsOnly)
 		routes = append(routes, networkRoutes...)
 		urls = addListToSetString(urls, networkUrls)
@@ -135,7 +135,7 @@ func PerformRouteCapture(ctx context.Context, target string, captureMethod websc
 		htmlContent = string(result.Content)
 
 		// Extract the routes and urls
-		routes, urls, errors = extractRoutes(ctx, target, htmlContent, baseURLsOnly, timeout, webscan.PageCaptureMethodRequest, nil)
+		routes, urls, errors = extractRoutes(ctx, target, htmlContent, baseURLsOnly, timeout, webscan.PageCaptureMethodBrowserbase, capturer.Capturer)
 
 		_ = capturer.Close(ctx)
 
