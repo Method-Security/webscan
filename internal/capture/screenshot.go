@@ -70,7 +70,7 @@ func (b *BrowserPageCapturer) CaptureScreenshot(ctx context.Context, url string,
 
 	return webscan.PageScreenshotReport{
 		Target:      url,
-		Screenshot:  img,
+		Screenshot:  &img,
 		Errors:      nil,
 		HtmlEncoded: &encodedBodyString,
 	}
