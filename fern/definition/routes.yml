@@ -4,12 +4,12 @@ types:
   SecuritySchemeName: string
   SecuritySchemeType:
     enum:
-      - basic
-      - apiKey
-      - http
-      - oauth2
-      - openIdConnect
-      - mutualTLS
+      - BASIC
+      - API_KEY
+      - HTTP
+      - OAUTH2
+      - OPEN_ID_CONNECT
+      - MUTUAL_TLS
   SecurityScheme:
     properties:
       type: SecuritySchemeType
@@ -110,7 +110,7 @@ types:
 
   APIType:
     enum:
-      - Grpc
-      - GraphQL
-      - SwaggerV2
-      - SwaggerV3
+      - GRPC
+      - GRAPHQL
+      - SWAGGER_V2
+      - SWAGGER_V3

@@ -20,14 +20,14 @@ types:
       - SHA256RSAPSS
       - SHA384RSAPSS
       - SHA512RSAPSS
-      - Ed25519
+      - ED25519
   PublicKeyAlgorithm:
     enum:
       - RSA
       - DSA
       - ECDSA
-      - Ed25519
-      - Unknown
+      - ED25519
+      - UNKNOWN
   Certificate:
     properties:
       subjectCommonName: optional<string>

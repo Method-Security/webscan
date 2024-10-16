@@ -266,8 +266,8 @@ const (
 	PublicKeyAlgorithmRsa     PublicKeyAlgorithm = "RSA"
 	PublicKeyAlgorithmDsa     PublicKeyAlgorithm = "DSA"
 	PublicKeyAlgorithmEcdsa   PublicKeyAlgorithm = "ECDSA"
-	PublicKeyAlgorithmEd25519 PublicKeyAlgorithm = "Ed25519"
-	PublicKeyAlgorithmUnknown PublicKeyAlgorithm = "Unknown"
+	PublicKeyAlgorithmEd25519 PublicKeyAlgorithm = "ED25519"
+	PublicKeyAlgorithmUnknown PublicKeyAlgorithm = "UNKNOWN"
 )
 
 func NewPublicKeyAlgorithmFromString(s string) (PublicKeyAlgorithm, error) {
@@ -278,9 +278,9 @@ func NewPublicKeyAlgorithmFromString(s string) (PublicKeyAlgorithm, error) {
 		return PublicKeyAlgorithmDsa, nil
 	case "ECDSA":
 		return PublicKeyAlgorithmEcdsa, nil
-	case "Ed25519":
+	case "ED25519":
 		return PublicKeyAlgorithmEd25519, nil
-	case "Unknown":
+	case "UNKNOWN":
 		return PublicKeyAlgorithmUnknown, nil
 	}
 	var t PublicKeyAlgorithm
@@ -309,7 +309,7 @@ const (
 	SignatureAlgorithmSha256Rsapss SignatureAlgorithm = "SHA256RSAPSS"
 	SignatureAlgorithmSha384Rsapss SignatureAlgorithm = "SHA384RSAPSS"
 	SignatureAlgorithmSha512Rsapss SignatureAlgorithm = "SHA512RSAPSS"
-	SignatureAlgorithmEd25519      SignatureAlgorithm = "Ed25519"
+	SignatureAlgorithmEd25519      SignatureAlgorithm = "ED25519"
 )
 
 func NewSignatureAlgorithmFromString(s string) (SignatureAlgorithm, error) {
@@ -344,7 +344,7 @@ func NewSignatureAlgorithmFromString(s string) (SignatureAlgorithm, error) {
 		return SignatureAlgorithmSha384Rsapss, nil
 	case "SHA512RSAPSS":
 		return SignatureAlgorithmSha512Rsapss, nil
-	case "Ed25519":
+	case "ED25519":
 		return SignatureAlgorithmEd25519, nil
 	}
 	var t SignatureAlgorithm
@@ -1209,21 +1209,21 @@ func (w *WebRoute) String() string {
 type ApiType string
 
 const (
-	ApiTypeGrpc      ApiType = "Grpc"
-	ApiTypeGraphQl   ApiType = "GraphQL"
-	ApiTypeSwaggerV2 ApiType = "SwaggerV2"
-	ApiTypeSwaggerV3 ApiType = "SwaggerV3"
+	ApiTypeGrpc      ApiType = "GRPC"
+	ApiTypeGraphql   ApiType = "GRAPHQL"
+	ApiTypeSwaggerV2 ApiType = "SWAGGER_V2"
+	ApiTypeSwaggerV3 ApiType = "SWAGGER_V3"
 )
 
 func NewApiTypeFromString(s string) (ApiType, error) {
 	switch s {
-	case "Grpc":
+	case "GRPC":
 		return ApiTypeGrpc, nil
-	case "GraphQL":
-		return ApiTypeGraphQl, nil
-	case "SwaggerV2":
+	case "GRAPHQL":
+		return ApiTypeGraphql, nil
+	case "SWAGGER_V2":
 		return ApiTypeSwaggerV2, nil
-	case "SwaggerV3":
+	case "SWAGGER_V3":
 		return ApiTypeSwaggerV3, nil
 	}
 	var t ApiType
@@ -1636,27 +1636,27 @@ type SecuritySchemeName = string
 type SecuritySchemeType string
 
 const (
-	SecuritySchemeTypeBasic         SecuritySchemeType = "basic"
-	SecuritySchemeTypeApiKey        SecuritySchemeType = "apiKey"
-	SecuritySchemeTypeHttp          SecuritySchemeType = "http"
-	SecuritySchemeTypeOauth2        SecuritySchemeType = "oauth2"
-	SecuritySchemeTypeOpenIdConnect SecuritySchemeType = "openIdConnect"
-	SecuritySchemeTypeMutualTls     SecuritySchemeType = "mutualTLS"
+	SecuritySchemeTypeBasic         SecuritySchemeType = "BASIC"
+	SecuritySchemeTypeApiKey        SecuritySchemeType = "API_KEY"
+	SecuritySchemeTypeHttp          SecuritySchemeType = "HTTP"
+	SecuritySchemeTypeOauth2        SecuritySchemeType = "OAUTH2"
+	SecuritySchemeTypeOpenIdConnect SecuritySchemeType = "OPEN_ID_CONNECT"
+	SecuritySchemeTypeMutualTls     SecuritySchemeType = "MUTUAL_TLS"
 )
 
 func NewSecuritySchemeTypeFromString(s string) (SecuritySchemeType, error) {
 	switch s {
-	case "basic":
+	case "BASIC":
 		return SecuritySchemeTypeBasic, nil
-	case "apiKey":
+	case "API_KEY":
 		return SecuritySchemeTypeApiKey, nil
-	case "http":
+	case "HTTP":
 		return SecuritySchemeTypeHttp, nil
-	case "oauth2":
+	case "OAUTH2":
 		return SecuritySchemeTypeOauth2, nil
-	case "openIdConnect":
+	case "OPEN_ID_CONNECT":
 		return SecuritySchemeTypeOpenIdConnect, nil
-	case "mutualTLS":
+	case "MUTUAL_TLS":
 		return SecuritySchemeTypeMutualTls, nil
 	}
 	var t SecuritySchemeType
