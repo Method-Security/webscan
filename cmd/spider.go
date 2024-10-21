@@ -13,6 +13,7 @@ func (a *WebScan) InitSpiderCommand() {
 		Short: "Perform a web web spider crawl against URL targets",
 		Long:  `Perform a web web spider crawl against URL targets`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			targets, err := cmd.Flags().GetString("targets")
 			if err != nil {
 				errorMessage := err.Error()

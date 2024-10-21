@@ -34,6 +34,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 		Short: "Perform a fully rendered webpage screenshot and HTML capture capture using a headless browser",
 		Long:  `Perform a fully rendered webpage screenshot and HTML capture capture using a headless browser`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			log := svc1log.FromContext(cmd.Context())
 
 			target, err := cmd.Flags().GetString("target")
@@ -80,6 +81,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			log := svc1log.FromContext(cmd.Context())
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
@@ -143,12 +145,14 @@ func (a *WebScan) InitPagecaptureCommand() {
 	}
 	htmlCaptureCmd.PersistentFlags().String("target", "", "URL target to perform webpage capture")
 	htmlCaptureCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
+	htmlCaptureCmd.PersistentFlags().Int("minDOMStabalizeTime", 5, "Minimum time in seconds to wait for DOM to stabilize, currently only used in screenshots")
 
 	requestCaptureCmd := &cobra.Command{
 		Use:   "request",
 		Short: "Perform a webpage HTML capture using a basic HTTP/HTTPS request",
 		Long:  `Perform a webpage HTML capture using a basic HTTP/HTTPS request`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			log := svc1log.FromContext(cmd.Context())
 			insecure, _ := cmd.Flags().GetBool("insecure")
 			target, err := cmd.Flags().GetString("target")
@@ -178,6 +182,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 		Short: "Perform a fully rendered webpage HTML capture using a headless browser",
 		Long:  `Perform a fully rendered webpage HTML capture using a headless browser`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			log := svc1log.FromContext(cmd.Context())
 
 			target, err := cmd.Flags().GetString("target")
@@ -226,6 +231,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			log := svc1log.FromContext(cmd.Context())
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {

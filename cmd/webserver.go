@@ -25,6 +25,7 @@ func (a *WebScan) InitWebServerCommand() {
 		Short: "Perform a web probe against targets to identify existence of web servers",
 		Long:  `Perform a web probe against targets to identify existence of web servers`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			targets, err := cmd.Flags().GetString("targets")
 			if err != nil {
 				a.OutputSignal.AddError(err)
@@ -56,6 +57,7 @@ func (a *WebScan) InitWebServerCommand() {
 		Short: "Enumerate a specific type of web server",
 		Long:  `Enumerate a specific type of web server`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			// Targets
 			targets, err := cmd.Flags().GetStringSlice("targets")
 			if err != nil {
@@ -118,6 +120,7 @@ func (a *WebScan) InitWebServerCommand() {
 		Short: "Preform validation against a specific type of web server",
 		Long:  `Preform validation against a specific type of web server`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			// Targets
 			targets, err := cmd.Flags().GetStringSlice("targets")
 			if err != nil {

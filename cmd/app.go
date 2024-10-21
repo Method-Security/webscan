@@ -130,6 +130,7 @@ func (a *WebScan) initSwaggerEnumerateCommand() *cobra.Command {
 This involves fetching and parsing the Swagger (OpenAPI) documentation to extract details about the available endpoints, 
 HTTP methods, query parameters, and authentication mechanisms.`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
 				errorMessage := err.Error()
@@ -172,6 +173,7 @@ func (a *WebScan) initGrpcEnumerateCommand() *cobra.Command {
 This involves connecting to the gRPC server, using reflection to discover available services and methods, 
 and extracting details about the methods, including their input and output types.`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
 				errorMessage := err.Error()
@@ -204,6 +206,7 @@ func (a *WebScan) initGraphqlEnumerateCommand() *cobra.Command {
 This involves querying the GraphQL schema to discover available types, queries, mutations, and subscriptions, 
 and extracting details about the fields and their types.`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
 				errorMessage := err.Error()
@@ -235,6 +238,7 @@ func (a *WebScan) initRequestsCommand() {
 		
 The requests command allows you to send custom HTTP requests to a target URL with specified method, path, and optional parameters including query, path, header, body, form, and multipart form data.`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			baseURL, err := cmd.Flags().GetString("baseUrl")
 			if err != nil || baseURL == "" {
 				a.handleError(cmd, "baseUrl flag is required")

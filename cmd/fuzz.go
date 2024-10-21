@@ -18,6 +18,7 @@ func (a *WebScan) InitFuzzCommand() {
 		Short: "Perform a path based web fuzz against a target",
 		Long:  `Perform a path based web fuzz against a target`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
 				errorMessage := err.Error()

@@ -26,6 +26,7 @@ func (a *WebScan) InitRoutecaptureCommand() {
 		Short: "Perform a webpage route capture using a basic HTTP/HTTPS request",
 		Long:  `Perform a webpage route capture using a basic HTTP/HTTPS request`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			insecure, _ := cmd.Flags().GetBool("insecure")
 
 			target, err := cmd.Flags().GetString("target")
@@ -62,6 +63,7 @@ func (a *WebScan) InitRoutecaptureCommand() {
 		Short: "Perform a webpage route capture using a headless browser",
 		Long:  `Perform a webpage route capture using a headless browser`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
 				a.OutputSignal.AddError(err)
@@ -103,6 +105,7 @@ func (a *WebScan) InitRoutecaptureCommand() {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
 				a.OutputSignal.AddError(err)

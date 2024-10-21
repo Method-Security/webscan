@@ -13,6 +13,7 @@ func (a *WebScan) InitFingerprintCommand() {
 		Short: "Perform a fingerprint against a URL target",
 		Long:  `Perform a fingerprint against a URL target`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
 				errorMessage := err.Error()
