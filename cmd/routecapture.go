@@ -19,6 +19,7 @@ func (a *WebScan) InitRoutecaptureCommand() {
 	routeCaptureCmd.PersistentFlags().String("browserPath", "", "Path to a browser executable")
 	routeCaptureCmd.PersistentFlags().Bool("base-urls-only", true, "Only match routes and urls that share the base URLs domain")
 	routeCaptureCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
+	routeCaptureCmd.PersistentFlags().Int("minDOMStabalizeTime", 5, "Minimum time in seconds to wait for DOM to stabilize, currently only used in screenshots")
 
 	requestCaptureCmd := &cobra.Command{
 		Use:   "request",
@@ -46,9 +47,10 @@ func (a *WebScan) InitRoutecaptureCommand() {
 			baseURLsOnly, _ := cmd.Flags().GetBool("base-urls-only")
 
 			timeout, _ := cmd.Flags().GetInt("timeout")
+			minDOMStabalizeTime, _ := cmd.Flags().GetInt("minDOMStabalizeTime")
 
 			// Extract the routes and links
-			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodRequest, baseURLsOnly, timeout, insecure, browserPath, nil, nil, nil)
+			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodRequest, baseURLsOnly, timeout, minDOMStabalizeTime, insecure, browserPath, nil, nil, nil)
 			a.OutputSignal.Content = report
 		},
 	}
@@ -79,9 +81,10 @@ func (a *WebScan) InitRoutecaptureCommand() {
 			}
 
 			timeout, _ := cmd.Flags().GetInt("timeout")
+			minDOMStabalizeTime, _ := cmd.Flags().GetInt("minDOMStabalizeTime")
 
 			// Extract the routes and links
-			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodBrowser, baseURLsOnly, timeout, false, browserPath, nil, nil, nil)
+			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodBrowser, baseURLsOnly, timeout, minDOMStabalizeTime, false, browserPath, nil, nil, nil)
 			a.OutputSignal.Content = report
 		},
 	}
@@ -119,6 +122,7 @@ func (a *WebScan) InitRoutecaptureCommand() {
 				return
 			}
 			timeout, _ := cmd.Flags().GetInt("timeout")
+			minDOMStabalizeTime, _ := cmd.Flags().GetInt("minDOMStabalizeTime")
 			proxy, _ := cmd.Flags().GetBool("proxy")
 			countries, _ := cmd.Flags().GetStringArray("country")
 
@@ -130,7 +134,7 @@ func (a *WebScan) InitRoutecaptureCommand() {
 			}
 
 			// Extract the routes and links
-			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodBrowserbase, baseURLsOnly, timeout, false, nil, &token, &project, &options)
+			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodBrowserbase, baseURLsOnly, timeout, minDOMStabalizeTime, false, nil, &token, &project, &options)
 			a.OutputSignal.Content = report
 		},
 	}

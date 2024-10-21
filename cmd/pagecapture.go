@@ -27,6 +27,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 	}
 	pageScreenshotCmd.PersistentFlags().String("target", "", "URL target to perform webpage capture")
 	pageScreenshotCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
+	pageScreenshotCmd.PersistentFlags().Int("minDOMStabalizeTime", 5, "Minimum time in seconds to wait for DOM to stabilize, currently only used in screenshots")
 
 	browserScreenshotCmd := &cobra.Command{
 		Use:   "browser",
@@ -52,8 +53,9 @@ func (a *WebScan) InitPagecaptureCommand() {
 			}
 
 			timeout, _ := cmd.Flags().GetInt("timeout")
+			minDOMStabalizeTime, _ := cmd.Flags().GetInt("minDOMStabalizeTime")
 
-			capturer := capture.NewBrowserPageCapturer(browserPath, timeout)
+			capturer := capture.NewBrowserPageCapturer(browserPath, timeout, minDOMStabalizeTime)
 			report := capturer.CaptureScreenshot(cmd.Context(), target, &capture.Options{})
 
 			_ = capturer.Close(cmd.Context())
@@ -96,6 +98,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 				return
 			}
 			timeout, _ := cmd.Flags().GetInt("timeout")
+			minDOMStabalizeTime, _ := cmd.Flags().GetInt("minDOMStabalizeTime")
 			proxy, _ := cmd.Flags().GetBool("proxy")
 			countries, _ := cmd.Flags().GetStringArray("country")
 
@@ -107,7 +110,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 			}
 
 			client := browserbase.NewBrowserbaseClient(token, project, browserbase.NewBrowserbaseOptions(cmd.Context(), options...))
-			capturer := capture.NewBrowserbasePageCapturer(cmd.Context(), timeout, client)
+			capturer := capture.NewBrowserbasePageCapturer(cmd.Context(), timeout, minDOMStabalizeTime, client)
 
 			if capturer == nil {
 				a.OutputSignal.AddError(fmt.Errorf("failed to create browserbase capturer"))
@@ -194,8 +197,9 @@ func (a *WebScan) InitPagecaptureCommand() {
 			}
 
 			timeout, _ := cmd.Flags().GetInt("timeout")
+			minDOMStabalizeTime, _ := cmd.Flags().GetInt("minDOMStabalizeTime")
 
-			capturer := capture.NewBrowserPageCapturer(browserPath, timeout)
+			capturer := capture.NewBrowserPageCapturer(browserPath, timeout, minDOMStabalizeTime)
 			result, err := capturer.Capture(cmd.Context(), target, &capture.Options{})
 			if err != nil {
 				a.OutputSignal.AddError(err)
@@ -240,6 +244,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 				return
 			}
 			timeout, _ := cmd.Flags().GetInt("timeout")
+			minDOMStabalizeTime, _ := cmd.Flags().GetInt("minDOMStabalizeTime")
 			proxy, _ := cmd.Flags().GetBool("proxy")
 			countries, _ := cmd.Flags().GetStringArray("country")
 
@@ -251,7 +256,7 @@ func (a *WebScan) InitPagecaptureCommand() {
 			}
 
 			client := browserbase.NewBrowserbaseClient(token, project, browserbase.NewBrowserbaseOptions(cmd.Context(), options...))
-			capturer := capture.NewBrowserbasePageCapturer(cmd.Context(), timeout, client)
+			capturer := capture.NewBrowserbasePageCapturer(cmd.Context(), timeout, minDOMStabalizeTime, client)
 
 			if capturer == nil {
 				a.OutputSignal.AddError(fmt.Errorf("failed to create browserbase capturer"))
