@@ -11,24 +11,27 @@ import (
 )
 
 type BrowserPageCapturer struct {
-	PathToBrowser  *string
-	Browser        *rod.Browser
-	TimeoutSeconds int
+	PathToBrowser              *string
+	Browser                    *rod.Browser
+	TimeoutSeconds             int
+	MinDOMStabalizeTimeSeconds int
 }
 
-func NewBrowserPageCapturer(pathToBrowser *string, timeout int) *BrowserPageCapturer {
+func NewBrowserPageCapturer(pathToBrowser *string, timeout int, minDOMStabalizeTime int) *BrowserPageCapturer {
 	return &BrowserPageCapturer{
-		PathToBrowser:  pathToBrowser,
-		Browser:        nil,
-		TimeoutSeconds: timeout,
+		PathToBrowser:              pathToBrowser,
+		Browser:                    nil,
+		TimeoutSeconds:             timeout,
+		MinDOMStabalizeTimeSeconds: minDOMStabalizeTime,
 	}
 }
 
-func NewBrowserPageCapturerWithClient(client *cdp.Client, timeout int) *BrowserPageCapturer {
+func NewBrowserPageCapturerWithClient(client *cdp.Client, timeout int, minDOMStabalizeTime int) *BrowserPageCapturer {
 	return &BrowserPageCapturer{
-		PathToBrowser:  nil,
-		Browser:        rod.New().Client(client).MustConnect(),
-		TimeoutSeconds: timeout,
+		PathToBrowser:              nil,
+		Browser:                    rod.New().Client(client).MustConnect(),
+		TimeoutSeconds:             timeout,
+		MinDOMStabalizeTimeSeconds: minDOMStabalizeTime,
 	}
 }
 
@@ -55,15 +58,25 @@ func (b *BrowserPageCapturer) Capture(ctx context.Context, url string, options *
 	}
 	log.Debug("Successfully connected to page")
 
-	page = page.MustWaitDOMStable()
-	evalResult, err := page.Eval(`() => document.documentElement.outerHTML`)
+	// Navigate to the page
+	err = page.Navigate(url)
+	if err != nil {
+		log.Error("Failed to navigate to page", svc1log.SafeParam("url", url), svc1log.SafeParam("error", err))
+		result.Errors = append(result.Errors, err.Error())
+		return result, err
+	}
+
+	// Wait for the page to load
+	page.MustWaitLoad()
+
+	evalResult, err := page.HTML()
 	if err != nil {
 		log.Error("Failed to evaluate page content", svc1log.SafeParam("url", url), svc1log.SafeParam("error", err))
 		result.Errors = append(result.Errors, err.Error())
 		return result, err
 	}
 
-	result.Content = []byte(evalResult.Value.String())
+	result.Content = []byte(evalResult)
 	return result, nil
 }
 

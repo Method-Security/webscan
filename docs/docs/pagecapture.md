@@ -59,6 +59,7 @@ Flags:
   -h, --help   help for browser
 
 Global Flags:
+  --minDOMStabalizeTime int   Minimum time in seconds to wait for DOM to stabilize, currently only used in screenshots (default 5)
   -o, --output string        Output format (signal, json, yaml). Default value is signal (default "signal")
   -f, --output-file string   Path to output file. If blank, will output to STDOUT
   -q, --quiet                Suppress output
@@ -91,6 +92,7 @@ Flags:
       --token string          Browserbase API token
 
 Global Flags:
+  --minDOMStabalizeTime int   Minimum time in seconds to wait for DOM to stabilize, currently only used in screenshots (default 5)
   -o, --output string        Output format (signal, json, yaml). Default value is signal (default "signal")
   -f, --output-file string   Path to output file. If blank, will output to STDOUT
   -q, --quiet                Suppress output
@@ -120,6 +122,7 @@ Flags:
   -h, --help                 help for browser
 
 Global Flags:
+  --minDOMStabalizeTime int   Minimum time in seconds to wait for DOM to stabilize, currently only used in screenshots (default 5)
   -o, --output string        Output format (signal, json, yaml). Default value is signal (default "signal")
   -f, --output-file string   Path to output file. If blank, will output to STDOUT
   -q, --quiet                Suppress output
@@ -152,6 +155,7 @@ Flags:
       --token string          Browserbase API token
 
 Global Flags:
+  --minDOMStabalizeTime int   Minimum time in seconds to wait for DOM to stabilize, currently only used in screenshots (default 5)
   -o, --output string        Output format (signal, json, yaml). Default value is signal (default "signal")
   -f, --output-file string   Path to output file. If blank, will output to STDOUT
   -q, --quiet                Suppress output

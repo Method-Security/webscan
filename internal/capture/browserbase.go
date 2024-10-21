@@ -16,6 +16,7 @@ type BrowserbasePageCapturer struct {
 func NewBrowserbasePageCapturer(
 	ctx context.Context,
 	timeout int,
+	minDOMStabalizeTime int,
 	browserbaseClient *browserbase.Client,
 ) *BrowserbasePageCapturer {
 	session, err := browserbaseClient.CreateSession(ctx)
@@ -27,7 +28,7 @@ func NewBrowserbasePageCapturer(
 	websocket := NewWebSocket(ctx, browserbaseClient.ConnectionString(*session))
 	client := cdp.New().Start(websocket)
 	return &BrowserbasePageCapturer{
-		Capturer: NewBrowserPageCapturerWithClient(client, timeout),
+		Capturer: NewBrowserPageCapturerWithClient(client, timeout, minDOMStabalizeTime),
 		Client:   browserbaseClient,
 	}
 }

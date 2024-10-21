@@ -23,6 +23,7 @@ func (a *WebScan) InitVulnCommand() {
 		Short: "Perform a vulnerability scan against a target using nuclei",
 		Long:  `Perform a vulnerability scan against a target using nuclei`,
 		Run: func(cmd *cobra.Command, args []string) {
+			defer a.OutputSignal.PanicHandler(cmd.Context())
 			target, err := cmd.Flags().GetString("target")
 			if err != nil {
 				errorMessage := err.Error()
