@@ -48,7 +48,7 @@ webscan vuln --severity INFO --tags swagger --tags fastapi --tags api --target e
 
 4. `docker buildx build . --platform linux/arm64 --load --tag webscan:local -f Dockerfile`
 
-5. Open shell: `docker run -it --rm --entrypoint /bin/sh webscan:testing`
+5. Open shell: `docker run -it --rm --entrypoint /bin/bash webscan:local`
 
 6. OR run command without shell example: `docker run webscan:local app enumerate graphql --target https://countries.trevorblades.com/ -o json`
 

@@ -7,6 +7,7 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/cdp"
 	"github.com/go-rod/rod/lib/launcher"
+	"github.com/go-rod/rod/lib/proto"
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
@@ -58,25 +59,26 @@ func (b *BrowserPageCapturer) Capture(ctx context.Context, url string, options *
 	}
 	log.Debug("Successfully connected to page")
 
-	// Navigate to the page
-	err = page.Navigate(url)
+	// Wait for any navigation for redirect(s) to complete
+	page.WaitNavigation(proto.PageLifecycleEventNameDOMContentLoaded)
+
+	// Wait for the DOM to be stable
+	// Important for capturing dynamic content
+	err = page.WaitDOMStable(time.Duration(b.MinDOMStabalizeTimeSeconds)*time.Second, .1)
 	if err != nil {
-		log.Error("Failed to navigate to page", svc1log.SafeParam("url", url), svc1log.SafeParam("error", err))
+		log.Debug("Failed to wait for page load", svc1log.SafeParam("url", url), svc1log.SafeParam("error", err))
 		result.Errors = append(result.Errors, err.Error())
 		return result, err
 	}
 
-	// Wait for the page to load
-	page.MustWaitLoad()
-
-	evalResult, err := page.HTML()
+	htmlContent, err := page.HTML()
 	if err != nil {
 		log.Error("Failed to evaluate page content", svc1log.SafeParam("url", url), svc1log.SafeParam("error", err))
 		result.Errors = append(result.Errors, err.Error())
 		return result, err
 	}
 
-	result.Content = []byte(evalResult)
+	result.Content = []byte(htmlContent)
 	return result, nil
 }
 
