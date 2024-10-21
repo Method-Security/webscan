@@ -19,6 +19,7 @@ func (XPoweredByHeaderGrabLib *XPoweredByHeaderGrabLibrary) ModuleRun(target str
 		Method: webscan.HttpMethodGet,
 		Url:    target,
 	}
+	response := webscan.VersionEnumerateResponseInfo{}
 
 	// Enumerate target
 	client := &http.Client{
@@ -29,15 +30,16 @@ func (XPoweredByHeaderGrabLib *XPoweredByHeaderGrabLibrary) ModuleRun(target str
 	}
 	resp, err := client.Get(target)
 	if err != nil {
-		errors = append(errors, err.Error())
-		VersionEnumerateAttemptInfo := webscan.VersionEnumerateAttemptInfo{Request: &request}
+		errorMessage := err.Error()
+		errors = append(errors, errorMessage)
+		response.Error = &errorMessage
+		VersionEnumerateAttemptInfo := webscan.VersionEnumerateAttemptInfo{Request: &request, Response: &response}
 		attempt.AttemptInfo = webscan.NewAttemptInfoUnionFromVersionAttempt(&VersionEnumerateAttemptInfo)
 		return &attempt, errors
 	}
 
 	xPoweredBy := resp.Header.Get("X-Powered-By")
 
-	response := webscan.VersionEnumerateResponseInfo{}
 	if xPoweredBy != "" {
 		typeVersion := parseXPoweredByHeader(xPoweredBy)
 		response = webscan.VersionEnumerateResponseInfo{
@@ -52,8 +54,7 @@ func (XPoweredByHeaderGrabLib *XPoweredByHeaderGrabLibrary) ModuleRun(target str
 	}
 	err = resp.Body.Close()
 	if err != nil {
-		VersionEnumerateAttemptInfo := webscan.VersionEnumerateAttemptInfo{Request: &request}
-		attempt.AttemptInfo = webscan.NewAttemptInfoUnionFromVersionAttempt(&VersionEnumerateAttemptInfo)
+		errors = append(errors, err.Error())
 		return &attempt, errors
 	}
 

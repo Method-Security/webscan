@@ -27,20 +27,20 @@ func NewEngine(config *webscan.WebServerTypeConfig) *Engine {
 	return &Engine{
 		Config: config,
 		ApacheModules: map[webscan.ProbeType]map[webscan.ModuleName]Module{
-			webscan.ProbeTypeEnumeration: {
+			webscan.ProbeTypeEnumerate: {
 				webscan.ModuleNamePathTraversal:        &apacheEnumerationModules.PathTraversalLibrary{},
 				webscan.ModuleNameXPoweredByHeaderGrab: &apacheEnumerationModules.XPoweredByHeaderGrabLibrary{},
 			},
-			webscan.ProbeTypeValidation: {
+			webscan.ProbeTypeValidate: {
 				webscan.ModuleNameRceModFile: &apacheValidationModules.RCEModFileLibrary{},
 			},
 		},
 		NginxModules: map[webscan.ProbeType]map[webscan.ModuleName]Module{
-			webscan.ProbeTypeEnumeration: {
+			webscan.ProbeTypeEnumerate: {
 				webscan.ModuleNamePathTraversal:                &nginxEnumerationModules.PathTraversalLibrary{},
 				webscan.ModuleNameReverseProxyMisconfiguration: &nginxEnumerationModules.ReverseProxyCheckLibrary{},
 			},
-			webscan.ProbeTypeValidation: {
+			webscan.ProbeTypeValidate: {
 				webscan.ModuleNameBufferOverflowContentHeader: &nginxValidationModules.BufferOverflowContentHeaderLibrary{},
 				webscan.ModuleNameCrlfInjection:               &nginxValidationModules.CRLFInjectionLibrary{},
 			},
@@ -48,15 +48,33 @@ func NewEngine(config *webscan.WebServerTypeConfig) *Engine {
 	}
 }
 
-func (e *Engine) GetModules() (map[webscan.ModuleName]Module, error) {
+func (e *Engine) GetModules() ([]Module, error) {
+	var moduleLibs []Module
+
+	appendModules := func(serverModules map[webscan.ModuleName]Module) {
+		if len(e.Config.Modules) == 0 {
+			for _, module := range serverModules {
+				moduleLibs = append(moduleLibs, module)
+			}
+		} else {
+			for _, moduleName := range e.Config.Modules {
+				if module, exists := serverModules[moduleName]; exists {
+					moduleLibs = append(moduleLibs, module)
+				}
+			}
+		}
+	}
+
 	switch e.Config.Server {
 	case webscan.ServerTypeApache:
-		return e.ApacheModules[e.Config.Probe], nil
+		appendModules(e.ApacheModules[e.Config.Probe])
 	case webscan.ServerTypeNginx:
-		return e.NginxModules[e.Config.Probe], nil
+		appendModules(e.NginxModules[e.Config.Probe])
 	default:
-		return nil, fmt.Errorf("unsupported module: %s", e.Config.Server)
+		return nil, fmt.Errorf("unsupported server type: %s", e.Config.Server)
 	}
+
+	return moduleLibs, nil
 }
 
 func (e *Engine) Run(ctx context.Context, target string) (*webscan.Attempt, []string) {

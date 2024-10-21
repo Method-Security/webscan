@@ -32,8 +32,10 @@ func (CRLFInjectionLib *CRLFInjectionLibrary) ModuleRun(target string, config *w
 	}
 	resp, err := client.Get(attackURL)
 	if err != nil {
-		errors = append(errors, err.Error())
-		GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &request}
+		errorMessage := err.Error()
+		errors = append(errors, errorMessage)
+		response := webscan.GeneralResponseInfo{Error: &errorMessage}
+		GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &request, Response: &response}
 		attempt.AttemptInfo = webscan.NewAttemptInfoUnionFromGeneralAttempt(&GeneralAttemptInfo)
 		return &attempt, errors
 	}
@@ -58,8 +60,7 @@ func (CRLFInjectionLib *CRLFInjectionLibrary) ModuleRun(target string, config *w
 	// Close the response body
 	err = resp.Body.Close()
 	if err != nil {
-		GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &request}
-		attempt.AttemptInfo = webscan.NewAttemptInfoUnionFromGeneralAttempt(&GeneralAttemptInfo)
+		errors = append(errors, err.Error())
 		return &attempt, errors
 	}
 

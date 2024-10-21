@@ -33,8 +33,10 @@ func (ReverseProxyCheckLib *ReverseProxyCheckLibrary) ModuleRun(target string, c
 	}
 	resp, err := client.Get(attackURL)
 	if err != nil {
+		errorMessage := err.Error()
 		errors = append(errors, err.Error())
-		GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &request}
+		response := webscan.GeneralResponseInfo{Error: &errorMessage}
+		GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &request, Response: &response}
 		attempt.AttemptInfo = webscan.NewAttemptInfoUnionFromGeneralAttempt(&GeneralAttemptInfo)
 		return &attempt, errors
 	}
@@ -51,8 +53,7 @@ func (ReverseProxyCheckLib *ReverseProxyCheckLibrary) ModuleRun(target string, c
 	}
 	err = resp.Body.Close()
 	if err != nil {
-		GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &request}
-		attempt.AttemptInfo = webscan.NewAttemptInfoUnionFromGeneralAttempt(&GeneralAttemptInfo)
+		errors = append(errors, err.Error())
 		return &attempt, errors
 	}
 
@@ -69,7 +70,6 @@ func (ReverseProxyCheckLib *ReverseProxyCheckLibrary) AnalyzeResponse(response *
 		return false
 	}
 	internalIndicators := []string{
-		"Welcome",
 		"Nginx",
 		"localhost",
 	}
