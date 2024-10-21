@@ -50,6 +50,7 @@ types:
       method: common.HttpMethod
       url: string
       headers: optional<map<string,string>>
+      params: optional<map<string,string>>
 # Attempt Structs
   PathInfo:
     properties:

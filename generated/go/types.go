@@ -1860,6 +1860,7 @@ type GeneralRequestInfo struct {
 	Method  HttpMethod        `json:"method" url:"method"`
 	Url     string            `json:"url" url:"url"`
 	Headers map[string]string `json:"headers,omitempty" url:"headers,omitempty"`
+	Params  map[string]string `json:"params,omitempty" url:"params,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

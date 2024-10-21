@@ -7,7 +7,6 @@ import (
 
 	webscan "github.com/Method-Security/webscan/generated/go"
 	webserver "github.com/Method-Security/webscan/internal/webserver"
-	webservertype "github.com/Method-Security/webscan/internal/webserver/type"
 	"github.com/spf13/cobra"
 )
 
@@ -107,7 +106,7 @@ func (a *WebScan) InitWebServerCommand() {
 				return
 			}
 
-			engine := webservertype.NewEngine(config)
+			engine := webserver.NewEngine(config)
 			report, err := engine.Launch(cmd.Context())
 			if err != nil {
 				a.OutputSignal.AddError(err)
@@ -184,7 +183,7 @@ func (a *WebScan) InitWebServerCommand() {
 				return
 			}
 
-			engine := webservertype.NewEngine(config)
+			engine := webserver.NewEngine(config)
 			report, err := engine.Launch(cmd.Context())
 			if err != nil {
 				a.OutputSignal.AddError(err)

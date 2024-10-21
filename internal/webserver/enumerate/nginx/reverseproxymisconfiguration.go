@@ -19,10 +19,14 @@ func (ReverseProxyCheckLib *ReverseProxyCheckLibrary) ModuleRun(target string, c
 	errors := []string{}
 
 	// Enumerate target
-	attackURL := target + "/?url=" + url.QueryEscape("http://127.0.0.1:80")
+	params := map[string]string{
+		"url": url.QueryEscape("http://127.0.0.1:80"),
+	}
+	attackURL := target + "/?url=" + params["url"]
 	request := webscan.GeneralRequestInfo{
 		Method: webscan.HttpMethodGet,
 		Url:    attackURL,
+		Params: params,
 	}
 
 	client := &http.Client{
@@ -70,7 +74,7 @@ func (ReverseProxyCheckLib *ReverseProxyCheckLibrary) AnalyzeResponse(response *
 		return false
 	}
 	internalIndicators := []string{
-		"Nginx",
+		"nginx",
 		"localhost",
 	}
 	for _, indicator := range internalIndicators {

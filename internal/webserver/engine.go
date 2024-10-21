@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
-	apacheEnumerationModules "github.com/Method-Security/webscan/internal/webserver/type/apache/enumeration"
-	apacheValidationModules "github.com/Method-Security/webscan/internal/webserver/type/apache/validation"
-	nginxEnumerationModules "github.com/Method-Security/webscan/internal/webserver/type/nginx/enumeration"
-	nginxValidationModules "github.com/Method-Security/webscan/internal/webserver/type/nginx/validation"
+	apacheEnumerationModules "github.com/Method-Security/webscan/internal/webserver/enumerate/apache"
+	nginxEnumerationModules "github.com/Method-Security/webscan/internal/webserver/enumerate/nginx"
+	apacheValidationModules "github.com/Method-Security/webscan/internal/webserver/validate/apache"
+	nginxValidationModules "github.com/Method-Security/webscan/internal/webserver/validate/nginx"
 )
 
 type Module interface {
