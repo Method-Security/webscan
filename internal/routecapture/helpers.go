@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"path"
 	"strings"
 
 	webscan "github.com/Method-Security/webscan/generated/go"
@@ -213,11 +214,18 @@ func urlRemoveQueryParams(rawURL string) (string, error) {
 	return parsedURL.String(), nil
 }
 
-// Function to check if a URL is allowed based on baseUrlsOnly and base domain
+// Function to check if a URL is allowed based on baseUrlsOnly and base domain and captureStaticAssets
 // This only checks the first subdomain only of the baseURL as a condition for match
 // Web routes often get redirected to www.* or other subdomains, so we only check the base domain
 // baseURL should be the original URL sent to the CLI, targetURL is the URL discovered that needs checking
-func isURLAllowed(baseURL string, targetURL string, baseUrlsOnly bool) bool {
+func isURLAllowed(baseURL string, targetURL string, baseUrlsOnly bool, captureStaticAssets bool) bool {
+	// First check to see if the targetURL is a static asset type
+	if !captureStaticAssets {
+		if isStaticAsset(targetURL) {
+			return false
+		}
+	}
+
 	if !baseUrlsOnly {
 		return true
 	}
@@ -227,6 +235,45 @@ func isURLAllowed(baseURL string, targetURL string, baseUrlsOnly bool) bool {
 
 	// Check if targetDomain is the same as baseDomain or a subdomain
 	return isSubdomain(baseDomain, targetDomain)
+}
+
+// Helper function to check if a URL is a static asset
+func isStaticAsset(urlStr string) bool {
+	// Parse the URL
+	parsedURL, err := url.Parse(urlStr)
+	if err != nil {
+		return false
+	}
+
+	// Extract the file extension from the URL path
+	ext := strings.ToLower(path.Ext(parsedURL.Path))
+
+	// List of common static asset extensions
+	staticExtensions := map[string]bool{
+		".js":    true,
+		".css":   true,
+		".jpg":   true,
+		".jpeg":  true,
+		".png":   true,
+		".gif":   true,
+		".svg":   true,
+		".ico":   true,
+		".woff":  true,
+		".woff2": true,
+		".ttf":   true,
+		".eot":   true,
+		".mp4":   true,
+		".webm":  true,
+		".mp3":   true,
+		".wav":   true,
+		".pdf":   true,
+		".zip":   true,
+	}
+
+	// Check if the file extension is in the list of static asset extensions
+	_, isStatic := staticExtensions[ext]
+
+	return isStatic
 }
 
 // Helper function to extract the domain from a URL with an optional maxDomainLevel parameter

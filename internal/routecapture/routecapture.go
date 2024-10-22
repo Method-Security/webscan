@@ -13,7 +13,7 @@ import (
 	"github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
 )
 
-func extractRoutes(ctx context.Context, target string, htmlContent string, baseURLsOnly bool, timeout int, captureMethod webscan.PageCaptureMethod, browserCapturer *capture.BrowserPageCapturer) ([]*webscan.WebRoute, []string, []string) {
+func extractRoutes(ctx context.Context, target string, htmlContent string, baseURLsOnly bool, captureStaticAssets bool, timeout int, captureMethod webscan.PageCaptureMethod, browserCapturer *capture.BrowserPageCapturer) ([]*webscan.WebRoute, []string, []string) {
 	routes := []*webscan.WebRoute{}
 	urls := make(map[string]struct{})
 	errors := []string{}
@@ -31,32 +31,32 @@ func extractRoutes(ctx context.Context, target string, htmlContent string, baseU
 	}
 
 	// Extract routes from form elements
-	formRoutes, formUrls, formErrors := extractFormRoutes(doc, target, baseURLsOnly)
+	formRoutes, formUrls, formErrors := extractFormRoutes(doc, target, baseURLsOnly, captureStaticAssets)
 	routes = append(routes, formRoutes...)
 	urls = addListToSetString(urls, formUrls)
 	errors = append(errors, formErrors...)
 
 	// Extract routes from anchor elements
-	anchorRoutes, anchorUrls, anchorErrors := extractAnchorRoutes(doc, target, baseURLsOnly)
+	anchorRoutes, anchorUrls, anchorErrors := extractAnchorRoutes(doc, target, baseURLsOnly, captureStaticAssets)
 	routes = append(routes, anchorRoutes...)
 	urls = addListToSetString(urls, anchorUrls)
 	errors = append(errors, anchorErrors...)
 
 	// Extract routes from link elements
-	linkRoutes, linkUrls, linkErrors := extractLinkRoutes(doc, target, baseURLsOnly)
+	linkRoutes, linkUrls, linkErrors := extractLinkRoutes(doc, target, baseURLsOnly, captureStaticAssets)
 	routes = append(routes, linkRoutes...)
 	urls = addListToSetString(urls, linkUrls)
 	errors = append(errors, linkErrors...)
 
 	// Extract routes from script elements
 	// This fetches script file contents and extracts routes from them
-	scriptRoutes, scriptUrls, scriptErrors := extractScriptRoutes(doc, target, baseURLsOnly, httpClient)
+	scriptRoutes, scriptUrls, scriptErrors := extractScriptRoutes(doc, target, baseURLsOnly, captureStaticAssets, httpClient)
 	routes = append(routes, scriptRoutes...)
 	urls = addListToSetString(urls, scriptUrls)
 	errors = append(errors, scriptErrors...)
 
 	// Extract routes from inline script elements
-	inlineScriptRoutes, inlineScriptUrls, inlineScriptErrors := extractInlineScriptRoutes(doc, target, baseURLsOnly)
+	inlineScriptRoutes, inlineScriptUrls, inlineScriptErrors := extractInlineScriptRoutes(doc, target, baseURLsOnly, captureStaticAssets)
 	routes = append(routes, inlineScriptRoutes...)
 	urls = addListToSetString(urls, inlineScriptUrls)
 	errors = append(errors, inlineScriptErrors...)
@@ -64,7 +64,7 @@ func extractRoutes(ctx context.Context, target string, htmlContent string, baseU
 	// Extract routes from inspecting network calls
 	// Only to be performed if captureMethod is of type Browser or Browserbase
 	if captureMethod == webscan.PageCaptureMethodBrowser || captureMethod == webscan.PageCaptureMethodBrowserbase {
-		networkRoutes, networkUrls, networkErrors := extractNetworkRoutes(ctx, browserCapturer, target, baseURLsOnly)
+		networkRoutes, networkUrls, networkErrors := extractNetworkRoutes(ctx, browserCapturer, target, baseURLsOnly, captureStaticAssets)
 		routes = append(routes, networkRoutes...)
 		urls = addListToSetString(urls, networkUrls)
 		errors = append(errors, networkErrors...)
@@ -75,7 +75,7 @@ func extractRoutes(ctx context.Context, target string, htmlContent string, baseU
 	return mergedRoutes, setToListString(urls), errors
 }
 
-func PerformRouteCapture(ctx context.Context, target string, captureMethod webscan.PageCaptureMethod, baseURLsOnly bool, timeout int, minDOMStabalizeTime int, insecure bool, browserPath *string, browserBaseToken *string, browserBaseProject *string, browserBaseOptions *[]browserbase.Option) webscan.RouteCaptureReport {
+func PerformRouteCapture(ctx context.Context, target string, captureMethod webscan.PageCaptureMethod, baseURLsOnly bool, captureStaticAssets bool, timeout int, minDOMStabalizeTime int, insecure bool, browserPath *string, browserBaseToken *string, browserBaseProject *string, browserBaseOptions *[]browserbase.Option) webscan.RouteCaptureReport {
 	log := svc1log.FromContext(ctx)
 
 	report := webscan.RouteCaptureReport{
@@ -101,7 +101,7 @@ func PerformRouteCapture(ctx context.Context, target string, captureMethod websc
 		htmlContent = string(result.Content)
 
 		// Extract the routes and urls
-		routes, urls, errors = extractRoutes(ctx, target, htmlContent, baseURLsOnly, timeout, webscan.PageCaptureMethodRequest, nil)
+		routes, urls, errors = extractRoutes(ctx, target, htmlContent, baseURLsOnly, captureStaticAssets, timeout, webscan.PageCaptureMethodRequest, nil)
 
 		_ = capturer.Close(ctx)
 
@@ -118,7 +118,7 @@ func PerformRouteCapture(ctx context.Context, target string, captureMethod websc
 		htmlContent = string(result.Content)
 
 		// Extract the routes and urls
-		routes, urls, errors = extractRoutes(ctx, target, htmlContent, baseURLsOnly, timeout, webscan.PageCaptureMethodBrowser, capturer)
+		routes, urls, errors = extractRoutes(ctx, target, htmlContent, baseURLsOnly, captureStaticAssets, timeout, webscan.PageCaptureMethodBrowser, capturer)
 
 		_ = capturer.Close(ctx)
 
@@ -135,7 +135,7 @@ func PerformRouteCapture(ctx context.Context, target string, captureMethod websc
 		htmlContent = string(result.Content)
 
 		// Extract the routes and urls
-		routes, urls, errors = extractRoutes(ctx, target, htmlContent, baseURLsOnly, timeout, webscan.PageCaptureMethodBrowserbase, capturer.Capturer)
+		routes, urls, errors = extractRoutes(ctx, target, htmlContent, baseURLsOnly, captureStaticAssets, timeout, webscan.PageCaptureMethodBrowserbase, capturer.Capturer)
 
 		_ = capturer.Close(ctx)
 

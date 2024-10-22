@@ -11,7 +11,7 @@ import (
 // extractFormRoutes extracts WebRoutes from form elements in the HTML document
 // It returns a slice of WebRoutes, a slice of URLs and a slice of errors
 // WebRoutes are merged to only return unique routes
-func extractFormRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool) ([]*webscan.WebRoute, []string, []string) {
+func extractFormRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool, captureStaticAssets bool) ([]*webscan.WebRoute, []string, []string) {
 	routes := []*webscan.WebRoute{}
 	urls := make(map[string]struct{})
 	errors := []string{}
@@ -30,7 +30,7 @@ func extractFormRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool)
 		fullURL := resolveURL(baseURL, action)
 
 		// Check if the URL is allowed
-		if !isURLAllowed(baseURL, fullURL, baseURLsOnly) {
+		if !isURLAllowed(baseURL, fullURL, baseURLsOnly, captureStaticAssets) {
 			return
 		}
 
@@ -89,7 +89,7 @@ func extractFormRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool)
 	return mergeWebRoutes(routes), setToListString(urls), []string{}
 }
 
-func extractAnchorRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool) ([]*webscan.WebRoute, []string, []string) {
+func extractAnchorRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool, captureStaticAssets bool) ([]*webscan.WebRoute, []string, []string) {
 	routes := []*webscan.WebRoute{}
 	urls := make(map[string]struct{})
 	errors := []string{}
@@ -107,7 +107,7 @@ func extractAnchorRoutes(doc *goquery.Document, baseURL string, baseURLsOnly boo
 			}
 
 			// Check if the URL is allowed
-			if !isURLAllowed(baseURL, fullURL, baseURLsOnly) {
+			if !isURLAllowed(baseURL, fullURL, baseURLsOnly, captureStaticAssets) {
 				return
 			}
 			urls[urlNoQuery] = struct{}{}
@@ -132,7 +132,7 @@ func extractAnchorRoutes(doc *goquery.Document, baseURL string, baseURLsOnly boo
 	return mergeWebRoutes(routes), setToListString(urls), errors
 }
 
-func extractLinkRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool) ([]*webscan.WebRoute, []string, []string) {
+func extractLinkRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool, captureStaticAssets bool) ([]*webscan.WebRoute, []string, []string) {
 	routes := []*webscan.WebRoute{}
 	urls := make(map[string]struct{})
 	errors := []string{}
@@ -150,7 +150,7 @@ func extractLinkRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool)
 			}
 
 			// Check if the URL is allowed
-			if !isURLAllowed(baseURL, fullURL, baseURLsOnly) {
+			if !isURLAllowed(baseURL, fullURL, baseURLsOnly, captureStaticAssets) {
 				return
 			}
 
