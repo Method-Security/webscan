@@ -18,6 +18,7 @@ func (a *WebScan) InitRoutecaptureCommand() {
 	routeCaptureCmd.PersistentFlags().String("target", "", "URL target to perform webpage capture")
 	routeCaptureCmd.PersistentFlags().String("browserPath", "", "Path to a browser executable")
 	routeCaptureCmd.PersistentFlags().Bool("base-urls-only", true, "Only match routes and urls that share the base URLs domain")
+	routeCaptureCmd.PersistentFlags().Bool("capture-static-assets", false, "Capture the routes and urls of static assets such as images, css, and js files")
 	routeCaptureCmd.PersistentFlags().Int("timeout", 30, "Timeout in seconds for the capture")
 	routeCaptureCmd.PersistentFlags().Int("minDOMStabalizeTime", 5, "Minimum time in seconds to wait for DOM to stabilize, currently only used in screenshots")
 
@@ -46,12 +47,13 @@ func (a *WebScan) InitRoutecaptureCommand() {
 			}
 
 			baseURLsOnly, _ := cmd.Flags().GetBool("base-urls-only")
+			captureStaticAssets, _ := cmd.Flags().GetBool("capture-static-assets")
 
 			timeout, _ := cmd.Flags().GetInt("timeout")
 			minDOMStabalizeTime, _ := cmd.Flags().GetInt("minDOMStabalizeTime")
 
 			// Extract the routes and links
-			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodRequest, baseURLsOnly, timeout, minDOMStabalizeTime, insecure, browserPath, nil, nil, nil)
+			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodRequest, baseURLsOnly, captureStaticAssets, timeout, minDOMStabalizeTime, insecure, browserPath, nil, nil, nil)
 			a.OutputSignal.Content = report
 		},
 	}
@@ -71,6 +73,7 @@ func (a *WebScan) InitRoutecaptureCommand() {
 			}
 
 			baseURLsOnly, _ := cmd.Flags().GetBool("base-urls-only")
+			captureStaticAssets, _ := cmd.Flags().GetBool("capture-static-assets")
 
 			var browserPath *string
 			if path, err := cmd.Flags().GetString("browserPath"); err == nil {
@@ -86,7 +89,7 @@ func (a *WebScan) InitRoutecaptureCommand() {
 			minDOMStabalizeTime, _ := cmd.Flags().GetInt("minDOMStabalizeTime")
 
 			// Extract the routes and links
-			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodBrowser, baseURLsOnly, timeout, minDOMStabalizeTime, false, browserPath, nil, nil, nil)
+			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodBrowser, baseURLsOnly, captureStaticAssets, timeout, minDOMStabalizeTime, false, browserPath, nil, nil, nil)
 			a.OutputSignal.Content = report
 		},
 	}
@@ -113,6 +116,7 @@ func (a *WebScan) InitRoutecaptureCommand() {
 			}
 
 			baseURLsOnly, _ := cmd.Flags().GetBool("base-urls-only")
+			captureStaticAssets, _ := cmd.Flags().GetBool("capture-static-assets")
 
 			token, err := getFlagOrEnvironmentVariable(cmd, "token", "BROWSERBASE_TOKEN")
 			if err != nil {
@@ -137,7 +141,7 @@ func (a *WebScan) InitRoutecaptureCommand() {
 			}
 
 			// Extract the routes and links
-			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodBrowserbase, baseURLsOnly, timeout, minDOMStabalizeTime, false, nil, &token, &project, &options)
+			report := routecapture.PerformRouteCapture(cmd.Context(), target, webscan.PageCaptureMethodBrowserbase, baseURLsOnly, captureStaticAssets, timeout, minDOMStabalizeTime, false, nil, &token, &project, &options)
 			a.OutputSignal.Content = report
 		},
 	}

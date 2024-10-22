@@ -14,7 +14,7 @@ import (
 )
 
 // extractScriptContentRoutes takes JavaScript code as a string, parses it using the Otto parser library to find all routes (including POST and GET methods with bodyParams and queryParams), and returns them.
-func extractScriptContentRoutes(scriptContent string, baseURL string, baseURLsOnly bool) ([]*webscan.WebRoute, []string, []string) {
+func extractScriptContentRoutes(scriptContent string, baseURL string, baseURLsOnly bool, captureStaticAssets bool) ([]*webscan.WebRoute, []string, []string) {
 	routes := []*webscan.WebRoute{}
 	urls := make(map[string]struct{})
 	errors := []string{}
@@ -28,18 +28,19 @@ func extractScriptContentRoutes(scriptContent string, baseURL string, baseURLsOn
 	}
 
 	// Traverse the AST to find relevant nodes
-	ast.Walk(&visitor{routes: &routes, urls: urls, baseURL: baseURL, baseURLsOnly: baseURLsOnly, errors: &errors}, program)
+	ast.Walk(&visitor{routes: &routes, urls: urls, baseURL: baseURL, baseURLsOnly: baseURLsOnly, captureStaticAssets: captureStaticAssets, errors: &errors}, program)
 
 	return mergeWebRoutes(routes), setToListString(urls), errors
 }
 
 // visitor struct for AST traversal
 type visitor struct {
-	routes       *[]*webscan.WebRoute
-	urls         map[string]struct{}
-	baseURL      string
-	baseURLsOnly bool
-	errors       *[]string
+	routes              *[]*webscan.WebRoute
+	urls                map[string]struct{}
+	baseURL             string
+	baseURLsOnly        bool
+	captureStaticAssets bool
+	errors              *[]string
 }
 
 // Enter method for the visitor to process each node
@@ -81,7 +82,7 @@ func (v *visitor) processFetchCall(node *ast.CallExpression) {
 
 	// Check if the URL is allowed
 	// Only consider URLs that are part of the base URL if specified
-	if !isURLAllowed(v.baseURL, urlStr, v.baseURLsOnly) {
+	if !isURLAllowed(v.baseURL, urlStr, v.baseURLsOnly, v.baseURLsOnly) {
 		return
 	}
 
@@ -137,7 +138,7 @@ func (v *visitor) addRoute(urlStr, method string, bodyParams []*webscan.BodyPara
 }
 
 // extractScriptRoutes finds script elements with a src attribute, fetches the JavaScript data, converts it to a string, then calls extractScriptContentRoutes and returns the results. If onlybaseURLs is set, only request script src that are relative.
-func extractScriptRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool, httpClient *http.Client) ([]*webscan.WebRoute, []string, []string) {
+func extractScriptRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool, captureStaticAssets bool, httpClient *http.Client) ([]*webscan.WebRoute, []string, []string) {
 	routes := []*webscan.WebRoute{}
 	urls := make(map[string]struct{})
 	errors := []string{}
@@ -158,7 +159,7 @@ func extractScriptRoutes(doc *goquery.Document, baseURL string, baseURLsOnly boo
 			fullURL := resolveURL(baseURL, src)
 
 			// Check if the URL is allowed
-			if !isURLAllowed(baseURL, fullURL, baseURLsOnly) {
+			if !isURLAllowed(baseURL, fullURL, baseURLsOnly, captureStaticAssets) {
 				return
 			}
 
@@ -190,7 +191,7 @@ func extractScriptRoutes(doc *goquery.Document, baseURL string, baseURLsOnly boo
 			scriptContent := string(bodyBytes)
 
 			// Extract routes from the JavaScript content
-			contentRoutes, contentUrls, contentErrors := extractScriptContentRoutes(scriptContent, baseURL, baseURLsOnly)
+			contentRoutes, contentUrls, contentErrors := extractScriptContentRoutes(scriptContent, baseURL, baseURLsOnly, captureStaticAssets)
 			routes = append(routes, contentRoutes...)
 			for _, u := range contentUrls {
 				urls[u] = struct{}{}
@@ -203,14 +204,14 @@ func extractScriptRoutes(doc *goquery.Document, baseURL string, baseURLsOnly boo
 }
 
 // extractInlineScriptRoutes finds inline JavaScript code within script tags, and for each, passes the string contents to extractScriptContentRoutes and returns the results.
-func extractInlineScriptRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool) ([]*webscan.WebRoute, []string, []string) {
+func extractInlineScriptRoutes(doc *goquery.Document, baseURL string, baseURLsOnly bool, captureStaticAssets bool) ([]*webscan.WebRoute, []string, []string) {
 	routes := []*webscan.WebRoute{}
 	urls := make(map[string]struct{})
 	errors := []string{}
 
 	doc.Find("script:not([src])").Each(func(i int, s *goquery.Selection) {
 		scriptContent := s.Text()
-		contentRoutes, contentUrls, contentErrors := extractScriptContentRoutes(scriptContent, baseURL, baseURLsOnly)
+		contentRoutes, contentUrls, contentErrors := extractScriptContentRoutes(scriptContent, baseURL, baseURLsOnly, captureStaticAssets)
 		routes = append(routes, contentRoutes...)
 		for _, u := range contentUrls {
 			urls[u] = struct{}{}

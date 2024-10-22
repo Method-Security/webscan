@@ -13,7 +13,7 @@ import (
 )
 
 // extractNetworkRoutes fetches network requests, parses them, and populates []WebRoute.
-func extractNetworkRoutes(ctx context.Context, b *capture.BrowserPageCapturer, target string, baseURLsOnly bool) ([]*webscan.WebRoute, []string, []string) {
+func extractNetworkRoutes(ctx context.Context, b *capture.BrowserPageCapturer, target string, baseURLsOnly bool, captureStaticAssets bool) ([]*webscan.WebRoute, []string, []string) {
 	routes := []*webscan.WebRoute{}
 	urls := make(map[string]struct{})
 	errors := []string{}
@@ -94,8 +94,8 @@ func extractNetworkRoutes(ctx context.Context, b *capture.BrowserPageCapturer, t
 		}
 
 		// Skip requests that don't match the base domain when baseURLsOnly is true
-		if !isURLAllowed(target, reqURL.String(), baseURLsOnly) {
-			log.Debug("Skipping URL, not part of base", svc1log.SafeParam("url", reqURL.String()), svc1log.SafeParam("target", target))
+		if !isURLAllowed(target, reqURL.String(), baseURLsOnly, captureStaticAssets) {
+			log.Debug("Skipping URL", svc1log.SafeParam("url", reqURL.String()), svc1log.SafeParam("target", target))
 			continue
 		}
 
