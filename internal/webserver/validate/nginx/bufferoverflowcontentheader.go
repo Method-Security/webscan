@@ -25,11 +25,11 @@ func (BufferOverflowContentHeaderLib *BufferOverflowContentHeaderLibrary) Module
 		"Connection":     "close",
 	}
 
+	request := webscan.GeneralRequestInfo{Method: webscan.HttpMethodPost, Url: target, Headers: headers}
+
 	req, err := http.NewRequest("POST", target, bytes.NewBuffer(payload))
 	if err != nil {
 		errors = append(errors, err.Error())
-		GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &webscan.GeneralRequestInfo{Method: webscan.HttpMethodPost, Url: target, Headers: headers}}
-		attempt.AttemptInfo = webscan.NewAttemptInfoUnionFromGeneralAttempt(&GeneralAttemptInfo)
 		return &attempt, errors
 	}
 
@@ -45,8 +45,10 @@ func (BufferOverflowContentHeaderLib *BufferOverflowContentHeaderLibrary) Module
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		errors = append(errors, err.Error())
-		GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &webscan.GeneralRequestInfo{Method: webscan.HttpMethodPost, Url: target, Headers: headers}}
+		errorMessage := err.Error()
+		errors = append(errors, errorMessage)
+		response := webscan.GeneralResponseInfo{Error: &errorMessage}
+		GeneralAttemptInfo := webscan.GeneralAttemptInfo{Request: &request, Response: &response}
 		attempt.AttemptInfo = webscan.NewAttemptInfoUnionFromGeneralAttempt(&GeneralAttemptInfo)
 		return &attempt, errors
 	}
@@ -55,6 +57,7 @@ func (BufferOverflowContentHeaderLib *BufferOverflowContentHeaderLibrary) Module
 	}
 	err = resp.Body.Close()
 	if err != nil {
+		errors = append(errors, err.Error())
 		return &attempt, errors
 	}
 

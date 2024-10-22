@@ -1860,6 +1860,7 @@ type GeneralRequestInfo struct {
 	Method  HttpMethod        `json:"method" url:"method"`
 	Url     string            `json:"url" url:"url"`
 	Headers map[string]string `json:"headers,omitempty" url:"headers,omitempty"`
+	Params  map[string]string `json:"params,omitempty" url:"params,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -1903,6 +1904,7 @@ type GeneralResponseInfo struct {
 	StatusCode int               `json:"statusCode" url:"statusCode"`
 	Body       *string           `json:"body,omitempty" url:"body,omitempty"`
 	Headers    map[string]string `json:"headers,omitempty" url:"headers,omitempty"`
+	Error      *string           `json:"error,omitempty" url:"error,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -2064,16 +2066,16 @@ func (p *PathInfo) String() string {
 type ProbeType string
 
 const (
-	ProbeTypeEnumeration ProbeType = "ENUMERATION"
-	ProbeTypeValidation  ProbeType = "VALIDATION"
+	ProbeTypeEnumerate ProbeType = "ENUMERATE"
+	ProbeTypeValidate  ProbeType = "VALIDATE"
 )
 
 func NewProbeTypeFromString(s string) (ProbeType, error) {
 	switch s {
-	case "ENUMERATION":
-		return ProbeTypeEnumeration, nil
-	case "VALIDATION":
-		return ProbeTypeValidation, nil
+	case "ENUMERATE":
+		return ProbeTypeEnumerate, nil
+	case "VALIDATE":
+		return ProbeTypeValidate, nil
 	}
 	var t ProbeType
 	return "", fmt.Errorf("%s is not a valid %T", s, t)
@@ -2221,6 +2223,7 @@ type VersionEnumerateResponseInfo struct {
 	Header        *string `json:"header,omitempty" url:"header,omitempty"`
 	VersionType   *string `json:"versionType,omitempty" url:"versionType,omitempty"`
 	VersionNumber *string `json:"versionNumber,omitempty" url:"versionNumber,omitempty"`
+	Error         *string `json:"error,omitempty" url:"error,omitempty"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage
@@ -2347,11 +2350,12 @@ func (w *WebServerReport) String() string {
 }
 
 type WebServerTypeConfig struct {
-	Targets        []string   `json:"targets,omitempty" url:"targets,omitempty"`
-	Server         ServerType `json:"server" url:"server"`
-	Probe          ProbeType  `json:"probe" url:"probe"`
-	Timeout        int        `json:"timeout" url:"timeout"`
-	SuccessfulOnly bool       `json:"successfulOnly" url:"successfulOnly"`
+	Targets        []string     `json:"targets,omitempty" url:"targets,omitempty"`
+	Modules        []ModuleName `json:"modules,omitempty" url:"modules,omitempty"`
+	Server         ServerType   `json:"server" url:"server"`
+	Probe          ProbeType    `json:"probe" url:"probe"`
+	Timeout        int          `json:"timeout" url:"timeout"`
+	SuccessfulOnly bool         `json:"successfulOnly" url:"successfulOnly"`
 
 	extraProperties map[string]interface{}
 	_rawJSON        json.RawMessage

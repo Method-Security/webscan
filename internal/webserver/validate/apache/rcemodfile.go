@@ -35,13 +35,19 @@ func (RCEModFileLib *RCEModFileLibrary) ModuleRun(target string, config *webscan
 	errors := []string{}
 	findingGlobal := false
 
+	// Payload Params
+	params := map[string]string{
+		"input": ";ls",
+	}
+
 	// Enumerate paths
 	var paths []*webscan.PathInfo
 	for _, filepath := range commonVulnerablePaths {
-		exploitURL := fmt.Sprintf("%s%s?input=;ls", target, filepath)
+		exploitURL := fmt.Sprintf("%s%s?%s=%s", target, filepath, "input", params["input"])
 		request := webscan.GeneralRequestInfo{
 			Method: webscan.HttpMethodGet,
 			Url:    exploitURL,
+			Params: params,
 		}
 		path := webscan.PathInfo{Path: filepath, Request: &request}
 
@@ -53,8 +59,10 @@ func (RCEModFileLib *RCEModFileLibrary) ModuleRun(target string, config *webscan
 		}
 		resp, err := client.Get(exploitURL)
 		if err != nil {
-			errors = append(errors, err.Error())
+			errorMessage := err.Error()
+			errors = append(errors, errorMessage)
 			path.Request = &request
+			path.Response = &webscan.GeneralResponseInfo{Error: &errorMessage}
 			paths = append(paths, &path)
 			continue
 		}
@@ -62,8 +70,6 @@ func (RCEModFileLib *RCEModFileLibrary) ModuleRun(target string, config *webscan
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			errors = append(errors, err.Error())
-			path.Request = &request
-			paths = append(paths, &path)
 			continue
 		}
 		bodyStr := string(body)
@@ -75,8 +81,6 @@ func (RCEModFileLib *RCEModFileLibrary) ModuleRun(target string, config *webscan
 		err = resp.Body.Close()
 		if err != nil {
 			errors = append(errors, err.Error())
-			path.Request = &request
-			paths = append(paths, &path)
 			continue
 		}
 

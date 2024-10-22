@@ -12,8 +12,8 @@ types:
       - X_POWERED_BY_HEADER_GRAB
   ProbeType:
     enum:
-      - ENUMERATION
-      - VALIDATION
+      - ENUMERATE
+      - VALIDATE
   ServerType:
     enum:
       - APACHE
@@ -22,6 +22,7 @@ types:
   WebServerTypeConfig:
     properties:
       targets: list<string>
+      modules: list<ModuleName>
       server: ServerType
       probe: ProbeType
       timeout: integer
@@ -37,16 +38,19 @@ types:
       header: optional<string>
       versionType: optional<string>
       versionNumber: optional<string>
+      error: optional<string>
   GeneralResponseInfo:
     properties:
       statusCode: integer
       body: optional<string>
       headers: optional<map<string,string>>
+      error: optional<string>
   GeneralRequestInfo:
     properties:
       method: common.HttpMethod
       url: string
       headers: optional<map<string,string>>
+      params: optional<map<string,string>>
 # Attempt Structs
   PathInfo:
     properties:

@@ -31,8 +31,10 @@ func PathTraversal(target string, timeout int, commonExposedPaths []string) ([]*
 		}
 		resp, err := client.Get(fullURL)
 		if err != nil {
-			errors = append(errors, err.Error())
+			errorMessage := err.Error()
+			errors = append(errors, errorMessage)
 			path.Request = &request
+			path.Response = &webscan.GeneralResponseInfo{Error: &errorMessage}
 			paths = append(paths, &path)
 			continue
 		}
@@ -40,8 +42,6 @@ func PathTraversal(target string, timeout int, commonExposedPaths []string) ([]*
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			errors = append(errors, err.Error())
-			path.Request = &request
-			paths = append(paths, &path)
 			continue
 		}
 		bodyStr := string(body)
@@ -53,8 +53,6 @@ func PathTraversal(target string, timeout int, commonExposedPaths []string) ([]*
 		err = resp.Body.Close()
 		if err != nil {
 			errors = append(errors, err.Error())
-			path.Request = &request
-			paths = append(paths, &path)
 			continue
 		}
 
