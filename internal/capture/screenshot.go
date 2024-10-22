@@ -55,29 +55,23 @@ func (b *BrowserPageCapturer) CaptureScreenshot(ctx context.Context, url string,
 	}
 	log.Debug("Successfully connected to page")
 
-	// Navigate to the page
-	err = page.Navigate(url)
-	if err != nil {
-		log.Error("Failed to navigate to page", svc1log.SafeParam("url", url), svc1log.SafeParam("error", err))
-		report.Errors = append(report.Errors, err.Error())
-		return report
-	}
+	// Wait for any navigation for redirect(s) to complete
+	log.Debug("Waiting navigation to complete for redirects or DOM loading")
+	page.WaitNavigation(proto.PageLifecycleEventNameDOMContentLoaded)
+	log.Debug("Navigation complete")
 
 	// Wait for the DOM to be stable
 	// Important for capturing dynamic content
+	log.Debug("Waiting for DOM to stabilize")
 	err = page.WaitDOMStable(time.Duration(b.MinDOMStabalizeTimeSeconds)*time.Second, .1)
 	if err != nil {
 		log.Debug("Failed to wait for page load", svc1log.SafeParam("url", url), svc1log.SafeParam("error", err))
 		report.Errors = append(report.Errors, err.Error())
-		// Reload the page if it can't load, possible redirect
-		reloadErr := page.Reload()
-		if reloadErr != nil {
-			log.Error("Failed to reload page", svc1log.SafeParam("url", url), svc1log.SafeParam("error", reloadErr))
-			report.Errors = append(report.Errors, err.Error())
-			return report
-		}
 	}
+	log.Debug("DOM stabilized")
 
+	// Capture the screenshot
+	log.Debug("Capturing screenshot")
 	img, err := page.Screenshot(true, &proto.PageCaptureScreenshot{
 		Format:  proto.PageCaptureScreenshotFormatPng,
 		Quality: gson.Int(100),
@@ -88,6 +82,7 @@ func (b *BrowserPageCapturer) CaptureScreenshot(ctx context.Context, url string,
 		report.Errors = append(report.Errors, err.Error())
 		return report
 	}
+	log.Debug("Screenshot captured")
 
 	report.Screenshot = &img
 	report.HtmlEncoded = &encodedBodyString
