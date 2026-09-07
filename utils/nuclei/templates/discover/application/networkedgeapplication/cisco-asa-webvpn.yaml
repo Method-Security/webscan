@@ -48,3 +48,6 @@ http:
           - "cisco"
         condition: and
         case-insensitive: true
+      - type: dsl
+        dsl:
+          - 'contains(tolower(body), "+cscoe+") && contains(tolower(header), "set-cookie: webvpn")'

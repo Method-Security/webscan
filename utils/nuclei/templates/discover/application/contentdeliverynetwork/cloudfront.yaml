@@ -1,0 +1,21 @@
+id: cloudfront-detect
+info:
+  name: Amazon CloudFront Detection
+  author: method-security
+  severity: info
+  description: Detects Amazon CloudFront only when the response includes CloudFront-owned request and POP headers.
+  metadata:
+    method-application-type: CONTENT_DELIVERY_NETWORK
+    method-module-name: CLOUDFRONT
+  tags: discovery,aws,cloudfront,cdn
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}"
+    redirects: true
+    max-redirects: 5
+    stop-at-first-match: true
+    matchers:
+      - type: dsl
+        dsl:
+          - 'regex("(?im)^x-amz-cf-id:\\s*\\S+", header) && regex("(?im)^x-amz-cf-pop:\\s*[A-Z0-9-]+", header)'
