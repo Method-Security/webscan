@@ -78,13 +78,13 @@ func TestMergePathParamsUnionsExampleValues(t *testing.T) {
 }
 
 func TestParseQueryParamsOmitsUnixTimestampExamples(t *testing.T) {
-	parsedURL, err := url.Parse("https://www.blackstone.com/wp-json/blackstone/v1/bxpwsregion/check?t=1790611384013&seconds=1790611384&micros=1790611384013000&nanos=1790611384013000000&isJapan=false")
+	parsedURL, err := url.Parse("https://example.com/api/check?t=1790611384013&time=1790611384&timestamp=1790611384013000&epoch=1790611384013000000&isJapan=false")
 	if err != nil {
 		t.Fatalf("failed to parse test URL: %v", err)
 	}
 
 	params := discoverroute.ParseQueryParams(parsedURL)
-	for _, name := range []string{"t", "seconds", "micros", "nanos"} {
+	for _, name := range []string{"t", "time", "timestamp", "epoch"} {
 		param := queryParamByName(params, name)
 		if param == nil {
 			t.Fatalf("expected %q query param, got %v", name, params)
@@ -101,68 +101,18 @@ func TestParseQueryParamsOmitsUnixTimestampExamples(t *testing.T) {
 }
 
 func TestParseQueryParamsKeepsNonTimestampNumbers(t *testing.T) {
-	parsedURL, err := url.Parse("https://example.com/items?id=1042&build=20260806&largeId=179061138401")
+	parsedURL, err := url.Parse("https://example.com/items?id=1042&build=20260806&largeId=179061138401&orderId=1790611384&snowflakeId=1790611384013000000")
 	if err != nil {
 		t.Fatalf("failed to parse test URL: %v", err)
 	}
 
 	params := discoverroute.ParseQueryParams(parsedURL)
 	for name, value := range map[string]string{
-		"id":      "1042",
-		"build":   "20260806",
-		"largeId": "179061138401",
-	} {
-		param := queryParamByName(params, name)
-		if param == nil || len(param.ExampleValues) != 1 || param.ExampleValues[0] != value {
-			t.Errorf("expected %q example %q to remain, got %v", name, value, param)
-		}
-	}
-}
-
-func TestParseQueryParamsOmitsTransientNamedExamples(t *testing.T) {
-	parsedURL, err := url.Parse("https://example.com/items?" +
-		"nonce=n1&_wpnonce=n2&csrfToken=n3&authenticity_token=n4&" +
-		"requestId=r1&traceId=r2&correlationId=r3&" +
-		"X-Amz-Signature=s1&X-Amz-Credential=s2&X-Amz-Date=s3&Expires=s4&Signature=s5&" +
-		"_=c1&cb=c2&cacheBust=c3&cachebuster=c4&ts=c5&timestamp=c6&" +
-		"documentId=doc-123&accessToken=keep-me")
-	if err != nil {
-		t.Fatalf("failed to parse test URL: %v", err)
-	}
-
-	params := discoverroute.ParseQueryParams(parsedURL)
-	for _, name := range []string{
-		"nonce",
-		"_wpnonce",
-		"csrfToken",
-		"authenticity_token",
-		"requestId",
-		"traceId",
-		"correlationId",
-		"X-Amz-Signature",
-		"X-Amz-Credential",
-		"X-Amz-Date",
-		"Expires",
-		"Signature",
-		"_",
-		"cb",
-		"cacheBust",
-		"cachebuster",
-		"ts",
-		"timestamp",
-	} {
-		param := queryParamByName(params, name)
-		if param == nil {
-			t.Fatalf("expected %q query param, got %v", name, params)
-		}
-		if len(param.ExampleValues) != 0 {
-			t.Errorf("expected %q transient example to be omitted, got %v", name, param.ExampleValues)
-		}
-	}
-
-	for name, value := range map[string]string{
-		"documentId":  "doc-123",
-		"accessToken": "keep-me",
+		"id":          "1042",
+		"build":       "20260806",
+		"largeId":     "179061138401",
+		"orderId":     "1790611384",
+		"snowflakeId": "1790611384013000000",
 	} {
 		param := queryParamByName(params, name)
 		if param == nil || len(param.ExampleValues) != 1 || param.ExampleValues[0] != value {

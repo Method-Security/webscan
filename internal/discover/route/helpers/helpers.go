@@ -245,12 +245,11 @@ func ParseQueryParams(reqURL *url.URL) []*discover.RouteQueryParam {
 		// Empty values carry no example information, so omit them rather than
 		// recording an empty string.
 		filteredValues := make([]string, 0, len(values))
-		transientParam := isLikelyTransientQueryParamName(key)
 		for _, value := range values {
 			if value == "" {
 				continue
 			}
-			if len(value) <= 256 && !transientParam && !isLikelyUnixTimestamp(value) {
+			if len(value) <= 256 && !isLikelyUnixTimestamp(key, value) {
 				filteredValues = append(filteredValues, value)
 			}
 		}
@@ -266,51 +265,28 @@ func ParseQueryParams(reqURL *url.URL) []*discover.RouteQueryParam {
 	return queryParams
 }
 
-// isLikelyTransientQueryParamName recognizes parameters whose values are commonly unique to one
-// request rather than useful examples for replay. Match names conservatively: a generic token or
-// ID may be meaningful, while these names overwhelmingly describe cache-busters, signatures, or
-// request-scoped state.
-func isLikelyTransientQueryParamName(name string) bool {
-	if name == "_" {
-		return true
-	}
-
+// normalizeQueryParamName collapses camelCase, snake_case, kebab-case, and case variants into
+// one form for conservative name matching.
+func normalizeQueryParamName(name string) string {
 	var normalized strings.Builder
 	for _, char := range strings.ToLower(name) {
 		if char >= 'a' && char <= 'z' || char >= '0' && char <= '9' {
 			normalized.WriteRune(char)
 		}
 	}
+	return normalized.String()
+}
 
-	switch normalized.String() {
-	case "nonce",
-		"wpnonce",
-		"csrf",
-		"csrftoken",
-		"authenticitytoken",
-		"requestid",
-		"traceid",
-		"correlationid",
-		"xamzsignature",
-		"xamzcredential",
-		"xamzdate",
-		"expires",
-		"signature",
-		"cb",
-		"cachebust",
-		"cachebuster",
-		"ts",
-		"timestamp":
-		return true
+// isLikelyUnixTimestamp recognizes modern Unix timestamps only when the parameter name also
+// suggests time data. This avoids dropping ordinary numeric IDs and snowflake IDs that happen to
+// fall in the same numeric range as an epoch value.
+func isLikelyUnixTimestamp(name string, value string) bool {
+	switch normalizeQueryParamName(name) {
+	case "t", "time", "timestamp", "ts", "epoch", "unixtime":
 	default:
 		return false
 	}
-}
 
-// isLikelyUnixTimestamp recognizes modern Unix timestamps at the precisions browsers and APIs
-// commonly emit. Restricting the accepted range avoids treating ordinary short numeric IDs as
-// transient values.
-func isLikelyUnixTimestamp(value string) bool {
 	const (
 		minLikelyUnixTimestamp = int64(946684800)  // 2000-01-01T00:00:00Z
 		maxLikelyUnixTimestamp = int64(4102444800) // 2100-01-01T00:00:00Z
