@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 
 	// Generated
@@ -244,11 +245,12 @@ func ParseQueryParams(reqURL *url.URL) []*discover.RouteQueryParam {
 		// Empty values carry no example information, so omit them rather than
 		// recording an empty string.
 		filteredValues := make([]string, 0, len(values))
+		transientParam := isLikelyTransientQueryParamName(key)
 		for _, value := range values {
 			if value == "" {
 				continue
 			}
-			if len(value) <= 256 {
+			if len(value) <= 256 && !transientParam && !isLikelyUnixTimestamp(value) {
 				filteredValues = append(filteredValues, value)
 			}
 		}
@@ -262,6 +264,78 @@ func ParseQueryParams(reqURL *url.URL) []*discover.RouteQueryParam {
 		})
 	}
 	return queryParams
+}
+
+// isLikelyTransientQueryParamName recognizes parameters whose values are commonly unique to one
+// request rather than useful examples for replay. Match names conservatively: a generic token or
+// ID may be meaningful, while these names overwhelmingly describe cache-busters, signatures, or
+// request-scoped state.
+func isLikelyTransientQueryParamName(name string) bool {
+	if name == "_" {
+		return true
+	}
+
+	var normalized strings.Builder
+	for _, char := range strings.ToLower(name) {
+		if char >= 'a' && char <= 'z' || char >= '0' && char <= '9' {
+			normalized.WriteRune(char)
+		}
+	}
+
+	switch normalized.String() {
+	case "nonce",
+		"wpnonce",
+		"csrf",
+		"csrftoken",
+		"authenticitytoken",
+		"requestid",
+		"traceid",
+		"correlationid",
+		"xamzsignature",
+		"xamzcredential",
+		"xamzdate",
+		"expires",
+		"signature",
+		"cb",
+		"cachebust",
+		"cachebuster",
+		"ts",
+		"timestamp":
+		return true
+	default:
+		return false
+	}
+}
+
+// isLikelyUnixTimestamp recognizes modern Unix timestamps at the precisions browsers and APIs
+// commonly emit. Restricting the accepted range avoids treating ordinary short numeric IDs as
+// transient values.
+func isLikelyUnixTimestamp(value string) bool {
+	const (
+		minLikelyUnixTimestamp = int64(946684800)  // 2000-01-01T00:00:00Z
+		maxLikelyUnixTimestamp = int64(4102444800) // 2100-01-01T00:00:00Z
+	)
+
+	var divisor int64
+	switch len(value) {
+	case 10:
+		divisor = 1
+	case 13:
+		divisor = 1000
+	case 16:
+		divisor = 1000000
+	case 19:
+		divisor = 1000000000
+	default:
+		return false
+	}
+
+	timestamp, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		return false
+	}
+	seconds := timestamp / divisor
+	return seconds >= minLikelyUnixTimestamp && seconds < maxLikelyUnixTimestamp
 }
 
 // ParseBodyParams parses body parameters from a JSON or form-urlencoded string into RouteBodyParam structs.
