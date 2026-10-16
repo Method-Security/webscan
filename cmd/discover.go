@@ -884,21 +884,6 @@ func (a *WebScan) InitDiscoverCommand() {
 				return
 			}
 
-			webServerIPAddress, err := cmd.Flags().GetString("web-server-ip-address")
-			if err != nil {
-				a.OutputSignal.AddError(err)
-				return
-			}
-			webServerPort, err := cmd.Flags().GetInt("web-server-port")
-			if err != nil {
-				a.OutputSignal.AddError(err)
-				return
-			}
-			webServerApplicationProtocol, err := cmd.Flags().GetString("web-server-application-protocol")
-			if err != nil {
-				a.OutputSignal.AddError(err)
-				return
-			}
 			webServers, err := cmd.Flags().GetStringArray("web-server")
 			if err != nil {
 				a.OutputSignal.AddError(err)
@@ -906,7 +891,7 @@ func (a *WebScan) InitDiscoverCommand() {
 			}
 
 			// Set Config
-			config, err := getDiscoverProbeConfig(targets, protocol, maxRedirects, verifyTLS, timeout, retries, sleep, jitter, ignoreCrossDomainRedirects, userAgentPreset, requestMethodConfig.RequestMethodEnum, requestMethodConfig.HeadlessConfig, requestMethodConfig.BrowserbaseConfig, webServers, webServerIPAddress, webServerPort, webServerApplicationProtocol)
+			config, err := getDiscoverProbeConfig(targets, protocol, maxRedirects, verifyTLS, timeout, retries, sleep, jitter, ignoreCrossDomainRedirects, userAgentPreset, requestMethodConfig.RequestMethodEnum, requestMethodConfig.HeadlessConfig, requestMethodConfig.BrowserbaseConfig, webServers)
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
@@ -942,9 +927,6 @@ func (a *WebScan) InitDiscoverCommand() {
 	discoverProbeCmd.Flags().Bool("browserbase-proxy", false, "Use Browserbase proxy for requests")
 	discoverProbeCmd.Flags().StringSlice("browserbase-countries", []string{}, "List of countries to use for Browserbase proxy")
 
-	discoverProbeCmd.Flags().String("web-server-ip-address", "", "IP address of the WebServer listener this probe is running against")
-	discoverProbeCmd.Flags().Int("web-server-port", 0, "Port of the WebServer listener this probe is running against")
-	discoverProbeCmd.Flags().String("web-server-application-protocol", "", "Application protocol of the WebServer listener this probe is running against (HTTP, HTTPS)")
 	discoverProbeCmd.Flags().StringArray("web-server", []string{}, "WebServer listener metadata as 'ip,port,protocol' (repeatable)")
 
 	// Mark Required Flags
@@ -1704,22 +1686,13 @@ func getDiscoverWitnessConfig(target string, responseCodes string, takeScreensho
 }
 
 // getDiscoverProbeConfig builds the config for probe discovery.
-func getDiscoverProbeConfig(targets []string, protocol string, maxRedirects int, verifyTLS bool, timeout int, retries int, sleep int, jitter int, ignoreCrossDomainRedirects bool, userAgent common.UserAgentPreset, requestMethod common.RequestMethod, headlessConfig *common.HeadlessRequestConfig, browserbaseConfig *common.BrowserbaseRequestConfig, webServers []string, webServerIPAddress string, webServerPort int, webServerApplicationProtocol string) (*discover.DiscoverProbeConfig, error) {
+func getDiscoverProbeConfig(targets []string, protocol string, maxRedirects int, verifyTLS bool, timeout int, retries int, sleep int, jitter int, ignoreCrossDomainRedirects bool, userAgent common.UserAgentPreset, requestMethod common.RequestMethod, headlessConfig *common.HeadlessRequestConfig, browserbaseConfig *common.BrowserbaseRequestConfig, webServers []string) (*discover.DiscoverProbeConfig, error) {
 	var protocolEnum common.WebProtocol
 	if protocol != "" {
 		var err error
 		protocolEnum, err = common.NewWebProtocolFromString(strings.ToUpper(protocol))
 		if err != nil {
 			return nil, fmt.Errorf("invalid protocol: %s", protocol)
-		}
-	}
-
-	var webServerApplicationProtocolEnum common.WebProtocol
-	if len(webServerApplicationProtocol) > 0 {
-		var err error
-		webServerApplicationProtocolEnum, err = common.NewWebProtocolFromString(webServerApplicationProtocol)
-		if err != nil {
-			return nil, fmt.Errorf("invalid web server application protocol: %s", webServerApplicationProtocol)
 		}
 	}
 
@@ -1739,15 +1712,6 @@ func getDiscoverProbeConfig(targets []string, protocol string, maxRedirects int,
 	}
 	if protocol != "" {
 		config.Protocol = &protocolEnum
-	}
-	if webServerIPAddress != "" {
-		config.WebServerIpAddress = &webServerIPAddress
-	}
-	if webServerPort > 0 {
-		config.WebServerPort = &webServerPort
-	}
-	if webServerApplicationProtocol != "" {
-		config.WebServerApplicationProtocol = &webServerApplicationProtocolEnum
 	}
 	parsedWebServers, err := parseDiscoverProbeWebServers(webServers)
 	if err != nil {
