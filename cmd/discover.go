@@ -116,24 +116,14 @@ func (a *WebScan) InitDiscoverCommand() {
 				a.OutputSignal.AddError(err)
 				return
 			}
-			webServerIpAddress, err := cmd.Flags().GetString("web-server-ip-address")
-			if err != nil {
-				a.OutputSignal.AddError(err)
-				return
-			}
-			webServerPort, err := cmd.Flags().GetInt("web-server-port")
-			if err != nil {
-				a.OutputSignal.AddError(err)
-				return
-			}
-			webServerApplicationProtocol, err := cmd.Flags().GetString("web-server-application-protocol")
+			webServers, err := cmd.Flags().GetStringArray("web-server")
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
 			}
 
 			// Create config
-			config, err := getDiscoverApplicationConfig(targets, resourceType, templatePaths, timeout, threads, proxy, verboseLogs, globalRateLimit, globalTimeout, userAgentPreset, ignoreCrossDomainRedirects, webServerIpAddress, webServerPort, webServerApplicationProtocol)
+			config, err := getDiscoverApplicationConfig(targets, resourceType, templatePaths, timeout, threads, proxy, verboseLogs, globalRateLimit, globalTimeout, userAgentPreset, ignoreCrossDomainRedirects, webServers)
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
@@ -159,9 +149,7 @@ func (a *WebScan) InitDiscoverCommand() {
 	discoverApplicationCmd.Flags().Int("global-rate-limit", 10, "Global rate limit in requests per second")
 	discoverApplicationCmd.Flags().Int("global-timeout", 0, "Maximum total scan time in seconds")
 	discoverApplicationCmd.Flags().String("user-agent", "RANDOM", "User-Agent preset (RANDOM, CHROME, FIREFOX, SAFARI, EDGE)")
-	discoverApplicationCmd.Flags().String("web-server-ip-address", "", "IP address of the WebServer listener this probe is running against")
-	discoverApplicationCmd.Flags().Int("web-server-port", 0, "Port of the WebServer listener this probe is running against")
-	discoverApplicationCmd.Flags().String("web-server-application-protocol", "", "Application protocol of the WebServer listener this probe is running against (HTTP, HTTPS)")
+	discoverApplicationCmd.Flags().StringArray("web-server", []string{}, "WebServer listener metadata as 'ip,port,protocol' (repeatable)")
 
 	// Mark Required Flags
 	_ = discoverApplicationCmd.MarkFlagRequired("targets")
@@ -1593,17 +1581,10 @@ func parseDiscoverRequestFiles(pairs []string) ([]*discover.RequestFile, error) 
 }
 
 // getDiscoverApplicationConfig builds the config for application fingerprinting discovery.
-func getDiscoverApplicationConfig(targets []string, resource string, templatePaths []string, timeout int, threads int, proxy string, verboseLogs bool, globalRateLimit int, globalTimeout int, userAgent common.UserAgentPreset, ignoreCrossDomainRedirects bool, webServerIPAddress string, webServerPort int, webServerApplicationProtocol string) (*discover.DiscoverApplicationConfig, error) {
+func getDiscoverApplicationConfig(targets []string, resource string, templatePaths []string, timeout int, threads int, proxy string, verboseLogs bool, globalRateLimit int, globalTimeout int, userAgent common.UserAgentPreset, ignoreCrossDomainRedirects bool, webServers []string) (*discover.DiscoverApplicationConfig, error) {
 	resourceEnum, err := getDiscoverApplicationResourceConfigTypeFromString(resource)
 	if err != nil {
 		return nil, fmt.Errorf("invalid resource type: %s", resource)
-	}
-	var webServerApplicationProtocolEnum common.WebProtocol
-	if len(webServerApplicationProtocol) > 0 {
-		webServerApplicationProtocolEnum, err = common.NewWebProtocolFromString(webServerApplicationProtocol)
-		if err != nil {
-			return nil, fmt.Errorf("invalid web server application protocol: %s", webServerApplicationProtocol)
-		}
 	}
 
 	config := &discover.DiscoverApplicationConfig{
@@ -1619,17 +1600,42 @@ func getDiscoverApplicationConfig(targets []string, resource string, templatePat
 		UserAgent:                  userAgent,
 		IgnoreCrossDomainRedirects: ignoreCrossDomainRedirects,
 	}
-	if webServerIPAddress != "" {
-		config.WebServerIpAddress = &webServerIPAddress
+	if err := validateDiscoverWebServers(webServers); err != nil {
+		return nil, err
 	}
-	if webServerPort > 0 {
-		config.WebServerPort = &webServerPort
-	}
-	if webServerApplicationProtocol != "" {
-		config.WebServerApplicationProtocol = &webServerApplicationProtocolEnum
+	if len(webServers) > 0 {
+		config.WebServers = webServers
 	}
 
 	return config, nil
+}
+
+func validateDiscoverWebServers(values []string) error {
+	for _, value := range values {
+		if _, _, _, err := parseDiscoverWebServer(value); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func parseDiscoverWebServer(value string) (string, int, common.WebProtocol, error) {
+	parts := strings.Split(value, ",")
+	if len(parts) != 3 {
+		return "", 0, "", fmt.Errorf("invalid web server %q: expected ip,port,protocol", value)
+	}
+
+	port, err := strconv.Atoi(parts[1])
+	if err != nil || port <= 0 {
+		return "", 0, "", fmt.Errorf("invalid web server %q: port must be a positive integer", value)
+	}
+
+	protocol, err := common.NewWebProtocolFromString(strings.ToUpper(parts[2]))
+	if err != nil {
+		return "", 0, "", fmt.Errorf("invalid web server %q: invalid protocol %s", value, parts[2])
+	}
+
+	return parts[0], port, protocol, nil
 }
 
 // getDiscoverApplicationResourceConfigTypeFromString converts a string to an ApplicationResourceConfigType enum.
@@ -1713,42 +1719,14 @@ func getDiscoverProbeConfig(targets []string, protocol string, maxRedirects int,
 	if protocol != "" {
 		config.Protocol = &protocolEnum
 	}
-	parsedWebServers, err := parseDiscoverProbeWebServers(webServers)
-	if err != nil {
+	if err := validateDiscoverWebServers(webServers); err != nil {
 		return nil, err
 	}
-	if len(parsedWebServers) > 0 {
-		config.WebServers = parsedWebServers
+	if len(webServers) > 0 {
+		config.WebServers = webServers
 	}
 
 	return config, nil
-}
-
-func parseDiscoverProbeWebServers(values []string) ([]*discover.DiscoverProbeWebServer, error) {
-	webServers := make([]*discover.DiscoverProbeWebServer, 0, len(values))
-	for _, value := range values {
-		parts := strings.Split(value, ",")
-		if len(parts) != 3 {
-			return nil, fmt.Errorf("invalid web server %q: expected ip,port,protocol", value)
-		}
-
-		port, err := strconv.Atoi(parts[1])
-		if err != nil || port <= 0 {
-			return nil, fmt.Errorf("invalid web server %q: port must be a positive integer", value)
-		}
-
-		protocol, err := common.NewWebProtocolFromString(strings.ToUpper(parts[2]))
-		if err != nil {
-			return nil, fmt.Errorf("invalid web server %q: invalid protocol %s", value, parts[2])
-		}
-
-		webServers = append(webServers, &discover.DiscoverProbeWebServer{
-			IpAddress:           parts[0],
-			Port:                port,
-			ApplicationProtocol: protocol,
-		})
-	}
-	return webServers, nil
 }
 
 // getDiscoverRouteConfig builds the config for route discovery.

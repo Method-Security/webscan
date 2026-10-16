@@ -3,11 +3,6 @@ imports:
   method: ../common/method.yml
   waf: ../common/waf.yml
 types:
-  DiscoverProbeWebServer:
-    properties:
-      ipAddress: string
-      port: integer
-      applicationProtocol: http.WebProtocol
   # Config Struct
   DiscoverProbeConfig:
     properties:
@@ -24,7 +19,7 @@ types:
       requestMethod: method.RequestMethod
       headlessConfig: optional<method.HeadlessRequestConfig>
       browserbaseConfig: optional<method.BrowserbaseRequestConfig>
-      webServers: optional<list<DiscoverProbeWebServer>>
+      webServers: optional<list<string>>
   DiscoverProbeTargetInfo:
     properties:
       target: string
