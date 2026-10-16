@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	// Generated
@@ -1600,42 +1599,11 @@ func getDiscoverApplicationConfig(targets []string, resource string, templatePat
 		UserAgent:                  userAgent,
 		IgnoreCrossDomainRedirects: ignoreCrossDomainRedirects,
 	}
-	if err := validateDiscoverWebServers(webServers); err != nil {
-		return nil, err
-	}
 	if len(webServers) > 0 {
 		config.WebServers = webServers
 	}
 
 	return config, nil
-}
-
-func validateDiscoverWebServers(values []string) error {
-	for _, value := range values {
-		if _, _, _, err := parseDiscoverWebServer(value); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func parseDiscoverWebServer(value string) (string, int, common.WebProtocol, error) {
-	parts := strings.Split(value, ",")
-	if len(parts) != 3 {
-		return "", 0, "", fmt.Errorf("invalid web server %q: expected ip,port,protocol", value)
-	}
-
-	port, err := strconv.Atoi(parts[1])
-	if err != nil || port <= 0 {
-		return "", 0, "", fmt.Errorf("invalid web server %q: port must be a positive integer", value)
-	}
-
-	protocol, err := common.NewWebProtocolFromString(strings.ToUpper(parts[2]))
-	if err != nil {
-		return "", 0, "", fmt.Errorf("invalid web server %q: invalid protocol %s", value, parts[2])
-	}
-
-	return parts[0], port, protocol, nil
 }
 
 // getDiscoverApplicationResourceConfigTypeFromString converts a string to an ApplicationResourceConfigType enum.
@@ -1718,9 +1686,6 @@ func getDiscoverProbeConfig(targets []string, protocol string, maxRedirects int,
 	}
 	if protocol != "" {
 		config.Protocol = &protocolEnum
-	}
-	if err := validateDiscoverWebServers(webServers); err != nil {
-		return nil, err
 	}
 	if len(webServers) > 0 {
 		config.WebServers = webServers
