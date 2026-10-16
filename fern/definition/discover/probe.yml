@@ -19,9 +19,7 @@ types:
       requestMethod: method.RequestMethod
       headlessConfig: optional<method.HeadlessRequestConfig>
       browserbaseConfig: optional<method.BrowserbaseRequestConfig>
-      webServerIpAddress: optional<string>
-      webServerPort: optional<integer>
-      webServerApplicationProtocol: optional<http.WebProtocol>
+      webServers: optional<list<string>>
   DiscoverProbeTargetInfo:
     properties:
       target: string
