@@ -14,8 +14,8 @@ import (
 	internalcommon "github.com/Method-Security/webscan/internal/common"
 	// Utils
 	utils "github.com/Method-Security/webscan/utils"
-	request "github.com/Method-Security/webscan/utils/request"
 	requesthelpers "github.com/Method-Security/webscan/utils/request/helpers"
+	retry "github.com/Method-Security/webscan/utils/request/retry"
 )
 
 func createSendHTTPRequestConfig(ctx context.Context, baseURL, path string, queryParams map[string]string, config *discover.DiscoverProbeConfig, browserbaseSecrets *common.BrowserbaseRequestSecrets) common.SendHttpRequestConfig {
@@ -58,7 +58,7 @@ func sendRequestWithProtocol(ctx context.Context, target string, protocol string
 	}
 
 	requestConfig := createSendHTTPRequestConfig(ctx, baseURL, path, queryParams, config, browserbaseSecrets)
-	httpRequestResponse, err := request.SendRequest(ctx, requestConfig)
+	httpRequestResponse, _, err := retry.SendRequest(ctx, requestConfig, nil, config.Retries)
 	if err != nil {
 		return nil, fmt.Errorf("failed to probe %s - %s", fullURL, err)
 	}

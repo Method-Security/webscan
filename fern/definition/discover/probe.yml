@@ -11,6 +11,7 @@ types:
       maxRedirects: integer
       verifyTls: boolean
       timeout: integer
+      retries: integer
       sleep: integer
       jitter: integer
       ignoreCrossDomainRedirects: boolean

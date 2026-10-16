@@ -17,6 +17,8 @@ import (
 
 	// Utils
 	requesthelpers "github.com/Method-Security/webscan/utils/request/helpers"
+	retry "github.com/Method-Security/webscan/utils/request/retry"
+
 	// External
 	uuid "github.com/google/uuid"
 	svc1log "github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
@@ -59,13 +61,6 @@ func newDirectoryRateLimiter(requestsPerSecond int) *rate.Limiter {
 		return nil
 	}
 	return rate.NewLimiter(rate.Limit(requestsPerSecond), 1)
-}
-
-func waitForDirectoryRateLimit(ctx context.Context, limiter *rate.Limiter) error {
-	if limiter == nil {
-		return nil
-	}
-	return limiter.Wait(ctx)
 }
 
 type directoryScanMetrics struct {
@@ -223,7 +218,7 @@ func baseLine(ctx context.Context, baseURL string, path string, validCodes map[i
 	requestConfig := createDirectorySendHTTPRequestConfig(ctx, baseURL, path, common.HttpMethodGet, common.HttpRequestParams{}, maxRedirects, config)
 
 	// send request; a rate-limited baseline would poison the comparison profile
-	request, _, err := sendWithBackoff(ctx, requestConfig, limiter, config.Retries)
+	request, _, err := retry.SendRequest(ctx, requestConfig, limiter, config.Retries)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -254,7 +249,11 @@ func calibrateCommonResponses(ctx context.Context, baseURL, parsedTargetPath str
 	for _, method := range config.HttpMethods {
 		for _, probePath := range commonResponseCalibrationPaths(parsedTargetPath) {
 			requestConfig := createDirectorySendHTTPRequestConfig(ctx, baseURL, probePath, method, common.HttpRequestParams{}, 0, config)
-			httpRequest, _, err := sendWithBackoff(ctx, requestConfig, limiter, config.Retries)
+			httpRequest, _, err := retry.SendRequest(ctx, requestConfig, limiter, config.Retries)
+			// Deadline expiry is reported by the caller as a timeout, not a calibration failure.
+			if ctx.Err() != nil {
+				return attempts, failureCount, failureSample
+			}
 			if err != nil {
 				failureCount++
 				if failureSample == "" {

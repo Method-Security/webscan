@@ -2,11 +2,13 @@ package discoverrequest
 
 import (
 	// Standard
+	"bytes"
 	"context"
 	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"io"
+	"net/http"
 	"time"
 
 	// Generated
@@ -17,6 +19,7 @@ import (
 	internalcommon "github.com/Method-Security/webscan/internal/common"
 	// Utils
 	requesthelpers "github.com/Method-Security/webscan/utils/request/helpers"
+	retry "github.com/Method-Security/webscan/utils/request/retry"
 	standardhelpers "github.com/Method-Security/webscan/utils/request/standard/helpers"
 
 	// External
@@ -231,23 +234,51 @@ func PerformRequest(ctx context.Context, config discover.DiscoverRequestConfig) 
 	}
 	constructedHeaders := requesthelpers.FlattenHeaders(rawHeaders)
 
+	// Buffered so every retry resends the full body.
+	var body []byte
+	if constructedReqReader != nil {
+		if body, err = io.ReadAll(constructedReqReader); err != nil {
+			errors = append(errors, err.Error())
+			report.Errors = errors
+			return &report
+		}
+	}
+
 	// Record sent time
 	sentAt := time.Now()
 	request.SentAt = sentAt
 
 	// Send HTTP request (directly to access TLS state)
 	log.Info("Sending HTTP request", svc1log.SafeParam("url", *constructedURL))
-	resp, redirectChain, err := standardhelpers.SendHTTPRequest(ctx, *constructedURL, constructedHeaders, constructedReqReader, sendConfig)
+	var resp *http.Response
+	var redirectChain []string
+	closeBody := func() {
+		if resp == nil {
+			return
+		}
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			log.Warn("Failed to close response body", svc1log.SafeParam("error", closeErr))
+		}
+	}
+	_, err = retry.Do(ctx, nil, config.Retries, func() (int, error) {
+		closeBody() // the previous attempt's response is being retried
+		var reqBody io.Reader
+		if body != nil {
+			reqBody = bytes.NewReader(body)
+		}
+		var sendErr error
+		resp, redirectChain, sendErr = standardhelpers.SendHTTPRequest(ctx, *constructedURL, constructedHeaders, reqBody, sendConfig)
+		if sendErr != nil {
+			return 0, sendErr
+		}
+		return resp.StatusCode, nil
+	})
+	defer closeBody()
 	if err != nil {
 		errors = append(errors, err.Error())
 		report.Errors = errors
 		return &report
 	}
-	defer func() {
-		if closeErr := resp.Body.Close(); closeErr != nil {
-			log.Warn("Failed to close response body", svc1log.SafeParam("error", closeErr))
-		}
-	}()
 
 	// Extract TLS certificates if available
 	if resp.TLS != nil && len(resp.TLS.PeerCertificates) > 0 {

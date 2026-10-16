@@ -19,6 +19,7 @@ import (
 	utils "github.com/Method-Security/webscan/utils"
 	request "github.com/Method-Security/webscan/utils/request"
 	requesthelpers "github.com/Method-Security/webscan/utils/request/helpers"
+	retry "github.com/Method-Security/webscan/utils/request/retry"
 
 	// External
 	svc1log "github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
@@ -334,7 +335,7 @@ func sweepFrontier(ctx context.Context, baseURL string, current frontier, allPat
 
 				// Send request
 				requestConfig := createDirectorySendHTTPRequestConfig(ctx, baseURL, fullPath, method, common.HttpRequestParams{}, 0, config)
-				httpRequest, retries, err := sendWithBackoff(ctx, requestConfig, limiter, config.Retries)
+				httpRequest, retries, err := retry.SendRequest(ctx, requestConfig, limiter, config.Retries)
 				if retries > 0 {
 					attemptsMutex.Lock()
 					outcome.metrics.retryCount += retries
