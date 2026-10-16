@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	// Generated
@@ -886,9 +887,14 @@ func (a *WebScan) InitDiscoverCommand() {
 				a.OutputSignal.AddError(err)
 				return
 			}
+			webServers, err := cmd.Flags().GetStringArray("web-server")
+			if err != nil {
+				a.OutputSignal.AddError(err)
+				return
+			}
 
 			// Set Config
-			config, err := getDiscoverProbeConfig(targets, protocol, maxRedirects, verifyTLS, timeout, sleep, jitter, ignoreCrossDomainRedirects, userAgentPreset, requestMethodConfig.RequestMethodEnum, requestMethodConfig.HeadlessConfig, requestMethodConfig.BrowserbaseConfig, webServerIPAddress, webServerPort, webServerApplicationProtocol)
+			config, err := getDiscoverProbeConfig(targets, protocol, maxRedirects, verifyTLS, timeout, sleep, jitter, ignoreCrossDomainRedirects, userAgentPreset, requestMethodConfig.RequestMethodEnum, requestMethodConfig.HeadlessConfig, requestMethodConfig.BrowserbaseConfig, webServers, webServerIPAddress, webServerPort, webServerApplicationProtocol)
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
@@ -926,6 +932,7 @@ func (a *WebScan) InitDiscoverCommand() {
 	discoverProbeCmd.Flags().String("web-server-ip-address", "", "IP address of the WebServer listener this probe is running against")
 	discoverProbeCmd.Flags().Int("web-server-port", 0, "Port of the WebServer listener this probe is running against")
 	discoverProbeCmd.Flags().String("web-server-application-protocol", "", "Application protocol of the WebServer listener this probe is running against (HTTP, HTTPS)")
+	discoverProbeCmd.Flags().StringArray("web-server", []string{}, "WebServer listener metadata as 'ip,port,protocol' (repeatable)")
 
 	// Mark Required Flags
 	_ = discoverProbeCmd.MarkFlagRequired("targets")
@@ -1684,7 +1691,7 @@ func getDiscoverWitnessConfig(target string, responseCodes string, takeScreensho
 }
 
 // getDiscoverProbeConfig builds the config for probe discovery.
-func getDiscoverProbeConfig(targets []string, protocol string, maxRedirects int, verifyTLS bool, timeout int, sleep int, jitter int, ignoreCrossDomainRedirects bool, userAgent common.UserAgentPreset, requestMethod common.RequestMethod, headlessConfig *common.HeadlessRequestConfig, browserbaseConfig *common.BrowserbaseRequestConfig, webServerIPAddress string, webServerPort int, webServerApplicationProtocol string) (*discover.DiscoverProbeConfig, error) {
+func getDiscoverProbeConfig(targets []string, protocol string, maxRedirects int, verifyTLS bool, timeout int, sleep int, jitter int, ignoreCrossDomainRedirects bool, userAgent common.UserAgentPreset, requestMethod common.RequestMethod, headlessConfig *common.HeadlessRequestConfig, browserbaseConfig *common.BrowserbaseRequestConfig, webServers []string, webServerIPAddress string, webServerPort int, webServerApplicationProtocol string) (*discover.DiscoverProbeConfig, error) {
 	var protocolEnum common.WebProtocol
 	if protocol != "" {
 		var err error
@@ -1728,8 +1735,42 @@ func getDiscoverProbeConfig(targets []string, protocol string, maxRedirects int,
 	if webServerApplicationProtocol != "" {
 		config.WebServerApplicationProtocol = &webServerApplicationProtocolEnum
 	}
+	parsedWebServers, err := parseDiscoverProbeWebServers(webServers)
+	if err != nil {
+		return nil, err
+	}
+	if len(parsedWebServers) > 0 {
+		config.WebServers = parsedWebServers
+	}
 
 	return config, nil
+}
+
+func parseDiscoverProbeWebServers(values []string) ([]*discover.DiscoverProbeWebServer, error) {
+	webServers := make([]*discover.DiscoverProbeWebServer, 0, len(values))
+	for _, value := range values {
+		parts := strings.Split(value, ",")
+		if len(parts) != 3 {
+			return nil, fmt.Errorf("invalid web server %q: expected ip,port,protocol", value)
+		}
+
+		port, err := strconv.Atoi(parts[1])
+		if err != nil || port <= 0 {
+			return nil, fmt.Errorf("invalid web server %q: port must be a positive integer", value)
+		}
+
+		protocol, err := common.NewWebProtocolFromString(strings.ToUpper(parts[2]))
+		if err != nil {
+			return nil, fmt.Errorf("invalid web server %q: invalid protocol %s", value, parts[2])
+		}
+
+		webServers = append(webServers, &discover.DiscoverProbeWebServer{
+			IpAddress:           parts[0],
+			Port:                port,
+			ApplicationProtocol: protocol,
+		})
+	}
+	return webServers, nil
 }
 
 // getDiscoverRouteConfig builds the config for route discovery.
