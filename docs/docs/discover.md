@@ -88,7 +88,7 @@ Flags:
       --max-runtime int                      Maximum time to run the engagement in seconds (default 650)
       --paths strings                        Paths to scan
       --response-codes string                Response codes to consider as valid responses (default "200-299")
-      --retries int                          Number of times to retry a request if it fails
+      --retries int                          Number of times to retry a request that returns 429/502/503/504, with jittered exponential backoff (default 5)
       --sleep int                            Number of seconds to sleep between requests
       --targets strings                      Targets to be scanned
       --threads int                          Number of threads to use (default 25)

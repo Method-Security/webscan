@@ -401,7 +401,7 @@ func (a *WebScan) InitDiscoverCommand() {
 	discoverDirectoryCmd.Flags().Int("max-redirects-baseline-request", 10, "Maximum number of redirects to follow for the baseline request")
 	discoverDirectoryCmd.Flags().Int("global-timeout", 650, "Maximum total scan time in seconds")
 	discoverDirectoryCmd.Flags().Int("threads", 25, "Number of threads to use")
-	discoverDirectoryCmd.Flags().Int("retries", 0, "Number of times to retry a request if it fails")
+	discoverDirectoryCmd.Flags().Int("retries", 5, "Number of times to retry a request that returns 429/502/503/504, with jittered exponential backoff")
 	discoverDirectoryCmd.Flags().Int("sleep", 0, "Number of seconds to sleep between requests")
 	discoverDirectoryCmd.Flags().Int("jitter", 0, "Jitter percentage (0-100) to apply random variance to sleep delay")
 	// User Agent Flag

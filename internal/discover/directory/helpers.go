@@ -16,9 +16,7 @@ import (
 	discover "github.com/Method-Security/webscan/generated/go/discover"
 
 	// Utils
-	request "github.com/Method-Security/webscan/utils/request"
 	requesthelpers "github.com/Method-Security/webscan/utils/request/helpers"
-
 	// External
 	uuid "github.com/google/uuid"
 	svc1log "github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
@@ -74,6 +72,7 @@ type directoryScanMetrics struct {
 	disallowedStatusCounts   map[int]int
 	sendFailureCount         int
 	sendFailureSample        string
+	retryCount               int
 	calibrationFailureCount  int
 	calibrationFailureSample string
 	baselineMatchCount       int
@@ -223,12 +222,8 @@ func baseLine(ctx context.Context, baseURL string, path string, validCodes map[i
 	// set request config
 	requestConfig := createDirectorySendHTTPRequestConfig(ctx, baseURL, path, common.HttpMethodGet, common.HttpRequestParams{}, maxRedirects, config)
 
-	if err := waitForDirectoryRateLimit(ctx, limiter); err != nil {
-		return nil, nil, nil, err
-	}
-
-	// send request
-	request, err := request.SendRequest(ctx, requestConfig)
+	// send request; a rate-limited baseline would poison the comparison profile
+	request, _, err := sendWithBackoff(ctx, requestConfig, limiter, config.Retries)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -259,14 +254,7 @@ func calibrateCommonResponses(ctx context.Context, baseURL, parsedTargetPath str
 	for _, method := range config.HttpMethods {
 		for _, probePath := range commonResponseCalibrationPaths(parsedTargetPath) {
 			requestConfig := createDirectorySendHTTPRequestConfig(ctx, baseURL, probePath, method, common.HttpRequestParams{}, 0, config)
-			if err := waitForDirectoryRateLimit(ctx, limiter); err != nil {
-				failureCount++
-				if failureSample == "" {
-					failureSample = err.Error()
-				}
-				continue
-			}
-			httpRequest, err := request.SendRequest(ctx, requestConfig)
+			httpRequest, _, err := sendWithBackoff(ctx, requestConfig, limiter, config.Retries)
 			if err != nil {
 				failureCount++
 				if failureSample == "" {
