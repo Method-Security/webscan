@@ -88,7 +88,7 @@ Flags:
       --max-runtime int                      Maximum time to run the engagement in seconds (default 650)
       --paths strings                        Paths to scan
       --response-codes string                Response codes to consider as valid responses (default "200-299")
-      --retries int                          Number of times to retry a request if it fails
+      --retries int                          Number of times to retry a request that returns 429/502/503/504, with jittered exponential backoff (default 5)
       --sleep int                            Number of seconds to sleep between requests
       --targets strings                      Targets to be scanned
       --threads int                          Number of threads to use (default 25)
@@ -173,6 +173,7 @@ Flags:
       --min-dom-stabalize-time int      Minimum time to wait for DOM stabilization in seconds (default 20)
       --protocol string                 Protocol to use for the probe (HTTP, HTTPS)
       --request-method string           Request method to use (standard, headless, browserbase) (default "STANDARD")
+      --retries int                     Number of times to retry a request that returns 429/502/503/504, with jittered exponential backoff (default 5)
       --targets strings                 URL targets to probe for web applications
       --timeout int                     Timeout per request in seconds (default 180)
       --verify-tls                      Verify TLS certificates when making HTTPS requests
@@ -213,6 +214,7 @@ Flags:
       --json-body string               Request body as JSON string
       --json-body-base64 string        Request body as base64-encoded JSON string
       --max-redirects int              Maximum number of redirects to follow (default 10)
+      --retries int                    Number of times to retry a request that returns 429/502/503/504, with jittered exponential backoff (default 5)
       --target string                  URL to send the HTTP request to
       --text-body string               Request body as plain text
       --timeout int                    Request timeout in seconds (default 30)
