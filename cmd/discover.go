@@ -115,7 +115,7 @@ func (a *WebScan) InitDiscoverCommand() {
 				a.OutputSignal.AddError(err)
 				return
 			}
-			webServers, err := cmd.Flags().GetStringArray("web-server")
+			webServers, err := cmd.Flags().GetStringArray("web-servers")
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
@@ -148,7 +148,7 @@ func (a *WebScan) InitDiscoverCommand() {
 	discoverApplicationCmd.Flags().Int("global-rate-limit", 10, "Global rate limit in requests per second")
 	discoverApplicationCmd.Flags().Int("global-timeout", 0, "Maximum total scan time in seconds")
 	discoverApplicationCmd.Flags().String("user-agent", "RANDOM", "User-Agent preset (RANDOM, CHROME, FIREFOX, SAFARI, EDGE)")
-	discoverApplicationCmd.Flags().StringArray("web-server", []string{}, "WebServer listener metadata as 'ip,port,protocol' (repeatable)")
+	discoverApplicationCmd.Flags().StringArray("web-servers", []string{}, "WebServer metadata values to pass through (repeatable)")
 
 	// Mark Required Flags
 	_ = discoverApplicationCmd.MarkFlagRequired("targets")
@@ -871,7 +871,7 @@ func (a *WebScan) InitDiscoverCommand() {
 				return
 			}
 
-			webServers, err := cmd.Flags().GetStringArray("web-server")
+			webServers, err := cmd.Flags().GetStringArray("web-servers")
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
@@ -914,7 +914,7 @@ func (a *WebScan) InitDiscoverCommand() {
 	discoverProbeCmd.Flags().Bool("browserbase-proxy", false, "Use Browserbase proxy for requests")
 	discoverProbeCmd.Flags().StringSlice("browserbase-countries", []string{}, "List of countries to use for Browserbase proxy")
 
-	discoverProbeCmd.Flags().StringArray("web-server", []string{}, "WebServer listener metadata as 'ip,port,protocol' (repeatable)")
+	discoverProbeCmd.Flags().StringArray("web-servers", []string{}, "WebServer metadata values to pass through (repeatable)")
 
 	// Mark Required Flags
 	_ = discoverProbeCmd.MarkFlagRequired("targets")
