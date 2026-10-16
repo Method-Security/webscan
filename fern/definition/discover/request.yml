@@ -37,6 +37,7 @@ types:
       followRedirects: boolean
       verifyTls: boolean
       timeout: integer
+      retries: integer
       userAgent: method.UserAgentPreset
       ignoreCrossDomainRedirects: boolean
 

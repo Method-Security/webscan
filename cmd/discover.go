@@ -402,7 +402,7 @@ func (a *WebScan) InitDiscoverCommand() {
 	discoverDirectoryCmd.Flags().Int("max-redirects-baseline-request", 10, "Maximum number of redirects to follow for the baseline request")
 	discoverDirectoryCmd.Flags().Int("global-timeout", 650, "Maximum total scan time in seconds")
 	discoverDirectoryCmd.Flags().Int("threads", 25, "Number of threads to use")
-	discoverDirectoryCmd.Flags().Int("retries", 0, "Number of times to retry a request if it fails")
+	discoverDirectoryCmd.Flags().Int("retries", 5, "Number of times to retry a request that returns 429/502/503/504, with jittered exponential backoff")
 	discoverDirectoryCmd.Flags().Int("sleep", 0, "Number of seconds to sleep between requests")
 	discoverDirectoryCmd.Flags().Int("jitter", 0, "Jitter percentage (0-100) to apply random variance to sleep delay")
 	// User Agent Flag
@@ -722,6 +722,11 @@ func (a *WebScan) InitDiscoverCommand() {
 				a.OutputSignal.AddError(err)
 				return
 			}
+			retries, err := cmd.Flags().GetInt("retries")
+			if err != nil {
+				a.OutputSignal.AddError(err)
+				return
+			}
 			ignoreCrossDomainRedirects, err := cmd.Flags().GetBool("ignore-cross-domain-redirects")
 			if err != nil {
 				a.OutputSignal.AddError(err)
@@ -756,6 +761,7 @@ func (a *WebScan) InitDiscoverCommand() {
 				FollowRedirects:            followRedirects,
 				VerifyTls:                  verifyTLS,
 				Timeout:                    timeout,
+				Retries:                    retries,
 				UserAgent:                  userAgentPreset,
 				IgnoreCrossDomainRedirects: ignoreCrossDomainRedirects,
 			}
@@ -782,6 +788,7 @@ func (a *WebScan) InitDiscoverCommand() {
 	discoverRequestCmd.Flags().Bool("follow-redirects", true, "Follow HTTP redirects")
 	discoverRequestCmd.Flags().Bool("verify-tls", false, "Verify TLS certificates")
 	discoverRequestCmd.Flags().Int("timeout", 30, "Request timeout in seconds")
+	discoverRequestCmd.Flags().Int("retries", 5, "Number of times to retry a request that returns 429/502/503/504, with jittered exponential backoff")
 	// User Agent Flag
 	discoverRequestCmd.Flags().String("user-agent", "RANDOM", "User-Agent preset (RANDOM, CHROME, FIREFOX, SAFARI, EDGE)")
 
@@ -823,6 +830,11 @@ func (a *WebScan) InitDiscoverCommand() {
 				return
 			}
 			timeout, err := cmd.Flags().GetInt("timeout")
+			if err != nil {
+				a.OutputSignal.AddError(err)
+				return
+			}
+			retries, err := cmd.Flags().GetInt("retries")
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
@@ -894,7 +906,7 @@ func (a *WebScan) InitDiscoverCommand() {
 			}
 
 			// Set Config
-			config, err := getDiscoverProbeConfig(targets, protocol, maxRedirects, verifyTLS, timeout, sleep, jitter, ignoreCrossDomainRedirects, userAgentPreset, requestMethodConfig.RequestMethodEnum, requestMethodConfig.HeadlessConfig, requestMethodConfig.BrowserbaseConfig, webServers, webServerIPAddress, webServerPort, webServerApplicationProtocol)
+			config, err := getDiscoverProbeConfig(targets, protocol, maxRedirects, verifyTLS, timeout, retries, sleep, jitter, ignoreCrossDomainRedirects, userAgentPreset, requestMethodConfig.RequestMethodEnum, requestMethodConfig.HeadlessConfig, requestMethodConfig.BrowserbaseConfig, webServers, webServerIPAddress, webServerPort, webServerApplicationProtocol)
 			if err != nil {
 				a.OutputSignal.AddError(err)
 				return
@@ -916,6 +928,7 @@ func (a *WebScan) InitDiscoverCommand() {
 	discoverProbeCmd.Flags().Int("max-redirects", 10, "Maximum number of redirects to follow")
 	discoverProbeCmd.Flags().Bool("verify-tls", false, "Verify TLS certificates when making HTTPS requests")
 	discoverProbeCmd.Flags().Int("timeout", 30, "Timeout per request in seconds")
+	discoverProbeCmd.Flags().Int("retries", 5, "Number of times to retry a request that returns 429/502/503/504, with jittered exponential backoff")
 	discoverProbeCmd.Flags().Int("sleep", 0, "Number of seconds to sleep between requests")
 	discoverProbeCmd.Flags().Int("jitter", 0, "Jitter percentage (0-100) to apply random variance to sleep delay")
 	// User Agent Flag
@@ -1691,7 +1704,7 @@ func getDiscoverWitnessConfig(target string, responseCodes string, takeScreensho
 }
 
 // getDiscoverProbeConfig builds the config for probe discovery.
-func getDiscoverProbeConfig(targets []string, protocol string, maxRedirects int, verifyTLS bool, timeout int, sleep int, jitter int, ignoreCrossDomainRedirects bool, userAgent common.UserAgentPreset, requestMethod common.RequestMethod, headlessConfig *common.HeadlessRequestConfig, browserbaseConfig *common.BrowserbaseRequestConfig, webServers []string, webServerIPAddress string, webServerPort int, webServerApplicationProtocol string) (*discover.DiscoverProbeConfig, error) {
+func getDiscoverProbeConfig(targets []string, protocol string, maxRedirects int, verifyTLS bool, timeout int, retries int, sleep int, jitter int, ignoreCrossDomainRedirects bool, userAgent common.UserAgentPreset, requestMethod common.RequestMethod, headlessConfig *common.HeadlessRequestConfig, browserbaseConfig *common.BrowserbaseRequestConfig, webServers []string, webServerIPAddress string, webServerPort int, webServerApplicationProtocol string) (*discover.DiscoverProbeConfig, error) {
 	var protocolEnum common.WebProtocol
 	if protocol != "" {
 		var err error
@@ -1715,6 +1728,7 @@ func getDiscoverProbeConfig(targets []string, protocol string, maxRedirects int,
 		MaxRedirects:               maxRedirects,
 		VerifyTls:                  verifyTLS,
 		Timeout:                    max(timeout, 0),
+		Retries:                    max(retries, 0),
 		Sleep:                      max(sleep, 0),
 		Jitter:                     max(jitter, 0),
 		IgnoreCrossDomainRedirects: ignoreCrossDomainRedirects,

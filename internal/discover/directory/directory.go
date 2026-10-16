@@ -19,6 +19,7 @@ import (
 	utils "github.com/Method-Security/webscan/utils"
 	request "github.com/Method-Security/webscan/utils/request"
 	requesthelpers "github.com/Method-Security/webscan/utils/request/helpers"
+	retry "github.com/Method-Security/webscan/utils/request/retry"
 
 	// External
 	svc1log "github.com/palantir/witchcraft-go-logging/wlog/svclog/svc1log"
@@ -254,7 +255,7 @@ func sweepFrontier(ctx context.Context, baseURL string, current frontier, allPat
 		threads = runtime.NumCPU()
 	}
 	semaphore := make(chan struct{}, threads) // Limit concurrent requests
-	totalRequests := len(allPaths) * len(config.HttpMethods) * (config.Retries + 1)
+	totalRequests := len(allPaths) * len(config.HttpMethods)
 	var completedRequests int
 	log.Info("Starting frontier directory requests",
 		svc1log.SafeParam("baseUrl", baseURL),
@@ -272,144 +273,137 @@ func sweepFrontier(ctx context.Context, baseURL string, current frontier, allPat
 		}
 		fullPath := fmt.Sprintf("%s%s", strings.TrimRight(current.basePath, "/"), cleanPath)
 
-		for i := 0; i <= config.Retries; i++ {
-			for _, method := range config.HttpMethods {
-				// Check if context has expired
-				if ctx.Err() != nil {
-					wg.Wait()
-					if config.EnableCommonResponseFilters {
-						attempts = detector.Results()
-						outcome.metrics.commonResponseCount, outcome.metrics.commonProfileCount = detector.Metrics()
+		for _, method := range config.HttpMethods {
+			// Check if context has expired
+			if ctx.Err() != nil {
+				wg.Wait()
+				if config.EnableCommonResponseFilters {
+					attempts = detector.Results()
+					outcome.metrics.commonResponseCount, outcome.metrics.commonProfileCount = detector.Metrics()
+				}
+				logDirectoryFindings(ctx, attempts)
+				outcome.attempts = attempts
+				appendFindingCandidates(&outcome, attempts, recursionCodes)
+				outcome.timedOutPhase = "request processing"
+				return outcome
+			}
+
+			wg.Add(1)
+			go func(fullPath string, method common.HttpMethod) {
+				defer wg.Done()
+				defer func() {
+					attemptsMutex.Lock()
+					completedRequests++
+					completed := completedRequests
+					sendFailures := outcome.metrics.sendFailureCount
+					retries := outcome.metrics.retryCount
+					baselineMatches := outcome.metrics.baselineMatchCount
+					standardResponses := outcome.metrics.standardResponseCount
+					disallowedResponses := countDisallowedResponses(outcome.metrics.disallowedStatusCounts)
+					positiveFindings := len(attempts)
+					attemptsMutex.Unlock()
+
+					if completed%250 == 0 || completed == totalRequests {
+						filteredCommonResponses := 0
+						if config.EnableCommonResponseFilters {
+							filteredCommonResponses, _, positiveFindings = detector.ProgressMetrics()
+						}
+						log.Info("Directory discovery progress",
+							svc1log.SafeParam("completedRequests", completed),
+							svc1log.SafeParam("positiveFindings", positiveFindings),
+							svc1log.SafeParam("sendFailures", sendFailures),
+							svc1log.SafeParam("retries", retries),
+							svc1log.SafeParam("baselineMatches", baselineMatches),
+							svc1log.SafeParam("standardResponses", standardResponses),
+							svc1log.SafeParam("disallowedStatusCodes", disallowedResponses),
+							svc1log.SafeParam("filteredCommonResponses", filteredCommonResponses))
 					}
-					logDirectoryFindings(ctx, attempts)
-					outcome.attempts = attempts
-					appendFindingCandidates(&outcome, attempts, recursionCodes)
-					outcome.timedOutPhase = "request processing"
-					return outcome
+				}()
+
+				// Check if context has expired before starting
+				if ctx.Err() != nil {
+					return
 				}
 
-				wg.Add(1)
-				go func(fullPath string, method common.HttpMethod) {
-					defer wg.Done()
-					defer func() {
+				// Acquire semaphore
+				select {
+				case semaphore <- struct{}{}:
+				case <-ctx.Done():
+					return
+				}
+				defer func() { <-semaphore }()
+
+				// Send request
+				requestConfig := createDirectorySendHTTPRequestConfig(ctx, baseURL, fullPath, method, common.HttpRequestParams{}, 0, config)
+				httpRequest, retries, err := retry.SendRequest(ctx, requestConfig, limiter, config.Retries)
+				if retries > 0 {
+					attemptsMutex.Lock()
+					outcome.metrics.retryCount += retries
+					attemptsMutex.Unlock()
+				}
+				if err != nil {
+					// Don't add errors if context was cancelled
+					if ctx.Err() == nil {
 						attemptsMutex.Lock()
-						completedRequests++
-						completed := completedRequests
-						sendFailures := outcome.metrics.sendFailureCount
-						baselineMatches := outcome.metrics.baselineMatchCount
-						standardResponses := outcome.metrics.standardResponseCount
-						disallowedResponses := countDisallowedResponses(outcome.metrics.disallowedStatusCounts)
-						positiveFindings := len(attempts)
-						attemptsMutex.Unlock()
-
-						if completed%250 == 0 || completed == totalRequests {
-							filteredCommonResponses := 0
-							if config.EnableCommonResponseFilters {
-								filteredCommonResponses, _, positiveFindings = detector.ProgressMetrics()
-							}
-							log.Info("Directory discovery progress",
-								svc1log.SafeParam("completedRequests", completed),
-								svc1log.SafeParam("positiveFindings", positiveFindings),
-								svc1log.SafeParam("sendFailures", sendFailures),
-								svc1log.SafeParam("baselineMatches", baselineMatches),
-								svc1log.SafeParam("standardResponses", standardResponses),
-								svc1log.SafeParam("disallowedStatusCodes", disallowedResponses),
-								svc1log.SafeParam("filteredCommonResponses", filteredCommonResponses))
+						outcome.metrics.sendFailureCount++
+						if outcome.metrics.sendFailureSample == "" {
+							outcome.metrics.sendFailureSample = err.Error()
 						}
-					}()
-
-					// Check if context has expired before starting
-					if ctx.Err() != nil {
-						return
+						attemptsMutex.Unlock()
 					}
+					return
+				}
 
-					// Acquire semaphore
+				// Check if context has expired after request
+				if ctx.Err() != nil {
+					return
+				}
+
+				wafAccumulator.Add(httpRequest)
+
+				// Analyze response
+				isValid, disallowedStatus, baselineMatch, standardResponseMatch := AnalyzeResponse(ctx, *httpRequest, validCodes, config.EnableCommonResponseFilters, baselineSizeInt, baselineWordsInt, config.Threshold)
+
+				// Judged on status alone when the findings pipeline either never sees this response,
+				// or cannot meaningfully judge it: a non-2xx body is boilerplate, not a soft 404.
+				outsidePipeline := disallowedStatus != 0 || !isSuccessStatus(statusCodeOf(httpRequest))
+				if outsidePipeline && isUnfilteredRecursionCandidate(httpRequest, recursionCodes, noisyStatuses) {
+					attemptsMutex.Lock()
+					outcome.recursionCandidates = append(outcome.recursionCandidates, httpRequest)
+					attemptsMutex.Unlock()
+				}
+
+				if isValid {
+					if config.EnableCommonResponseFilters {
+						detector.Observe(httpRequest)
+					} else {
+						attemptsMutex.Lock()
+						attempts = append(attempts, httpRequest)
+						attemptsMutex.Unlock()
+					}
+				} else if disallowedStatus != 0 {
+					attemptsMutex.Lock()
+					outcome.metrics.disallowedStatusCounts[disallowedStatus]++
+					attemptsMutex.Unlock()
+				} else if baselineMatch {
+					attemptsMutex.Lock()
+					outcome.metrics.baselineMatchCount++
+					attemptsMutex.Unlock()
+				} else if standardResponseMatch {
+					attemptsMutex.Lock()
+					outcome.metrics.standardResponseCount++
+					attemptsMutex.Unlock()
+				}
+
+				if config.Sleep > 0 {
+					delay := utils.CalculateDelayWithJitter(config.Sleep, config.Jitter)
 					select {
-					case semaphore <- struct{}{}:
+					case <-time.After(delay):
 					case <-ctx.Done():
 						return
 					}
-					defer func() { <-semaphore }()
-
-					if err := waitForDirectoryRateLimit(ctx, limiter); err != nil {
-						if ctx.Err() == nil {
-							attemptsMutex.Lock()
-							outcome.metrics.sendFailureCount++
-							if outcome.metrics.sendFailureSample == "" {
-								outcome.metrics.sendFailureSample = err.Error()
-							}
-							attemptsMutex.Unlock()
-						}
-						return
-					}
-
-					// Send request
-					requestConfig := createDirectorySendHTTPRequestConfig(ctx, baseURL, fullPath, method, common.HttpRequestParams{}, 0, config)
-					httpRequest, err := request.SendRequest(ctx, requestConfig)
-					if err != nil {
-						// Don't add errors if context was cancelled
-						if ctx.Err() == nil {
-							attemptsMutex.Lock()
-							outcome.metrics.sendFailureCount++
-							if outcome.metrics.sendFailureSample == "" {
-								outcome.metrics.sendFailureSample = err.Error()
-							}
-							attemptsMutex.Unlock()
-						}
-						return
-					}
-
-					// Check if context has expired after request
-					if ctx.Err() != nil {
-						return
-					}
-
-					wafAccumulator.Add(httpRequest)
-
-					// Analyze response
-					isValid, disallowedStatus, baselineMatch, standardResponseMatch := AnalyzeResponse(ctx, *httpRequest, validCodes, config.EnableCommonResponseFilters, baselineSizeInt, baselineWordsInt, config.Threshold)
-
-					// Judged on status alone when the findings pipeline either never sees this response,
-					// or cannot meaningfully judge it: a non-2xx body is boilerplate, not a soft 404.
-					outsidePipeline := disallowedStatus != 0 || !isSuccessStatus(statusCodeOf(httpRequest))
-					if outsidePipeline && isUnfilteredRecursionCandidate(httpRequest, recursionCodes, noisyStatuses) {
-						attemptsMutex.Lock()
-						outcome.recursionCandidates = append(outcome.recursionCandidates, httpRequest)
-						attemptsMutex.Unlock()
-					}
-
-					if isValid {
-						if config.EnableCommonResponseFilters {
-							detector.Observe(httpRequest)
-						} else {
-							attemptsMutex.Lock()
-							attempts = append(attempts, httpRequest)
-							attemptsMutex.Unlock()
-						}
-					} else if disallowedStatus != 0 {
-						attemptsMutex.Lock()
-						outcome.metrics.disallowedStatusCounts[disallowedStatus]++
-						attemptsMutex.Unlock()
-					} else if baselineMatch {
-						attemptsMutex.Lock()
-						outcome.metrics.baselineMatchCount++
-						attemptsMutex.Unlock()
-					} else if standardResponseMatch {
-						attemptsMutex.Lock()
-						outcome.metrics.standardResponseCount++
-						attemptsMutex.Unlock()
-					}
-
-					if config.Sleep > 0 {
-						delay := utils.CalculateDelayWithJitter(config.Sleep, config.Jitter)
-						select {
-						case <-time.After(delay):
-						case <-ctx.Done():
-							return
-						}
-					}
-				}(fullPath, method)
-			}
+				}
+			}(fullPath, method)
 		}
 	}
 
@@ -430,7 +424,8 @@ func sweepFrontier(ctx context.Context, baseURL string, current frontier, allPat
 		svc1log.SafeParam("baselineMatches", outcome.metrics.baselineMatchCount),
 		svc1log.SafeParam("standardResponses", outcome.metrics.standardResponseCount),
 		svc1log.SafeParam("disallowedStatusCodes", countDisallowedResponses(outcome.metrics.disallowedStatusCounts)),
-		svc1log.SafeParam("sendFailures", outcome.metrics.sendFailureCount))
+		svc1log.SafeParam("sendFailures", outcome.metrics.sendFailureCount),
+		svc1log.SafeParam("retries", outcome.metrics.retryCount))
 
 	outcome.attempts = attempts
 	appendFindingCandidates(&outcome, attempts, recursionCodes)
